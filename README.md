@@ -71,3 +71,15 @@ Deploy by committing and pushing. Do not deploy directly from a local checkout.
 For local validation, run `bun install --frozen-lockfile`, `bun run build`, and
 `bun run check:deploy`. The last command is a dry run and does not publish.
 For a rollback, revert the relevant commit and push to `main`.
+
+### Release verification
+
+Before merging a pull request, confirm that both the GitHub CI check and the
+Cloudflare Workers build succeed. Open the preview URL linked by Cloudflare
+and check the page, images, videos, and document downloads. The preview response
+must include `X-Robots-Tag: noindex, nofollow`.
+
+After merging, verify the Cloudflare production deployment identifies the
+merged commit, and that both production hosts respond over HTTPS. Check the
+canonical URL and an image, video, and PDF from the deployed site. Production
+must not send the preview-only `X-Robots-Tag` header.
