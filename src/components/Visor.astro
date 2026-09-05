@@ -1,0 +1,105 @@
+---
+// The robot face hidden in the GM monogram: a rounded visor with two pill
+// eyes. It blinks on its own and glances toward the pointer.
+interface Props {
+  class?: string;
+  label?: string;
+}
+const { class: className = '', label = 'Robot GM mirando' } = Astro.props;
+---
+
+<span class:list={['visor', className]} role="img" aria-label={label} data-visor>
+  <span class="eye eye-l"><span class="pupil"></span></span>
+  <span class="eye eye-r"><span class="pupil"></span></span>
+</span>
+
+<style>
+  .visor {
+    --w: 1em;
+    display: inline-grid;
+    grid-auto-flow: column;
+    gap: calc(var(--w) * 0.14);
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--w) * 1.05);
+    height: calc(var(--w) * 0.72);
+    padding: 0 calc(var(--w) * 0.14);
+    border-radius: calc(var(--w) * 0.22);
+    background: var(--white);
+    vertical-align: -0.08em;
+    box-shadow: 0 calc(var(--w) * 0.06) calc(var(--w) * 0.25) rgba(0, 0, 0, 0.25);
+  }
+
+  .eye {
+    position: relative;
+    width: calc(var(--w) * 0.2);
+    height: calc(var(--w) * 0.4);
+    border-radius: calc(var(--w) * 0.1);
+    background: var(--coral);
+    overflow: hidden;
+    transform-origin: center;
+    animation: blink 5.2s infinite;
+  }
+
+  .eye-r {
+    animation-delay: 0.02s;
+  }
+
+  .pupil {
+    position: absolute;
+    inset: 0;
+    background: var(--burgundy);
+    opacity: 0;
+  }
+
+  @keyframes blink {
+    0%,
+    92%,
+    100% {
+      transform: scaleY(1);
+    }
+    95% {
+      transform: scaleY(0.08);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .eye {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Eyes glance toward the pointer, within the visor's padding.
+  const visors = document.querySelectorAll<HTMLElement>('[data-visor]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce && visors.length && matchMedia('(pointer: fine)').matches) {
+    let raf = 0;
+    let mx = 0;
+    let my = 0;
+    const update = () => {
+      raf = 0;
+      for (const v of visors) {
+        const r = v.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const dx = Math.max(-1, Math.min(1, (mx - cx) / 400));
+        const dy = Math.max(-1, Math.min(1, (my - cy) / 400));
+        const w = r.width;
+        v.querySelectorAll<HTMLElement>('.eye').forEach((eye) => {
+          eye.style.translate = `${dx * w * 0.06}px ${dy * w * 0.05}px`;
+        });
+      }
+    };
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+        if (!raf) raf = requestAnimationFrame(update);
+      },
+      { passive: true },
+    );
+  }
+</script>

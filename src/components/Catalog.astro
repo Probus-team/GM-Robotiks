@@ -1,0 +1,318 @@
+---
+import { families, robots } from '../data/robots';
+---
+
+<section class="section catalog" id="robots">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Catálogo Pudu</p>
+      <h2>Un robot para cada piso, pasillo y jardín.</h2>
+      <p>
+        Todos los modelos son de Pudu Robotics, con refacciones y soporte a través de GM Robotics IA en
+        México. Los datos son los del fabricante; en el piloto los medimos en tu sitio.
+      </p>
+    </div>
+
+    <div class="filters reveal" role="tablist" aria-label="Filtrar por línea">
+      <button type="button" role="tab" aria-selected="true" data-filter="all" class="chip is-active">
+        Todos <span class="n">{robots.length}</span>
+      </button>
+      {families.map((f) => (
+        <button type="button" role="tab" aria-selected="false" data-filter={f.id} class="chip">
+          {f.name} <span class="n">{robots.filter((r) => r.family === f.id).length}</span>
+        </button>
+      ))}
+    </div>
+
+    <ul class="grid" data-catalog>
+      {robots.map((r) => {
+        const family = families.find((f) => f.id === r.family)!;
+        return (
+          <li class="card reveal" data-family={r.family}>
+            <article>
+              <div class:list={['media', r.imageStyle]}>
+                <img src={r.image} alt={`${r.name}, ${r.role.toLowerCase()}`} loading="lazy" decoding="async" />
+                {r.isNew && <span class="tag">Nuevo 2026</span>}
+              </div>
+              <div class="body">
+                <p class="family">{family.name}</p>
+                <h3>{r.name}</h3>
+                <p class="role">{r.role}</p>
+                <p class="summary">{r.summary}</p>
+                <dl class="specs">
+                  {r.specs.map(([k, v]) => (
+                    <div>
+                      <dt>{k}</dt>
+                      <dd>{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <div class="links">
+                  <a href={`#contacto`} class="ask" data-robot={r.name}>Cotizar {r.name.replace('PUDU ', '')}</a>
+                  {r.doc && (
+                    <a href={r.doc} class="doc" target="_blank" rel="noopener">Ficha técnica (PDF)</a>
+                  )}
+                </div>
+              </div>
+            </article>
+          </li>
+        );
+      })}
+    </ul>
+
+    <p class="empty" data-empty hidden>No hay modelos en esta línea todavía.</p>
+  </div>
+</section>
+
+<style>
+  .catalog {
+    background: var(--white);
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--line-strong);
+    background: transparent;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      border-color 0.2s;
+  }
+
+  .chip .n {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .chip:hover {
+    border-color: var(--burgundy);
+  }
+
+  .chip.is-active {
+    background: var(--burgundy);
+    border-color: var(--burgundy);
+    color: var(--white);
+  }
+
+  .chip.is-active .n {
+    color: var(--coral-tint);
+  }
+
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18.5rem, 1fr));
+    gap: 1.25rem;
+  }
+
+  .card[hidden] {
+    display: none;
+  }
+
+  article {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--white);
+    border: 1px solid var(--line);
+    transition:
+      transform 0.35s var(--ease-out),
+      box-shadow 0.35s var(--ease-out),
+      border-color 0.2s;
+  }
+
+  article:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 44px -22px rgba(43, 8, 16, 0.35);
+    border-color: var(--line-strong);
+  }
+
+  .media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: var(--rose);
+    overflow: hidden;
+  }
+
+  .media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .media.cutout {
+    background:
+      radial-gradient(60% 18% at 50% 92%, rgba(136, 16, 40, 0.16), transparent),
+      linear-gradient(180deg, var(--rose) 0%, var(--rose-2) 100%);
+  }
+
+  .media.cutout img {
+    object-fit: contain;
+    padding: 1.25rem 1.25rem 0.75rem;
+  }
+
+  article:hover .media img {
+    transform: scale(1.03);
+  }
+
+  .tag {
+    position: absolute;
+    top: 0.85rem;
+    left: 0.85rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: var(--coral);
+    color: var(--white);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .body {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1.25rem 1.35rem 1.35rem;
+    align-content: start;
+  }
+
+  .family {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--coral);
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    line-height: 1.05;
+  }
+
+  .role {
+    font-weight: 600;
+    color: var(--burgundy);
+    margin-top: -0.3rem;
+  }
+
+  .summary {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .specs {
+    margin: 0.5rem 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .specs div {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .specs dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .specs dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-top: 0.6rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+
+  .links a {
+    color: var(--burgundy);
+    text-decoration: none;
+    border-bottom: 2px solid var(--coral-tint);
+    transition: border-color 0.2s;
+  }
+
+  .links a:hover {
+    border-bottom-color: var(--coral);
+  }
+
+  .empty {
+    color: var(--muted);
+    padding: 2rem 0;
+  }
+</style>
+
+<script>
+  const chips = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const cards = document.querySelectorAll<HTMLElement>('[data-catalog] [data-family]');
+  const empty = document.querySelector<HTMLElement>('[data-empty]');
+
+  const apply = (filter: string) => {
+    let shown = 0;
+    cards.forEach((card) => {
+      const show = filter === 'all' || card.dataset.family === filter;
+      card.hidden = !show;
+      if (show) {
+        shown++;
+        card.classList.add('is-visible');
+      }
+    });
+    if (empty) empty.hidden = shown > 0;
+    chips.forEach((chip) => {
+      const active = chip.dataset.filter === filter;
+      chip.classList.toggle('is-active', active);
+      chip.setAttribute('aria-selected', String(active));
+    });
+  };
+
+  chips.forEach((chip) => chip.addEventListener('click', () => apply(chip.dataset.filter ?? 'all')));
+
+  // Links from the hero index preselect a family.
+  document.querySelectorAll<HTMLAnchorElement>('[data-family-link]').forEach((a) =>
+    a.addEventListener('click', () => apply(a.dataset.familyLink ?? 'all')),
+  );
+
+  // "Cotizar" links prefill the contact form.
+  document.querySelectorAll<HTMLAnchorElement>('[data-robot]').forEach((a) =>
+    a.addEventListener('click', () => {
+      const field = document.querySelector<HTMLTextAreaElement>('#mensaje');
+      if (field && !field.value.trim()) {
+        field.value = `Me interesa ${a.dataset.robot}. `;
+      }
+    }),
+  );
+</script>

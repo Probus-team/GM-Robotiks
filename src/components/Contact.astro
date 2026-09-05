@@ -1,0 +1,255 @@
+---
+import { site } from '../data/site';
+import { families } from '../data/robots';
+const { email, whatsapp, formEndpoint } = site.contact;
+const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
+---
+
+<section class="section contact" id="contacto">
+  <div class="container grid">
+    <div class="intro reveal">
+      <p class="eyebrow">Agendar demo</p>
+      <h2>Cuéntanos de tu operación.</h2>
+      <p class="lede">
+        Con el tipo de instalación y los metros o entregas por turno podemos decirte qué robot probar y qué
+        esperar de él. Te respondemos en menos de un día hábil.
+      </p>
+      {(email || waLink) && (
+        <ul class="channels">
+          {waLink && (
+            <li><a href={waLink} target="_blank" rel="noopener">WhatsApp</a></li>
+          )}
+          {email && (
+            <li><a href={`mailto:${email}`}>{email}</a></li>
+          )}
+        </ul>
+      )}
+    </div>
+
+    <form class="form reveal" data-contact-form data-endpoint={formEndpoint} data-email={email} novalidate>
+      <div class="row">
+        <label>
+          <span>Nombre</span>
+          <input type="text" name="nombre" autocomplete="name" required />
+        </label>
+        <label>
+          <span>Empresa</span>
+          <input type="text" name="empresa" autocomplete="organization" required />
+        </label>
+      </div>
+      <div class="row">
+        <label>
+          <span>Correo</span>
+          <input type="email" name="correo" autocomplete="email" required />
+        </label>
+        <label>
+          <span>Teléfono o WhatsApp</span>
+          <input type="tel" name="telefono" autocomplete="tel" />
+        </label>
+      </div>
+      <label>
+        <span>¿Qué necesitas resolver?</span>
+        <select name="linea" required>
+          <option value="">Elige una línea</option>
+          {families.map((f) => (
+            <option value={f.id}>{f.name}: {f.short.toLowerCase()}</option>
+          ))}
+          <option value="varias">Varias líneas</option>
+        </select>
+      </label>
+      <label>
+        <span>Cuéntanos del sitio</span>
+        <textarea id="mensaje" name="mensaje" rows="4" placeholder="Tipo de instalación, metros cuadrados o entregas por turno, ciudad."></textarea>
+      </label>
+      <div class="foot">
+        <button type="submit" class="btn btn-burgundy">Enviar y agendar</button>
+        <p class="status" data-status role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  .contact {
+    background: var(--white);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: clamp(2rem, 6vw, 6rem);
+    align-items: start;
+  }
+
+  .intro {
+    display: grid;
+    gap: 1.25rem;
+    position: sticky;
+    top: 6rem;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+  }
+
+  .lede {
+    font-size: 1.125rem;
+    color: var(--muted);
+    max-width: 30em;
+  }
+
+  .channels {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+    font-weight: 700;
+  }
+
+  .channels a {
+    color: var(--burgundy);
+    text-decoration: none;
+    border-bottom: 2px solid var(--coral-tint);
+  }
+
+  .form {
+    display: grid;
+    gap: 1.1rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border-radius: var(--radius);
+    background: var(--rose);
+    border: 1px solid var(--line);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem;
+  }
+
+  label {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--burgundy);
+  }
+
+  input,
+  select,
+  textarea {
+    font: inherit;
+    font-weight: 400;
+    font-size: 1rem;
+    color: var(--text);
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--line-strong);
+    background: var(--white);
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--coral);
+    box-shadow: 0 0 0 3px var(--coral-tint);
+  }
+
+  input:user-invalid,
+  select:user-invalid {
+    border-color: var(--coral);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 6rem;
+  }
+
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .status {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .status.is-error {
+    color: var(--burgundy);
+    font-weight: 600;
+  }
+
+  @media (max-width: 64rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .intro {
+      position: static;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  const status = document.querySelector<HTMLElement>('[data-status]');
+
+  const say = (text: string, error = false) => {
+    if (!status) return;
+    status.textContent = text;
+    status.classList.toggle('is-error', error);
+  };
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      say('Faltan datos obligatorios.', true);
+      return;
+    }
+    const data = new FormData(form);
+    const endpoint = form.dataset.endpoint;
+    const email = form.dataset.email;
+
+    if (endpoint) {
+      say('Enviando…');
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          body: data,
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        say('Enviado. Te escribimos en menos de un día hábil.');
+      } catch {
+        say('No se pudo enviar. Intenta de nuevo o escríbenos por WhatsApp.', true);
+      }
+      return;
+    }
+
+    if (email) {
+      const lines = Array.from(data.entries()).map(([k, v]) => `${k}: ${String(v)}`);
+      const subject = encodeURIComponent(`Demo de robots Pudu · ${data.get('empresa') ?? ''}`);
+      const body = encodeURIComponent(lines.join('\n'));
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+      say('Se abrió tu correo con los datos listos para enviar.');
+      return;
+    }
+
+    say('El formulario aún no tiene destino configurado (site.ts → contact).', true);
+  });
+</script>

@@ -1,0 +1,326 @@
+---
+import Visor from './Visor.astro';
+import { families, robots } from '../data/robots';
+
+const lineup = [
+  { id: 'bellabot-pro', name: 'BellaBot Pro', family: 'Entrega' },
+  { id: 'et1', name: 'ET1', family: 'Limpieza' },
+  { id: 'gt5', name: 'GT5', family: 'Exteriores' },
+].map((item) => ({ ...item, robot: robots.find((r) => r.id === item.id)! }));
+
+const counts = families.map((f) => ({
+  ...f,
+  count: robots.filter((r) => r.family === f.id).length,
+}));
+---
+
+<section class="hero" id="inicio">
+  <div class="container hero-grid">
+    <div class="copy">
+      <p class="eyebrow">Distribuidor Pudu Robotics · México</p>
+      <h1>
+        Robots que ya <span class="line">trabajan<Visor class="visor-inline" />.</span>
+      </h1>
+      <p class="lede">
+        Limpieza, entrega, logística y áreas verdes con robots Pudu. Los medimos en tu operación antes
+        de que los compres, y los sostenemos después.
+      </p>
+      <div class="cta">
+        <a href="#robots" class="btn btn-coral">Ver los robots</a>
+        <a href="#contacto" class="btn btn-ghost-light">Agendar una demo</a>
+      </div>
+    </div>
+
+    <div class="stage" aria-hidden="true">
+      <div class="floor"></div>
+      {lineup.map((item, i) => (
+        <figure class={`bot bot-${i + 1}`}>
+          <img src={item.robot.image} alt="" width="744" height="880" loading="eager" fetchpriority={i === 1 ? 'high' : 'auto'} />
+          <figcaption>
+            <b>{item.name}</b>
+            <span>{item.family}</span>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </div>
+
+  <div class="container">
+    <ol class="index" aria-label="Líneas de robots">
+      {counts.map((f) => (
+        <li>
+          <a href={`#robots`} data-family-link={f.id}>
+            <span class="idx-name">{f.name}</span>
+            <span class="idx-short">{f.short}</span>
+            <span class="idx-count">{f.count} {f.count === 1 ? 'modelo' : 'modelos'}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    margin-top: -4.75rem;
+    padding-top: 4.75rem;
+    color: var(--white);
+    background:
+      radial-gradient(90rem 50rem at 85% 110%, rgba(248, 80, 56, 0.35), transparent 60%),
+      radial-gradient(60rem 40rem at -10% -20%, rgba(255, 255, 255, 0.08), transparent 60%),
+      linear-gradient(160deg, var(--burgundy) 0%, var(--burgundy-deep) 55%, var(--burgundy-ink) 100%);
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: end;
+    padding-top: clamp(3rem, 8vw, 6rem);
+    min-height: min(84vh, 56rem);
+  }
+
+  .copy {
+    display: grid;
+    gap: 1.75rem;
+    padding-bottom: clamp(2rem, 6vw, 5rem);
+  }
+
+  h1 {
+    font-size: clamp(3rem, 8.2vw, 7rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 0.92;
+  }
+
+  h1 .line {
+    white-space: nowrap;
+  }
+
+  :global(.visor-inline) {
+    --w: 0.78em;
+    margin-left: 0.12em;
+  }
+
+  .lede {
+    font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+    line-height: 1.45;
+    max-width: 30em;
+    color: var(--on-dark-muted);
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  /* Lineup stage */
+  .stage {
+    position: relative;
+    width: 108%;
+    height: clamp(24rem, 46vw, 40rem);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: end;
+    isolation: isolate;
+  }
+
+  .floor {
+    position: absolute;
+    left: -10%;
+    right: -30%;
+    bottom: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--coral) 20%, var(--coral) 70%, transparent);
+    opacity: 0.9;
+  }
+
+  .floor::after {
+    content: '';
+    position: absolute;
+    left: 10%;
+    right: 20%;
+    bottom: -3rem;
+    height: 6rem;
+    background: radial-gradient(closest-side, rgba(248, 80, 56, 0.35), transparent);
+    filter: blur(10px);
+  }
+
+  .bot {
+    margin: 0;
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-self: end;
+    animation: rise 1s var(--ease-out) both;
+  }
+
+  .bot img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 24px 30px rgba(0, 0, 0, 0.45));
+  }
+
+  .bot-1 {
+    animation-delay: 0.1s;
+    width: 92%;
+  }
+
+  .bot-2 {
+    animation-delay: 0.25s;
+    width: 116%;
+    z-index: 2;
+  }
+
+  .bot-3 {
+    animation-delay: 0.4s;
+    width: 122%;
+    justify-self: end;
+  }
+
+  .bot figcaption {
+    position: absolute;
+    left: 50%;
+    bottom: -2.6rem;
+    translate: -50% 0;
+    display: grid;
+    justify-items: center;
+    gap: 0.1rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-dark-muted);
+    white-space: nowrap;
+  }
+
+  .bot figcaption b {
+    color: var(--white);
+    font-weight: 700;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Family index */
+  .index {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin-top: 4.5rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .index a {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.5rem 1.25rem 1.75rem 0;
+    text-decoration: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    transition: background-color 0.2s;
+  }
+
+  .index li:not(:first-child) a {
+    padding-left: 1.25rem;
+  }
+
+  .index li:last-child a {
+    border-right: 0;
+  }
+
+  .index a:hover .idx-name {
+    color: var(--coral-hot);
+  }
+
+  .idx-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+    transition: color 0.2s;
+  }
+
+  .idx-short {
+    font-size: 0.9rem;
+    color: var(--on-dark-muted);
+  }
+
+  .idx-count {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--coral-hot);
+    margin-top: 0.25rem;
+  }
+
+  @media (max-width: 64rem) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      align-items: start;
+      min-height: 0;
+    }
+
+    .copy {
+      padding-bottom: 0;
+    }
+
+    .stage {
+      height: auto;
+      margin-top: 2.5rem;
+      width: min(100%, 36rem);
+      padding-bottom: 0.25rem;
+    }
+
+    .bot-1 {
+      width: 86%;
+    }
+
+    .bot-2 {
+      width: 104%;
+    }
+
+    .bot-3 {
+      width: 108%;
+      justify-self: center;
+    }
+
+    .floor {
+      left: -5%;
+      right: -5%;
+    }
+
+    .index {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .index li:nth-child(2) a {
+      border-right: 0;
+    }
+
+    .index li:nth-child(n + 3) a {
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .index li:nth-child(3) a {
+      padding-left: 0;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .bot figcaption {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,147 @@
+---
+// The order carries information: no robot is quoted before it is measured.
+const steps = [
+  {
+    title: 'Diagnóstico en sitio',
+    detail:
+      'Recorremos tu instalación: pasos, rampas, elevadores, tipo de piso y residuos, horarios y tráfico. Salimos con el modelo correcto o con un no.',
+    when: 'Semana 1',
+  },
+  {
+    title: 'Piloto medido',
+    detail:
+      'Un robot trabaja en tu turno real durante días o semanas. Registramos metros cuadrados, entregas, paros y horas de persona liberadas.',
+    when: '2–4 semanas',
+  },
+  {
+    title: 'Despliegue y capacitación',
+    detail:
+      'Mapeo, rutas, estaciones y permisos en Pudu Link. Tu equipo aprende a asignar tareas, vaciar tanques y resolver lo cotidiano.',
+    when: '1–2 semanas',
+  },
+  {
+    title: 'Soporte y refacciones',
+    detail:
+      'Monitoreo de flota, consumibles, garantía y refacciones desde México. Sin esperar a que alguien conteste desde otro continente.',
+    when: 'Continuo',
+  },
+];
+---
+
+<section class="section process" id="proceso">
+  <div class="container">
+    <div class="head reveal">
+      <p class="eyebrow">Cómo trabajamos</p>
+      <h2>Primero medimos. Luego cotizamos.</h2>
+      <p>
+        Un robot mal elegido termina apagado en una bodega. Por eso el orden importa y no lo saltamos.
+      </p>
+    </div>
+
+    <ol class="steps">
+      {steps.map((s, i) => (
+        <li class="step reveal" style={`--i:${i}`}>
+          <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <div class="text">
+            <h3>{s.title}</h3>
+            <p>{s.detail}</p>
+          </div>
+          <span class="when">{s.when}</span>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .process {
+    color: var(--white);
+    background:
+      radial-gradient(70rem 40rem at 100% 0%, rgba(248, 80, 56, 0.28), transparent 60%),
+      linear-gradient(180deg, var(--burgundy) 0%, var(--burgundy-deep) 100%);
+  }
+
+  .head {
+    display: grid;
+    gap: 1rem;
+    max-width: 44rem;
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .head h2 {
+    font-size: clamp(2rem, 4.2vw, 3.4rem);
+  }
+
+  .head p:last-child {
+    font-size: 1.125rem;
+    color: var(--on-dark-muted);
+    max-width: 36rem;
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 5rem 1fr auto;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 2rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    transition-delay: calc(var(--i) * 80ms);
+  }
+
+  .num {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--coral-hot);
+  }
+
+  .text {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 40rem;
+  }
+
+  h3 {
+    font-size: 1.6rem;
+  }
+
+  .text p {
+    color: var(--on-dark-muted);
+  }
+
+  .when {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    white-space: nowrap;
+    margin-top: 0.4rem;
+  }
+
+  @media (max-width: 40rem) {
+    .step {
+      grid-template-columns: 3.5rem 1fr;
+    }
+
+    .num {
+      font-size: 1.8rem;
+    }
+
+    .when {
+      grid-column: 2;
+      justify-self: start;
+    }
+  }
+</style>

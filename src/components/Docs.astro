@@ -1,0 +1,98 @@
+---
+import { docs } from '../data/robots';
+---
+
+<section class="section docs" id="documentos">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Fichas técnicas</p>
+      <h2>Documentos del fabricante, para descargar.</h2>
+      <p>Catálogos y fichas oficiales de Pudu Robotics. Si necesitas la de otro modelo, pídela en el formulario.</p>
+    </div>
+
+    <ul class="list">
+      {docs.map((d) => (
+        <li class="reveal">
+          <a href={d.href} target="_blank" rel="noopener" download>
+            <span class="icon" aria-hidden="true">PDF</span>
+            <span class="text">
+              <strong>{d.title}</strong>
+              <span>{d.detail}</span>
+            </span>
+            <span class="size">{d.size}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .docs {
+    background: var(--rose);
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1rem;
+  }
+
+  .list a {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.1rem 1.25rem;
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    border: 1px solid var(--line);
+    text-decoration: none;
+    transition:
+      border-color 0.2s,
+      transform 0.3s var(--ease-out);
+  }
+
+  .list a:hover {
+    border-color: var(--burgundy);
+    transform: translateY(-2px);
+  }
+
+  .icon {
+    display: inline-grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.6rem;
+    background: var(--burgundy);
+    color: var(--white);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  .text {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .text strong {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+  }
+
+  .text span {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .size {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+</style>

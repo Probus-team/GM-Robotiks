@@ -1,0 +1,223 @@
+---
+import { site } from '../data/site';
+---
+
+<header class="header" data-header>
+  <div class="container header-inner">
+    <a href="#inicio" class="brand" aria-label={`${site.name}, inicio`}>
+      <img src="/brand/logo-full-white.png" alt="" width="992" height="659" class="brand-dark" />
+      <img src="/brand/logo-full.png" alt="" width="992" height="659" class="brand-light" />
+    </a>
+
+    <nav class="nav" aria-label="Principal" id="nav">
+      <ul>
+        {site.nav.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <a href="#contacto" class="btn btn-coral header-cta">Agendar demo</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav" data-menu-toggle>
+        <span class="sr-only">Abrir menú</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    color: var(--white);
+    background: transparent;
+    transition:
+      background-color 0.3s,
+      color 0.3s,
+      box-shadow 0.3s;
+  }
+
+  .header.is-scrolled {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--text);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 1px 0 var(--line);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    height: 4.75rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+  }
+
+  .brand img {
+    height: 3rem;
+    width: auto;
+  }
+
+  .brand-light {
+    display: none;
+  }
+
+  .header.is-scrolled .brand-dark {
+    display: none;
+  }
+
+  .header.is-scrolled .brand-light {
+    display: block;
+  }
+
+  .nav ul {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav a {
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    opacity: 0.85;
+    padding-block: 0.4rem;
+    border-bottom: 2px solid transparent;
+    transition:
+      opacity 0.2s,
+      border-color 0.2s;
+  }
+
+  .nav a:hover {
+    opacity: 1;
+    border-bottom-color: var(--coral);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .header-cta {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .menu-toggle {
+    display: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+    border: 2px solid currentColor;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .menu-toggle .bar {
+    position: absolute;
+    left: 50%;
+    width: 1.1rem;
+    height: 2px;
+    background: currentColor;
+    transform: translateX(-50%);
+    transition: transform 0.25s var(--ease-out);
+  }
+
+  .menu-toggle .bar:first-of-type {
+    top: calc(50% - 4px);
+  }
+
+  .menu-toggle .bar:last-of-type {
+    top: calc(50% + 2px);
+  }
+
+  .menu-toggle[aria-expanded='true'] .bar:first-of-type {
+    transform: translateX(-50%) translateY(3px) rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded='true'] .bar:last-of-type {
+    transform: translateX(-50%) translateY(-3px) rotate(-45deg);
+  }
+
+  @media (max-width: 56rem) {
+    .menu-toggle {
+      display: inline-flex;
+    }
+
+    .header-cta {
+      display: none;
+    }
+
+    .nav {
+      position: absolute;
+      inset: 4.75rem 0 auto 0;
+      background: var(--burgundy-ink);
+      color: var(--white);
+      padding: 1rem var(--gutter) 1.5rem;
+      transform: translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        opacity 0.25s,
+        transform 0.25s var(--ease-out);
+    }
+
+    .nav.is-open {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .nav ul {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .nav a {
+      display: block;
+      padding: 0.9rem 0;
+      font-size: 1.15rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const nav = document.getElementById('nav');
+
+  const onScroll = () => {
+    header?.classList.toggle('is-scrolled', window.scrollY > 24);
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    nav?.classList.toggle('is-open', !open);
+  });
+
+  nav?.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', () => {
+      toggle?.setAttribute('aria-expanded', 'false');
+      nav.classList.remove('is-open');
+    }),
+  );
+</script>

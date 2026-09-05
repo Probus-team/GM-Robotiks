@@ -1,0 +1,120 @@
+---
+// Pudu Link and Pudu Cloud are the manufacturer's fleet tools; every robot in
+// the catalog reports to them.
+const points = [
+  ['Tareas desde el teléfono', 'Asigna rutas, horarios y zonas desde Pudu Link, sin computadora en piso.'],
+  ['Métricas por robot', 'Metros limpiados, entregas, agua y energía por turno, en Pudu Cloud.'],
+  ['Alertas a tiempo', 'Tanque lleno, bolsa llena, batería baja o robot detenido: aviso inmediato.'],
+  ['Integraciones', 'Elevadores, controles de acceso, VDA5050 y API para tu sistema de gestión.'],
+];
+---
+
+<section class="section fleet">
+  <div class="container grid">
+    <div class="text reveal">
+      <p class="eyebrow">Flota conectada</p>
+      <h2>Toda la flota en una pantalla que cabe en el bolsillo.</h2>
+      <p class="lede">
+        Los robots Pudu reportan a Pudu Link y Pudu Cloud. Tú ves lo que hicieron; nosotros vemos lo que
+        necesitan.
+      </p>
+      <ul class="points">
+        {points.map(([t, d]) => (
+          <li>
+            <strong>{t}</strong>
+            <span>{d}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="shots reveal" aria-hidden="true">
+      <img class="dash" src="/media/software/pudu-cloud-dashboard.webp" alt="" width="1600" height="703" loading="lazy" />
+      <img class="phone" src="/media/software/pudu-link-fleet.webp" alt="" width="900" height="1950" loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .fleet {
+    background: var(--white);
+    overflow: hidden;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: clamp(2rem, 6vw, 6rem);
+    align-items: center;
+  }
+
+  .text {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+  }
+
+  .lede {
+    font-size: 1.125rem;
+    color: var(--muted);
+  }
+
+  .points {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .points li {
+    display: grid;
+    gap: 0.15rem;
+    padding-left: 1.25rem;
+    border-left: 3px solid var(--coral);
+  }
+
+  .points strong {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+  }
+
+  .points span {
+    color: var(--muted);
+    font-size: 0.98rem;
+  }
+
+  .shots {
+    position: relative;
+    padding: 2rem 0 3rem;
+  }
+
+  .dash {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    box-shadow: 0 40px 60px -40px rgba(43, 8, 16, 0.4);
+  }
+
+  .phone {
+    position: absolute;
+    right: -1rem;
+    bottom: 0;
+    width: 32%;
+    border-radius: 1.4rem;
+    border: 6px solid var(--burgundy-ink);
+    box-shadow: 0 30px 50px -20px rgba(43, 8, 16, 0.5);
+    aspect-ratio: 9 / 19.5;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  @media (max-width: 64rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
