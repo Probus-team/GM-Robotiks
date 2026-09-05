@@ -51,17 +51,24 @@ Cloudflare Workers Builds uses the GitHub integration with these settings:
 | --- | --- |
 | Root directory | `/` |
 | Production branch | `main` |
-| Build command | `bun install --frozen-lockfile && bun run build && bun run check:deploy` |
+| Build command | `npx --yes bun@1.3.14 install --frozen-lockfile && npx --yes bun@1.3.14 run build && npx --yes bun@1.3.14 run check:deploy` |
 | Production deploy command | `bun run deploy` |
 | Non-production branch builds | Enabled |
 | Non-production deploy command | `bun run deploy:preview` |
-| Node / Bun | `24.16.0` / `1.3.14` (build variable `BUN_VERSION`) |
+| Node / Bun | `24.16.0` / `1.3.14` |
+
+The shared build command pins Bun explicitly because Cloudflare's production
+build variables are not inherited by non-production branch builds. The initial
+Cloudflare dependency bootstrap may use its preinstalled Bun; the frozen install,
+site build, and deployment validation above use the pinned version.
 
 Pushes to `main` build and deploy production. Branch pushes build isolated
 Worker versions with preview URLs, which the Cloudflare GitHub integration
 links from pull requests. Uploading a preview does not promote it to production
 or change the production domain bindings. Preview and workers.dev URLs send
-`X-Robots-Tag: noindex, nofollow` to keep them out of search results.
+`X-Robots-Tag` with `noindex` to keep them out of search results. Cloudflare
+overrides version-preview responses to `noindex`; the asset rule also applies
+`nofollow` to the main workers.dev hostname.
 
 GitHub Actions also builds and validates the deployment on every pull request
 and push to `main`, without Cloudflare credentials. Cloudflare owns the deploy
@@ -77,7 +84,7 @@ For a rollback, revert the relevant commit and push to `main`.
 Before merging a pull request, confirm that both the GitHub CI check and the
 Cloudflare Workers build succeed. Open the preview URL linked by Cloudflare
 and check the page, images, videos, and document downloads. The preview response
-must include `X-Robots-Tag: noindex, nofollow`.
+must include `noindex` in its `X-Robots-Tag` header.
 
 After merging, verify the Cloudflare production deployment identifies the
 merged commit, and that both production hosts respond over HTTPS. Check the
