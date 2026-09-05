@@ -55,7 +55,7 @@ Cloudflare Workers Builds uses the GitHub integration with these settings:
 | Production deploy command | `bun run deploy` |
 | Non-production branch builds | Enabled |
 | Non-production deploy command | `bun run deploy:preview` |
-| Node / Bun | `24.16.0` / `1.3.14` |
+| Node / Bun | `24.16.0` / `1.3.14` (build variable `BUN_VERSION`) |
 
 Pushes to `main` build and deploy production. Branch pushes build isolated
 Worker versions with preview URLs, which the Cloudflare GitHub integration
