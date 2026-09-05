@@ -54,7 +54,7 @@ Cloudflare Workers Builds uses the GitHub integration with these settings:
 | Build command | `npx --yes bun@1.3.14 install --frozen-lockfile && npx --yes bun@1.3.14 run build && npx --yes bun@1.3.14 run check:deploy` |
 | Production deploy command | `bun run deploy` |
 | Non-production branch builds | Enabled |
-| Non-production deploy command | `bun run deploy:preview` |
+| Non-production deploy command | `npx wrangler versions upload` |
 | Node / Bun | `24.16.0` / `1.3.14` |
 
 The shared build command pins Bun explicitly because Cloudflare's production
