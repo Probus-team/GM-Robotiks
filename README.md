@@ -38,3 +38,36 @@ public/
 - Product figures come from Pudu's official spec sheets and product pages (2025 brochure, 2026 cleaning catalog, September 2026 ET1 / GT-series pages). Update them in `src/data/robots.ts`.
 - Contact channels (`email`, `whatsapp`, `formEndpoint`) live in `src/data/site.ts`. The form posts to `formEndpoint` when set, falls back to a prefilled `mailto:` when only `email` is set, and otherwise shows a configuration notice.
 - Fonts (Bricolage Grotesque, Figtree) are fetched at build time through Astro's fonts API, configured in `astro.config.mjs`.
+
+## Deployment
+
+Repository: `Probus-team/GM-Robotiks`. Cloudflare Worker: `gm-robotiks`.
+Production hosts: `https://gmrobotiks.com` and `https://www.gmrobotiks.com`.
+The canonical URL is `https://gmrobotiks.com`.
+
+Cloudflare Workers Builds uses the GitHub integration with these settings:
+
+| Setting | Value |
+| --- | --- |
+| Root directory | `/` |
+| Production branch | `main` |
+| Build command | `bun install --frozen-lockfile && bun run build && bun run check:deploy` |
+| Production deploy command | `bun run deploy` |
+| Non-production branch builds | Enabled |
+| Non-production deploy command | `bun run deploy:preview` |
+| Node / Bun | `24.16.0` / `1.3.14` |
+
+Pushes to `main` build and deploy production. Branch pushes build isolated
+Worker versions with preview URLs, which the Cloudflare GitHub integration
+links from pull requests. Uploading a preview does not promote it to production
+or change the production domain bindings. Preview and workers.dev URLs send
+`X-Robots-Tag: noindex, nofollow` to keep them out of search results.
+
+GitHub Actions also builds and validates the deployment on every pull request
+and push to `main`, without Cloudflare credentials. Cloudflare owns the deploy
+credential; no deployment secrets are stored in the repository.
+
+Deploy by committing and pushing. Do not deploy directly from a local checkout.
+For local validation, run `bun install --frozen-lockfile`, `bun run build`, and
+`bun run check:deploy`. The last command is a dry run and does not publish.
+For a rollback, revert the relevant commit and push to `main`.

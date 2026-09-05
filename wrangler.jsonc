@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gm-robotiks",
+  "account_id": "e1bfcc6137d9e70b5c5fe255ad321753",
+  "compatibility_date": "2026-09-05",
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "gmrobotiks.com", "custom_domain": true },
+    { "pattern": "www.gmrobotiks.com", "custom_domain": true }
+  ]
+}
