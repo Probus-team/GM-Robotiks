@@ -4,13 +4,13 @@ import { docs } from '../data/robots';
 
 <section class="section docs" id="documentos">
   <div class="container">
-    <div class="section-head reveal">
-      <p class="eyebrow">Fichas técnicas</p>
-      <h2>Documentos del fabricante, para descargar.</h2>
-      <p>Catálogos y fichas oficiales de Pudu Robotics. Si necesitas la de otro modelo, pídela en el formulario.</p>
+    <div class="section-head" data-stagger>
+      <p class="eyebrow reveal">Fichas técnicas</p>
+      <h2 class="reveal">Documentos del fabricante, para descargar.</h2>
+      <p class="reveal">Catálogos y fichas oficiales de Pudu Robotics. Si necesitas la de otro modelo, pídela en el formulario.</p>
     </div>
 
-    <ul class="list">
+    <ul class="list" data-stagger>
       {docs.map((d) => (
         <li class="reveal">
           <a href={d.href} target="_blank" rel="noopener" download>

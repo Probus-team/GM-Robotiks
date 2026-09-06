@@ -46,8 +46,13 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
   <body>
     <slot />
     <script>
-      // Scroll reveal
-      const items = document.querySelectorAll<HTMLElement>('.reveal');
+      // Scroll reveal. Containers with [data-stagger] number their children so
+      // each one waits a little longer than the previous (see global.css).
+      document.querySelectorAll<HTMLElement>('[data-stagger]').forEach((group) => {
+        Array.from(group.children).forEach((child, i) => (child as HTMLElement).style.setProperty('--i', String(i)));
+      });
+
+      const items = document.querySelectorAll<HTMLElement>('.reveal, .reveal-clip, .reveal-lines');
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce || !('IntersectionObserver' in window)) {
         items.forEach((el) => el.classList.add('is-visible'));

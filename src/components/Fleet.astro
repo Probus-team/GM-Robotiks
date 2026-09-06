@@ -11,16 +11,16 @@ const points = [
 
 <section class="section fleet">
   <div class="container grid">
-    <div class="text reveal">
-      <p class="eyebrow">Flota conectada</p>
-      <h2>Toda la flota en una pantalla que cabe en el bolsillo.</h2>
-      <p class="lede">
+    <div class="text" data-stagger>
+      <p class="eyebrow reveal">Flota conectada</p>
+      <h2 class="reveal">Toda la flota en una pantalla que cabe en el bolsillo.</h2>
+      <p class="lede reveal">
         Los robots Pudu reportan a Pudu Link y Pudu Cloud. Tú ves lo que hicieron; nosotros vemos lo que
         necesitan.
       </p>
-      <ul class="points">
+      <ul class="points" data-stagger>
         {points.map(([t, d]) => (
-          <li>
+          <li class="reveal">
             <strong>{t}</strong>
             <span>{d}</span>
           </li>
@@ -28,9 +28,11 @@ const points = [
       </ul>
     </div>
 
-    <div class="shots reveal" aria-hidden="true">
-      <img class="dash" src="/media/software/pudu-cloud-dashboard.webp" alt="" width="1600" height="703" loading="lazy" />
-      <img class="phone" src="/media/software/pudu-link-fleet.webp" alt="" width="900" height="1950" loading="lazy" />
+    <div class="shots" aria-hidden="true">
+      <div class="dash-wrap reveal-clip">
+        <img class="dash" src="/media/software/pudu-cloud-dashboard.webp" alt="" width="1600" height="703" loading="lazy" />
+      </div>
+      <img class="phone reveal" src="/media/software/pudu-link-fleet.webp" alt="" width="900" height="1950" loading="lazy" />
     </div>
   </div>
 </section>
@@ -110,6 +112,26 @@ const points = [
     aspect-ratio: 9 / 19.5;
     object-fit: cover;
     object-position: top;
+    transition-delay: 0.35s;
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .phone.is-visible {
+        animation: phone-drift linear both;
+        animation-timeline: view();
+        animation-range: entry 0% exit 100%;
+      }
+
+      @keyframes phone-drift {
+        from {
+          translate: 0 3rem;
+        }
+        to {
+          translate: 0 -3rem;
+        }
+      }
+    }
   }
 
   @media (max-width: 64rem) {

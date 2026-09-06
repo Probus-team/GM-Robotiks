@@ -230,28 +230,98 @@ p {
   border: 0;
 }
 
-/* Scroll reveal (progressively enhanced; content is visible without JS) */
-.reveal {
+/* Cross-document view transitions (progressive: a soft cross-fade between pages) */
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.32s;
+}
+
+/* Scroll reveal (progressively enhanced; content is visible without JS).
+   Variants:
+   .reveal          fade + rise
+   .reveal-clip     wipes its first child up from the bottom (the observed element
+                    itself stays unclipped: browsers apply clip-path when computing
+                    intersections, so a fully clipped element would never reveal)
+   [data-stagger]   children get --i in DOM order (Layout script), used as delay */
+.reveal,
+.reveal-clip {
   opacity: 1;
   transform: none;
 }
 
 .js .reveal {
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(22px);
+  filter: blur(6px);
   transition:
-    opacity 0.7s var(--ease-out),
-    transform 0.7s var(--ease-out);
+    opacity 0.8s var(--ease-out),
+    transform 0.8s var(--ease-out),
+    filter 0.8s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 90ms);
 }
 
 .js .reveal.is-visible {
   opacity: 1;
   transform: none;
+  filter: none;
+}
+
+.js .reveal-clip > :first-child {
+  clip-path: inset(100% 0 0 0 round var(--radius));
+  transition: clip-path 1.1s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+
+.js .reveal-clip.is-visible > :first-child {
+  clip-path: inset(0 0 0 0 round var(--radius));
+}
+
+/* Heading line reveal: each line slides up out of a mask */
+.js .reveal-lines .line-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.js .reveal-lines .line-mask > span {
+  display: block;
+  transform: translateY(110%);
+  transition: transform 0.9s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+
+.js .reveal-lines.is-visible .line-mask > span {
+  transform: none;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .js .reveal {
+  .js .reveal,
+  .js .reveal-clip > :first-child {
     opacity: 1;
+    transform: none;
+    filter: none;
+    clip-path: none;
+  }
+
+  .js .reveal-lines .line-mask > span {
     transform: none;
   }
 }

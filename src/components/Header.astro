@@ -1,10 +1,16 @@
 ---
 import { site } from '../data/site';
+
+interface Props {
+  /** Solid header from the start, for pages without a dark hero behind it. */
+  solid?: boolean;
+}
+const { solid = false } = Astro.props;
 ---
 
-<header class="header" data-header>
+<header class:list={['header', { 'is-solid': solid }]} data-header>
   <div class="container header-inner">
-    <a href="#inicio" class="brand" aria-label={`${site.name}, inicio`}>
+    <a href="/" class="brand" aria-label={`${site.name}, inicio`}>
       <img src="/brand/logo-full-white.png" alt="" width="992" height="659" class="brand-dark" />
       <img src="/brand/logo-full.png" alt="" width="992" height="659" class="brand-light" />
     </a>
@@ -12,7 +18,7 @@ import { site } from '../data/site';
     <nav class="nav" aria-label="Principal" id="nav">
       <ul>
         {site.nav.map((item) => (
-          <li><a href={item.href}>{item.label}</a></li>
+          <li><a href={item.href} aria-current={Astro.url.pathname === item.href ? 'page' : undefined}>{item.label}</a></li>
         ))}
       </ul>
     </nav>
@@ -35,18 +41,26 @@ import { site } from '../data/site';
     z-index: 50;
     color: var(--white);
     background: transparent;
+    view-transition-name: site-header;
     transition:
       background-color 0.3s,
       color 0.3s,
-      box-shadow 0.3s;
+      box-shadow 0.3s,
+      transform 0.45s var(--ease-out);
   }
 
-  .header.is-scrolled {
+  .header.is-scrolled,
+  .header.is-solid {
     background: rgba(255, 255, 255, 0.92);
     color: var(--text);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 1px 0 var(--line);
+  }
+
+  /* Slides away while reading down, comes back on the first scroll up. */
+  .header.is-hidden {
+    transform: translateY(-100%);
   }
 
   .header-inner {
@@ -72,11 +86,13 @@ import { site } from '../data/site';
     display: none;
   }
 
-  .header.is-scrolled .brand-dark {
+  .header.is-scrolled .brand-dark,
+  .header.is-solid .brand-dark {
     display: none;
   }
 
-  .header.is-scrolled .brand-light {
+  .header.is-scrolled .brand-light,
+  .header.is-solid .brand-light {
     display: block;
   }
 
@@ -89,20 +105,37 @@ import { site } from '../data/site';
   }
 
   .nav a {
+    position: relative;
     text-decoration: none;
     font-weight: 600;
     font-size: 0.95rem;
     opacity: 0.85;
     padding-block: 0.4rem;
-    border-bottom: 2px solid transparent;
-    transition:
-      opacity 0.2s,
-      border-color 0.2s;
+    transition: opacity 0.2s;
   }
 
-  .nav a:hover {
+  .nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--coral);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.35s var(--ease-out);
+  }
+
+  .nav a:hover,
+  .nav a[aria-current='page'] {
     opacity: 1;
-    border-bottom-color: var(--coral);
+  }
+
+  .nav a:hover::after,
+  .nav a[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left;
   }
 
   .actions {
@@ -194,6 +227,10 @@ import { site } from '../data/site';
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       opacity: 1;
     }
+
+    .nav a::after {
+      display: none;
+    }
   }
 </style>
 
@@ -202,16 +239,33 @@ import { site } from '../data/site';
   const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
   const nav = document.getElementById('nav');
 
+  let last = window.scrollY;
+  let raf = 0;
   const onScroll = () => {
-    header?.classList.toggle('is-scrolled', window.scrollY > 24);
+    raf = 0;
+    const y = window.scrollY;
+    header?.classList.toggle('is-scrolled', y > 24);
+    const menuOpen = toggle?.getAttribute('aria-expanded') === 'true' || header?.classList.contains('is-solid');
+    const goingDown = y > last + 4;
+    const goingUp = y < last - 4;
+    if (!menuOpen && goingDown && y > 280) header?.classList.add('is-hidden');
+    else if (goingUp || y <= 280) header?.classList.remove('is-hidden');
+    last = y;
   };
   onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!raf) raf = requestAnimationFrame(onScroll);
+    },
+    { passive: true },
+  );
 
   toggle?.addEventListener('click', () => {
     const open = toggle.getAttribute('aria-expanded') === 'true';
     toggle.setAttribute('aria-expanded', String(!open));
     nav?.classList.toggle('is-open', !open);
+    header?.classList.remove('is-hidden');
   });
 
   nav?.querySelectorAll('a').forEach((a) =>

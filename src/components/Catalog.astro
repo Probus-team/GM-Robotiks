@@ -4,10 +4,13 @@ import { families, robots } from '../data/robots';
 
 <section class="section catalog" id="robots">
   <div class="container">
-    <div class="section-head reveal">
-      <p class="eyebrow">Catálogo Pudu</p>
-      <h2>Un robot para cada piso, pasillo y jardín.</h2>
-      <p>
+    <div class="section-head reveal-lines" data-stagger>
+      <p class="eyebrow" style="--i:0">Catálogo Pudu · {robots.length} modelos</p>
+      <h1 class="reveal-lines">
+        <span class="line-mask"><span style="--i:0">Un robot para cada</span></span>
+        <span class="line-mask"><span style="--i:1">piso, pasillo y jardín.</span></span>
+      </h1>
+      <p class="reveal" style="--i:2">
         Todos los modelos son de Pudu Robotics, con refacciones y soporte a través de GM Robotics IA en
         México. Los datos son los del fabricante; en el piloto los medimos en tu sitio.
       </p>
@@ -24,7 +27,7 @@ import { families, robots } from '../data/robots';
       ))}
     </div>
 
-    <ul class="grid" data-catalog>
+    <ul class="grid" data-catalog data-stagger>
       {robots.map((r) => {
         const family = families.find((f) => f.id === r.family)!;
         return (
@@ -69,11 +72,26 @@ import { families, robots } from '../data/robots';
     background: var(--white);
   }
 
+  .section-head h1 {
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    letter-spacing: -0.03em;
+  }
+
+  .filters {
+    position: sticky;
+    top: 4.75rem;
+    z-index: 5;
+    padding-block: 0.75rem;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
   .filters {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .chip {
@@ -124,6 +142,10 @@ import { families, robots } from '../data/robots';
 
   .card[hidden] {
     display: none;
+  }
+
+  .card {
+    transition-delay: calc(min(var(--i, 0), 5) * 70ms) !important;
   }
 
   article {
@@ -281,7 +303,9 @@ import { families, robots } from '../data/robots';
   const cards = document.querySelectorAll<HTMLElement>('[data-catalog] [data-family]');
   const empty = document.querySelector<HTMLElement>('[data-empty]');
 
-  const apply = (filter: string) => {
+  const familyIds = Array.from(chips, (c) => c.dataset.filter ?? '').filter((f) => f && f !== 'all');
+
+  const apply = (filter: string, updateHash = true) => {
     let shown = 0;
     cards.forEach((card) => {
       const show = filter === 'all' || card.dataset.family === filter;
@@ -297,14 +321,20 @@ import { families, robots } from '../data/robots';
       chip.classList.toggle('is-active', active);
       chip.setAttribute('aria-selected', String(active));
     });
+    if (updateHash) {
+      history.replaceState(null, '', filter === 'all' ? location.pathname : `#${filter}`);
+    }
   };
 
   chips.forEach((chip) => chip.addEventListener('click', () => apply(chip.dataset.filter ?? 'all')));
 
-  // Links from the hero index preselect a family.
-  document.querySelectorAll<HTMLAnchorElement>('[data-family-link]').forEach((a) =>
-    a.addEventListener('click', () => apply(a.dataset.familyLink ?? 'all')),
-  );
+  // /robots#limpieza opens the catalog already filtered to that line.
+  const fromHash = () => {
+    const id = location.hash.slice(1);
+    if (familyIds.includes(id)) apply(id, false);
+  };
+  fromHash();
+  window.addEventListener('hashchange', fromHash);
 
   // "Cotizar" links prefill the contact form.
   document.querySelectorAll<HTMLAnchorElement>('[data-robot]').forEach((a) =>

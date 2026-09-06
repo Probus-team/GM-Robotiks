@@ -1,0 +1,448 @@
+---
+// Full-screen media, one panel per robot line. Panels are sticky, so each
+// one slides over the previous as you scroll; the loop under it only plays
+// while its panel is the one on screen. The last panel hands off to the
+// full catalog at /robots.
+import { panels } from '../data/showcase';
+import { families, robots } from '../data/robots';
+
+const withCounts = panels.map((p) => ({
+  ...p,
+  count: robots.filter((r) => r.family === p.family).length,
+  familyName: families.find((f) => f.id === p.family)!.name,
+}));
+const models = robots.map((r) => r.name.replace('PUDU ', ''));
+---
+
+<section class="showcase" id="lineas" aria-label="Robots en acción, por línea" data-showcase>
+  <ol class="rail" aria-hidden="true" data-rail>
+    {withCounts.map((p) => (
+      <li data-rail-item={p.family}><span class="rail-bar"></span><span class="rail-label">{p.familyName}</span></li>
+    ))}
+  </ol>
+
+  {withCounts.map((p, i) => (
+    <article class="panel" data-panel={p.family} style={`--n:${i}`}>
+      <div class="media">
+        {p.media.type === 'video' ? (
+          <video
+            src={p.media.src}
+            poster={p.media.poster}
+            muted
+            loop
+            playsinline
+            preload={i === 0 ? 'auto' : 'metadata'}
+            aria-hidden="true"
+            data-loop
+          ></video>
+        ) : (
+          <img src={p.media.src} alt="" width="2000" height="1125" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" class="still" />
+        )}
+      </div>
+      <div class="scrim" aria-hidden="true"></div>
+
+      <div class="container content">
+        <p class="kicker"><span class="fam">{p.kicker}</span><span class="sep"></span><span class="count">{p.count} modelos</span></p>
+        <h2>{p.title}</h2>
+        <p class="detail">{p.detail}</p>
+        <div class="foot">
+          <a href={`/robots#${p.family}`} class="btn btn-coral">Ver los {p.count} modelos</a>
+          <p class="figure"><b>{p.figure}</b><span>{p.figureLabel}</span></p>
+        </div>
+      </div>
+      <p class="credit">{p.credit}</p>
+    </article>
+  ))}
+
+  <article class="panel panel-all" data-panel="all" style={`--n:${withCounts.length}`}>
+    <div class="media">
+      <img src="/media/hero/pudu-family.webp" alt="" width="1800" height="1012" loading="lazy" decoding="async" class="still" />
+    </div>
+    <div class="scrim scrim-all" aria-hidden="true"></div>
+
+    <div class="content content-all">
+      <div class="container">
+        <p class="kicker"><span class="fam">Catálogo completo</span><span class="sep"></span><span class="count">{robots.length} modelos</span></p>
+        <h2>Todos los Pudu, con sus números.</h2>
+      </div>
+      <div class="ticker" aria-hidden="true">
+        <div class="track">
+          {[...models, ...models].map((m) => <span>{m}</span>)}
+        </div>
+        <div class="track reverse">
+          {[...models, ...models].reverse().map((m) => <span>{m}</span>)}
+        </div>
+      </div>
+      <div class="container foot">
+        <a href="/robots" class="btn btn-coral">Ver el catálogo completo</a>
+        <a href="/#contacto" class="btn btn-ghost-light">Pedir recomendación</a>
+      </div>
+    </div>
+  </article>
+</section>
+
+<style>
+  .showcase {
+    position: relative;
+    overflow: clip; /* keeps the rail inside the section; clip (unlike hidden) leaves sticky intact */
+    background: var(--burgundy-ink);
+    color: var(--white);
+  }
+
+  .panel {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    display: grid;
+    align-items: end;
+    isolation: isolate;
+    background: var(--burgundy-ink);
+    /* --cover: how much the next panel already covers this one (0–1), set by script */
+    --cover: 0;
+  }
+
+  .media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    transform: scale(calc(1 + var(--cover) * 0.08));
+    filter: brightness(calc(1 - var(--cover) * 0.6));
+    transition: transform 0.1s linear, filter 0.1s linear;
+  }
+
+  .media video,
+  .media .still {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Stills get a slow drift so the panel is never fully static. */
+  .panel.is-active .still {
+    animation: kenburns 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes kenburns {
+    from {
+      transform: scale(1) translateX(0);
+    }
+    to {
+      transform: scale(1.08) translateX(-2%);
+    }
+  }
+
+  .scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(43, 8, 16, 0.35) 0%, transparent 30%, transparent 55%, rgba(43, 8, 16, 0.85) 100%),
+      linear-gradient(90deg, rgba(43, 8, 16, 0.55) 0%, transparent 60%);
+  }
+
+  .scrim-all {
+    background:
+      linear-gradient(180deg, rgba(43, 8, 16, 0.75) 0%, rgba(43, 8, 16, 0.45) 50%, rgba(43, 8, 16, 0.9) 100%);
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    justify-items: start;
+    gap: 1.1rem;
+    padding-bottom: clamp(3.5rem, 8vh, 6rem);
+  }
+
+  .content > * {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+      opacity 0.9s var(--ease-out),
+      transform 0.9s var(--ease-out);
+  }
+
+  .content > :nth-child(1) { transition-delay: 0.05s; }
+  .content > :nth-child(2) { transition-delay: 0.15s; }
+  .content > :nth-child(3) { transition-delay: 0.25s; }
+  .content > :nth-child(4) { transition-delay: 0.35s; }
+
+  .panel.is-active .content > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .kicker .fam {
+    color: var(--coral-hot);
+  }
+
+  .kicker .sep {
+    width: 2rem;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .kicker .count {
+    color: var(--on-dark-muted);
+  }
+
+  h2 {
+    font-size: clamp(2.2rem, 5.4vw, 4.6rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    max-width: 12em;
+    text-shadow: 0 2px 30px rgba(43, 8, 16, 0.5);
+  }
+
+  .detail {
+    font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+    color: rgba(255, 236, 232, 0.88);
+    max-width: 34em;
+  }
+
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: 0.5rem;
+  }
+
+  .figure {
+    display: grid;
+    line-height: 1.1;
+  }
+
+  .figure b {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--white);
+  }
+
+  .figure span {
+    font-size: 0.82rem;
+    color: var(--on-dark-muted);
+  }
+
+  .credit {
+    position: absolute;
+    z-index: 2;
+    left: var(--gutter);
+    bottom: 1.25rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  /* Closing panel */
+  .panel-all {
+    align-items: center;
+  }
+
+  .content-all {
+    width: 100%;
+    justify-items: stretch;
+    gap: 2rem;
+    padding-bottom: 0;
+  }
+
+  .content-all h2 {
+    max-width: 14em;
+    margin-top: 0.75rem;
+  }
+
+  .ticker {
+    display: grid;
+    gap: 0.75rem;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  }
+
+  .track {
+    display: flex;
+    gap: 2.5rem;
+    width: max-content;
+    padding-inline: 1.25rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 3vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    animation: marquee 60s linear infinite;
+  }
+
+  .track.reverse {
+    animation-direction: reverse;
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  .track span::after {
+    content: '·';
+    margin-left: 2.5rem;
+    color: var(--coral);
+  }
+
+  .panel-all:hover .track {
+    animation-play-state: paused;
+  }
+
+  /* Progress rail */
+  .rail {
+    position: sticky;
+    top: 50%;
+    z-index: 10;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: none;
+    gap: 0.75rem;
+    transform: translateY(-50%);
+    width: max-content;
+    margin-left: auto;
+    margin-right: var(--gutter);
+  }
+
+  .rail.is-off {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .rail {
+    transition: opacity 0.4s;
+  }
+
+  .rail li {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    transition: color 0.3s;
+  }
+
+  .rail-bar {
+    width: 1.25rem;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transition:
+      width 0.4s var(--ease-out),
+      background-color 0.3s;
+  }
+
+  .rail li.is-current {
+    color: var(--white);
+  }
+
+  .rail li.is-current .rail-bar {
+    width: 2.5rem;
+    background: var(--coral);
+  }
+
+  @media (min-width: 64rem) {
+    .rail {
+      display: grid;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .credit {
+      display: none;
+    }
+
+    .figure b {
+      font-size: 1.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .media {
+      transform: none;
+      filter: none;
+    }
+
+    .panel.is-active .still,
+    .track {
+      animation: none;
+    }
+
+    .content > * {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-showcase]');
+  const panels = Array.from(root?.querySelectorAll<HTMLElement>('[data-panel]') ?? []);
+  const railItems = Array.from(root?.querySelectorAll<HTMLElement>('[data-rail-item]') ?? []);
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const rail = root?.querySelector<HTMLElement>('[data-rail]');
+  const setCurrent = (id: string) => {
+    railItems.forEach((li) => li.classList.toggle('is-current', li.dataset.railItem === id));
+    rail?.classList.toggle('is-off', id === 'all');
+  };
+
+  // A panel is "active" while it owns most of the viewport: its text fades in and its loop plays.
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const panel = entry.target as HTMLElement;
+        const video = panel.querySelector<HTMLVideoElement>('[data-loop]');
+        if (entry.isIntersecting) {
+          panel.classList.add('is-active');
+          setCurrent(panel.dataset.panel ?? '');
+          if (video && !reduce) video.play().catch(() => {});
+        } else if (video) {
+          video.pause();
+        }
+      }
+    },
+    { threshold: 0.55 },
+  );
+  panels.forEach((p) => io.observe(p));
+
+  // As the next panel slides up, the one underneath recedes (scale + dim).
+  if (!reduce) {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const vh = window.innerHeight;
+      for (let i = 0; i < panels.length - 1; i++) {
+        const nextTop = panels[i + 1].getBoundingClientRect().top;
+        const cover = Math.min(1, Math.max(0, 1 - nextTop / vh));
+        panels[i].style.setProperty('--cover', cover.toFixed(3));
+      }
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+  }
+</script>

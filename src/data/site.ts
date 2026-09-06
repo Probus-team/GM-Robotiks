@@ -11,10 +11,11 @@ export const site = {
     whatsapp: '523319566711', // E.164 digits only, without the leading +
     formEndpoint: '', // POST endpoint for the contact form (Formspree, own API, etc.)
   },
+  // Absolute paths so the links work from every page.
   nav: [
-    { href: '#robots', label: 'Robots' },
-    { href: '#casos', label: 'En operación' },
-    { href: '#proceso', label: 'Cómo trabajamos' },
-    { href: '#documentos', label: 'Fichas técnicas' },
+    { href: '/robots', label: 'Catálogo' },
+    { href: '/#casos', label: 'En operación' },
+    { href: '/#proceso', label: 'Cómo trabajamos' },
+    { href: '/#contacto', label: 'Contacto' },
   ],
 };
