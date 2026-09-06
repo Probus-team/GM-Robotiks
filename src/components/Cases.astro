@@ -6,18 +6,18 @@ const rest = cases.filter((c) => !c.featured);
 
 <section class="section cases" id="casos">
   <div class="container">
-    <div class="section-head reveal">
-      <p class="eyebrow">En operación</p>
-      <h2>Así se ven en turno, no en render.</h2>
-      <p>
+    <div class="section-head" data-stagger>
+      <p class="eyebrow reveal">En operación</p>
+      <h2 class="reveal">Así se ven en turno, no en render.</h2>
+      <p class="reveal">
         Material de despliegues reales y presentaciones oficiales de Pudu. Sin locución nuestra: lo que
         importa es cómo se mueve el robot entre gente, montacargas y estantes.
       </p>
     </div>
 
-    <div class="grid">
-      {[...featured, ...rest].map((c, i) => (
-        <figure class:list={['clip reveal', { featured: c.featured }]} style={`--i:${i}`}>
+    <div class="grid" data-stagger>
+      {[...featured, ...rest].map((c) => (
+        <figure class:list={['clip reveal-clip', { featured: c.featured }]}>
           <div class="frame">
             <video
               src={c.src}
@@ -29,7 +29,7 @@ const rest = cases.filter((c) => !c.featured);
             ></video>
             <span class="time">{c.minutes}</span>
           </div>
-          <figcaption>
+          <figcaption class="reveal">
             <span class="where">{c.where}</span>
             <strong>{c.title}</strong>
             <span class="robots">{c.robots.join(' · ')}</span>
@@ -78,7 +78,13 @@ const rest = cases.filter((c) => !c.featured);
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.8s var(--ease-out);
   }
+
+  .frame:hover video:paused {
+    transform: scale(1.03);
+  }
+
 
   .time {
     position: absolute;

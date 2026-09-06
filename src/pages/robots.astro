@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Catalog from '../components/Catalog.astro';
+import Docs from '../components/Docs.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+import { robots } from '../data/robots';
+---
+
+<Layout
+  title={`Catálogo de robots Pudu · ${site.name}`}
+  description={`Los ${robots.length} robots Pudu de limpieza, entrega, logística y exteriores que GM Robotics IA integra en México, con especificaciones del fabricante y fichas técnicas.`}
+>
+  <Header solid />
+  <main>
+    <Catalog />
+    <Docs />
+    <Contact />
+  </main>
+  <Footer />
+</Layout>

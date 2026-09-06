@@ -16,18 +16,22 @@ Marketing site for GM Robotics IA, distributor and integrator of Pudu Robotics s
 ```text
 src/
 ├── assets/brand/            # original logo file (source of truth)
-├── components/              # Header, Hero, Visor, Catalog, Cases, Process, Fleet, Docs, Contact, Footer
+├── components/              # Header, Hero, Visor, Showcase, Catalog, Cases, Process, Fleet, Docs, Contact, Footer
 ├── data/
 │   ├── robots.ts            # Pudu catalog, case videos and downloadable documents
+│   ├── showcase.ts          # full-screen home panels, one per robot line
 │   └── site.ts              # site name, nav, contact channels
 ├── layouts/Layout.astro     # head, favicons, fonts, scroll reveal
-├── pages/index.astro
-└── styles/global.css        # design tokens and base styles
+├── pages/
+│   ├── index.astro          # home: hero, full-screen showcase, cases, process, fleet, contact
+│   └── robots.astro         # full catalog with filters (/robots#limpieza preselects a line), docs, contact
+└── styles/global.css        # design tokens, reveal variants, base styles
 public/
 ├── brand/                   # logo lockups: full, mark, wordmark, white and mono variants
 ├── favicon.ico              # 16–256 px multi-size icon, plus PNG favicons and app icons
 ├── media/robots/            # product images (webp)
 ├── media/cases/             # web-encoded case videos and posters
+├── media/loops/             # short muted cuts of the case videos for the home showcase
 ├── media/docs/              # official Pudu PDFs
 ├── media/hero/, media/software/
 └── site.webmanifest
@@ -90,3 +94,19 @@ After merging, verify the Cloudflare production deployment identifies the
 merged commit, and that both production hosts respond over HTTPS. Check the
 canonical URL and an image, video, and PDF from the deployed site. Production
 must not send the preview-only `X-Robots-Tag` header.
+
+## Showcase loops
+
+`public/media/loops/*.mp4` are 6–8 s muted cuts of the case videos, for the
+full-screen panels on the home page. To regenerate one (example: the
+Limpieza loop, seconds 4–12 of the CC1 video):
+
+```sh
+ffmpeg -ss 4 -t 8 -i public/media/cases/cc1-factory.mp4 -an \
+  -vf "scale='min(1280,iw)':-2,fps=30,format=yuv420p" \
+  -c:v libx264 -preset slow -crf 27 -movflags +faststart \
+  public/media/loops/limpieza.mp4
+```
+
+Then export the first frame as `<name>-poster.webp`. Panels are defined in
+`src/data/showcase.ts`.

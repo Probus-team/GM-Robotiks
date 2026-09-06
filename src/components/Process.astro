@@ -30,15 +30,18 @@ const steps = [
 
 <section class="section process" id="proceso">
   <div class="container">
-    <div class="head reveal">
-      <p class="eyebrow">Cómo trabajamos</p>
-      <h2>Primero medimos. Luego cotizamos.</h2>
-      <p>
+    <div class="head reveal-lines" data-stagger>
+      <p class="eyebrow reveal" style="--i:0">Cómo trabajamos</p>
+      <h2>
+        <span class="line-mask"><span style="--i:0">Primero medimos.</span></span>
+        <span class="line-mask"><span style="--i:1">Luego cotizamos.</span></span>
+      </h2>
+      <p class="reveal" style="--i:2">
         Un robot mal elegido termina apagado en una bodega. Por eso el orden importa y no lo saltamos.
       </p>
     </div>
 
-    <ol class="steps">
+    <ol class="steps reveal-lines" data-stagger>
       {steps.map((s, i) => (
         <li class="step reveal" style={`--i:${i}`}>
           <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
@@ -79,10 +82,29 @@ const steps = [
   }
 
   .steps {
+    position: relative;
     list-style: none;
     margin: 0;
     padding: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  /* The line draws down the numbers as the list comes into view. */
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--coral-hot), rgba(255, 106, 80, 0.15));
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 2.2s var(--ease-out) 0.2s;
+  }
+
+  .steps.is-visible::before {
+    transform: scaleY(1);
   }
 
   .step {
@@ -90,9 +112,13 @@ const steps = [
     grid-template-columns: 5rem 1fr auto;
     gap: 1.5rem;
     align-items: start;
-    padding: 2rem 0;
+    padding: 2rem 0 2rem 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-    transition-delay: calc(var(--i) * 80ms);
+    transition-delay: calc(var(--i) * 120ms);
+  }
+
+  .step:hover .num {
+    translate: 0.35rem 0;
   }
 
   .num {
@@ -102,6 +128,7 @@ const steps = [
     letter-spacing: -0.04em;
     line-height: 1;
     color: var(--coral-hot);
+    transition: translate 0.4s var(--ease-out);
   }
 
   .text {
