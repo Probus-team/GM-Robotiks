@@ -1,5 +1,4 @@
-// Site-wide constants. Contact channels are intentionally empty until the
-// business confirms them; components hide anything that is not configured.
+// Site-wide constants. Components hide contact channels that are not configured.
 export const site = {
   name: 'GM Robotics IA',
   shortName: 'GM Robotics',
@@ -8,8 +7,8 @@ export const site = {
     'GM Robotics IA integra robots Pudu de limpieza, entrega, logística y exteriores en México: diagnóstico en sitio, piloto medido, despliegue y soporte local.',
   locale: 'es_MX',
   contact: {
-    email: '',
-    whatsapp: '', // E.164 digits only, e.g. 5215512345678
+    email: 'info@gmrobotiks.com',
+    whatsapp: '523319566711', // E.164 digits only, without the leading +
     formEndpoint: '', // POST endpoint for the contact form (Formspree, own API, etc.)
   },
   nav: [
