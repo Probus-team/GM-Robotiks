@@ -1,12 +1,13 @@
 ---
 import { site } from '../data/site';
+import BrandImage from './BrandImage.astro';
 const year = new Date().getFullYear();
 ---
 
 <footer class="footer">
   <div class="container inner">
     <div class="brand">
-      <img src="/brand/logo-mark-white.png" alt="" width="920" height="453" />
+      <BrandImage variant="mark" loading="lazy" />
       <p>{site.tagline}. Distribuidor e integrador de Pudu Robotics.</p>
     </div>
     <nav aria-label="Pie de página">
@@ -44,7 +45,7 @@ const year = new Date().getFullYear();
     max-width: 24rem;
   }
 
-  .brand img {
+  .brand :global(img) {
     width: 5.5rem;
     height: auto;
   }

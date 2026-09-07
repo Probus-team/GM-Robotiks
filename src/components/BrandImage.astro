@@ -1,0 +1,33 @@
+---
+import full from '../assets/brand/optimized/logo-full.webp';
+import full144 from '../assets/brand/optimized/logo-full-144.webp';
+import full216 from '../assets/brand/optimized/logo-full-216.webp';
+import white from '../assets/brand/optimized/logo-full-white.webp';
+import white144 from '../assets/brand/optimized/logo-full-white-144.webp';
+import white216 from '../assets/brand/optimized/logo-full-white-216.webp';
+import mark from '../assets/brand/optimized/logo-mark-white.webp';
+import mark144 from '../assets/brand/optimized/logo-mark-white-144.webp';
+import mark216 from '../assets/brand/optimized/logo-mark-white-216.webp';
+
+interface Props {
+  variant: 'full' | 'white' | 'mark';
+  class?: string;
+  loading?: 'eager' | 'lazy';
+}
+
+const { variant, class: className, loading = 'eager' } = Astro.props;
+const sources = { full: [full144, full216, full], white: [white144, white216, white], mark: [mark144, mark216, mark] }[variant];
+const original = sources[2];
+---
+
+<img
+  src={sources[1].src}
+  srcset={sources.map((image) => `${image.src} ${image.width}w`).join(', ')}
+  sizes={variant === 'mark' ? '5.5rem' : '4.52rem'}
+  width={original.width}
+  height={original.height}
+  alt=""
+  class={className}
+  loading={loading}
+  decoding="async"
+/>

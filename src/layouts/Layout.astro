@@ -37,8 +37,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta property="og:locale" content={site.locale} />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <Font cssVariable="--font-display" preload />
-    <Font cssVariable="--font-body" preload />
+    <Font cssVariable="--font-display" preload={[{ subset: 'latin', style: 'normal' }]} />
+    <Font cssVariable="--font-body" preload={[{ subset: 'latin', style: 'normal' }]} />
     <script is:inline>
       document.documentElement.classList.add('js');
     </script>
