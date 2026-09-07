@@ -13,7 +13,7 @@ export const site = {
   },
   // Absolute paths so the links work from every page.
   nav: [
-    { href: '/robots', label: 'Catálogo' },
+    { href: '/robots/', label: 'Catálogo' },
     { href: '/#casos', label: 'En operación' },
     { href: '/#proceso', label: 'Cómo trabajamos' },
     { href: '/#contacto', label: 'Contacto' },

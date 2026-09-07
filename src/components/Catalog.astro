@@ -31,7 +31,7 @@ import { families, robots } from '../data/robots';
       {robots.map((r) => {
         const family = families.find((f) => f.id === r.family)!;
         return (
-          <li class="card reveal" data-family={r.family}>
+          <li class="card reveal" id={r.id} data-family={r.family}>
             <article>
               <div class:list={['media', r.imageStyle]}>
                 <img src={r.image} alt={`${r.name}, ${r.role.toLowerCase()}`} loading="lazy" decoding="async" />

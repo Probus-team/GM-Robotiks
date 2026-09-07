@@ -2,14 +2,39 @@
 import { Font } from 'astro:assets';
 import '../styles/global.css';
 import { site } from '../data/site';
+import { canonicalPath } from '../data/seo';
 
 interface Props {
   title?: string;
   description?: string;
+  structuredData?: Record<string, unknown>[];
 }
 
-const { title = `${site.name} · ${site.tagline}`, description = site.description } = Astro.props;
-const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const { title = `${site.name} · ${site.tagline}`, description = site.description, structuredData = [] } = Astro.props;
+if (!Astro.site) throw new Error('A canonical site URL is required for page metadata.');
+const canonical = new URL(canonicalPath(Astro.url.pathname), Astro.site).href;
+const home = new URL('/', Astro.site).href;
+const socialImage = new URL('/og-default.png', Astro.site).href;
+const organizationId = `${home}#organization`;
+const graph = [
+  {
+    '@type': 'Organization', '@id': organizationId,
+    name: site.name, alternateName: ['GM Robotiks', site.shortName],
+    url: home, description: site.description,
+    logo: new URL('/icon-512.png', Astro.site).href,
+    email: site.contact.email,
+    contactPoint: { '@type': 'ContactPoint', contactType: 'sales',
+      telephone: `+${site.contact.whatsapp}`, email: site.contact.email,
+      areaServed: 'MX', availableLanguage: 'Spanish' },
+  },
+  { '@type': 'WebSite', '@id': `${home}#website`, url: home, name: site.name,
+    alternateName: 'GM Robotiks', inLanguage: 'es-MX', publisher: { '@id': organizationId } },
+  { '@type': Astro.url.pathname.startsWith('/robots') ? 'CollectionPage' : 'WebPage',
+    '@id': `${canonical}#webpage`, url: canonical, name: title, description,
+    inLanguage: 'es-MX', isPartOf: { '@id': `${home}#website` }, about: { '@id': organizationId } },
+  ...structuredData,
+];
+const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
@@ -19,9 +44,11 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="theme-color" content="#881028" />
     <meta name="generator" content={Astro.generator} />
     {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -33,9 +60,16 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/og-default.png" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content={`${site.name} — robots de servicio Pudu en México`} />
     <meta property="og:locale" content={site.locale} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content={`${site.name} — robots de servicio Pudu en México`} />
+    <script type="application/ld+json" set:html={jsonLd} />
 
     <Font cssVariable="--font-display" preload={[{ subset: 'latin', style: 'normal' }]} />
     <Font cssVariable="--font-body" preload={[{ subset: 'latin', style: 'normal' }]} />

@@ -28,7 +28,7 @@ const counts = families.map((f) => ({
         de que los compres, y los sostenemos después.
       </p>
       <div class="cta intro" style="--i:5">
-        <a href="/robots" class="btn btn-coral">Ver los robots</a>
+        <a href="/robots/" class="btn btn-coral">Ver los robots</a>
         <a href="#contacto" class="btn btn-ghost-light">Agendar una demo</a>
       </div>
     </div>
@@ -51,7 +51,7 @@ const counts = families.map((f) => ({
     <ol class="index intro" style="--i:6" aria-label="Líneas de robots">
       {counts.map((f) => (
         <li>
-          <a href={`/robots#${f.id}`}>
+          <a href={`/robots/#${f.id}`}>
             <span class="idx-name">{f.name}</span>
             <span class="idx-short">{f.short}</span>
             <span class="idx-count">{f.count} {f.count === 1 ? 'modelo' : 'modelos'}</span>
