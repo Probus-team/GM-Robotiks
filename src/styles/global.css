@@ -1,19 +1,29 @@
-/* GM Robotics IA — design tokens and base styles */
+/* GM Robotiks IA — design tokens and base styles.
+   Two inks, taken straight from the approved logo: navy and blue. Everything
+   else is a shade of those or plain white. */
 :root {
-  --burgundy: #881028;
-  --burgundy-deep: #5c0b1c;
-  --burgundy-ink: #2b0810;
-  --coral: #f85038;
-  --coral-hot: #ff6a50;
-  --coral-tint: #ffe3dc;
+  --navy: #123559;
+  --navy-deep: #0e2942;
+  --navy-ink: #0a1c2b;
+  /* The logo ink is #2A7ABC. On screen it is used one step darker — same hue and
+     saturation, 2% less lightness — so eyebrow-sized text clears AA on white and
+     on --mist alike. The artwork itself keeps the exact ink. */
+  --blue: #2875b4;
+  /* A lift of the logo blue. The logo blue itself only reaches 2.7:1 on navy,
+     so dark grounds use this instead (5.4:1). */
+  --blue-light: #6fb2ea;
+  --blue-tint: #dceaf7;
   --white: #ffffff;
-  --rose: #f8f3f4;
-  --rose-2: #efe5e8;
-  --line: rgba(136, 16, 40, 0.14);
-  --line-strong: rgba(136, 16, 40, 0.3);
-  --text: #1f1418;
-  --muted: #6f5c62;
-  --on-dark-muted: rgba(255, 228, 222, 0.72);
+  --mist: #f4f7fa;
+  --mist-2: #e6edf4;
+  --line: rgba(18, 53, 89, 0.14);
+  --line-strong: rgba(18, 53, 89, 0.3);
+  --text: #14212e;
+  --muted: #5c6f80;
+  --on-dark-muted: rgba(219, 233, 246, 0.72);
+  /* Accent for eyebrows and focus rings. Dark sections re-point this at
+     --blue-light so both stay legible; see .on-dark below. */
+  --accent: var(--blue);
 
   --container: 80rem;
   --gutter: clamp(1.25rem, 4vw, 2.5rem);
@@ -21,6 +31,11 @@
   --radius: 1.25rem;
   --radius-sm: 0.75rem;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Sections that paint a navy ground opt into the lifted accent. */
+.on-dark {
+  --accent: var(--blue-light);
 }
 
 *,
@@ -96,13 +111,13 @@ p {
 }
 
 :focus-visible {
-  outline: 3px solid var(--coral);
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
 ::selection {
-  background: var(--coral);
+  background: var(--blue);
   color: var(--white);
 }
 
@@ -139,7 +154,7 @@ p {
   font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--coral);
+  color: var(--accent);
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
@@ -182,13 +197,14 @@ p {
   transform: translateY(0);
 }
 
-.btn-coral {
-  background: var(--coral);
-  color: var(--white);
+/* Solid white: the primary action on navy grounds (13.9:1). */
+.btn-white {
+  background: var(--white);
+  color: var(--navy);
 }
 
-.btn-coral:hover {
-  background: var(--coral-hot);
+.btn-white:hover {
+  background: var(--blue-tint);
 }
 
 .btn-ghost-light {
@@ -200,22 +216,23 @@ p {
   border-color: var(--white);
 }
 
-.btn-burgundy {
-  background: var(--burgundy);
+/* Solid navy: the primary action on light grounds (13.9:1). */
+.btn-navy {
+  background: var(--navy);
   color: var(--white);
 }
 
-.btn-burgundy:hover {
-  background: var(--burgundy-deep);
+.btn-navy:hover {
+  background: var(--navy-deep);
 }
 
 .btn-ghost-dark {
   border-color: var(--line-strong);
-  color: var(--burgundy);
+  color: var(--navy);
 }
 
 .btn-ghost-dark:hover {
-  border-color: var(--burgundy);
+  border-color: var(--navy);
 }
 
 .sr-only {

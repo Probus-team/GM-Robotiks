@@ -1,10 +1,10 @@
 // Site-wide constants. Components hide contact channels that are not configured.
 export const site = {
-  name: 'GM Robotics IA',
-  shortName: 'GM Robotics',
+  name: 'GM Robotiks IA',
+  shortName: 'GM Robotiks',
   tagline: 'Robots de servicio Pudu para México',
   description:
-    'GM Robotics IA integra robots Pudu de limpieza, entrega, logística y exteriores en México: diagnóstico en sitio, piloto medido, despliegue y soporte local.',
+    'GM Robotiks IA integra robots Pudu de limpieza, entrega, logística y exteriores en México: diagnóstico en sitio, piloto medido, despliegue y soporte local.',
   locale: 'es_MX',
   contact: {
     email: 'info@gmrobotiks.com',

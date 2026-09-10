@@ -14,7 +14,7 @@ const withCounts = panels.map((p) => ({
 const models = robots.map((r) => r.name.replace('PUDU ', ''));
 ---
 
-<section class="showcase" id="lineas" aria-label="Robots en acción, por línea" data-showcase>
+<section class="showcase on-dark" id="lineas" aria-label="Robots en acción, por línea" data-showcase>
   <ol class="rail" aria-hidden="true" data-rail>
     {withCounts.map((p) => (
       <li data-rail-item={p.family}><span class="rail-bar"></span><span class="rail-label">{p.familyName}</span></li>
@@ -46,7 +46,7 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
         <h2>{p.title}</h2>
         <p class="detail">{p.detail}</p>
         <div class="foot">
-          <a href={`/robots/#${p.family}`} class="btn btn-coral">Ver los {p.count} modelos</a>
+          <a href={`/robots/#${p.family}`} class="btn btn-white">Ver los {p.count} modelos</a>
           <p class="figure"><b>{p.figure}</b><span>{p.figureLabel}</span></p>
         </div>
       </div>
@@ -74,7 +74,7 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
         </div>
       </div>
       <div class="container foot">
-        <a href="/robots/" class="btn btn-coral">Ver el catálogo completo</a>
+        <a href="/robots/" class="btn btn-white">Ver el catálogo completo</a>
         <a href="/#contacto" class="btn btn-ghost-light">Pedir recomendación</a>
       </div>
     </div>
@@ -85,7 +85,7 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
   .showcase {
     position: relative;
     overflow: clip; /* keeps the rail inside the section; clip (unlike hidden) leaves sticky intact */
-    background: var(--burgundy-ink);
+    background: var(--navy-ink);
     color: var(--white);
   }
 
@@ -98,7 +98,7 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
     display: grid;
     align-items: end;
     isolation: isolate;
-    background: var(--burgundy-ink);
+    background: var(--navy-ink);
     /* --cover: how much the next panel already covers this one (0–1), set by script */
     --cover: 0;
   }
@@ -138,13 +138,13 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
     inset: 0;
     z-index: 1;
     background:
-      linear-gradient(180deg, rgba(43, 8, 16, 0.35) 0%, transparent 30%, transparent 55%, rgba(43, 8, 16, 0.85) 100%),
-      linear-gradient(90deg, rgba(43, 8, 16, 0.55) 0%, transparent 60%);
+      linear-gradient(180deg, rgba(10, 28, 43, 0.35) 0%, transparent 30%, transparent 55%, rgba(10, 28, 43, 0.85) 100%),
+      linear-gradient(90deg, rgba(10, 28, 43, 0.55) 0%, transparent 60%);
   }
 
   .scrim-all {
     background:
-      linear-gradient(180deg, rgba(43, 8, 16, 0.75) 0%, rgba(43, 8, 16, 0.45) 50%, rgba(43, 8, 16, 0.9) 100%);
+      linear-gradient(180deg, rgba(10, 28, 43, 0.75) 0%, rgba(10, 28, 43, 0.45) 50%, rgba(10, 28, 43, 0.9) 100%);
   }
 
   .content {
@@ -185,7 +185,7 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
   }
 
   .kicker .fam {
-    color: var(--coral-hot);
+    color: var(--blue-light);
   }
 
   .kicker .sep {
@@ -204,12 +204,12 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
     letter-spacing: -0.03em;
     line-height: 0.98;
     max-width: 12em;
-    text-shadow: 0 2px 30px rgba(43, 8, 16, 0.5);
+    text-shadow: 0 2px 30px rgba(10, 28, 43, 0.5);
   }
 
   .detail {
     font-size: clamp(1.05rem, 1.4vw, 1.25rem);
-    color: rgba(255, 236, 232, 0.88);
+    color: rgba(226, 238, 248, 0.88);
     max-width: 34em;
   }
 
@@ -296,7 +296,7 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
   .track span::after {
     content: '·';
     margin-left: 2.5rem;
-    color: var(--coral);
+    color: var(--blue-light);
   }
 
   .panel-all:hover .track {
@@ -358,7 +358,7 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
 
   .rail li.is-current .rail-bar {
     width: 2.5rem;
-    background: var(--coral);
+    background: var(--blue-light);
   }
 
   @media (min-width: 64rem) {

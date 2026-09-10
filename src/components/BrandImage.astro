@@ -23,11 +23,11 @@ const original = sources[2];
 <img
   src={sources[1].src}
   srcset={sources.map((image) => `${image.src} ${image.width}w`).join(', ')}
-  sizes={variant === 'mark' ? '5.5rem' : '4.52rem'}
+  sizes={variant === 'mark' ? '5.5rem' : '5.6rem'}
   width={original.width}
   height={original.height}
   style={`aspect-ratio: ${original.width} / ${original.height}`}
-  alt=""
+  alt={variant === 'mark' ? 'GM Robotiks IA' : ''}
   class={className}
   loading={loading}
   decoding="async"
