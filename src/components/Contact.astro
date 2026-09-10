@@ -62,7 +62,7 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
         <textarea id="mensaje" name="mensaje" rows="4" placeholder="Tipo de instalación, metros cuadrados o entregas por turno, ciudad."></textarea>
       </label>
       <div class="foot">
-        <button type="submit" class="btn btn-burgundy">Enviar y agendar</button>
+        <button type="submit" class="btn btn-navy">Enviar y agendar</button>
         <p class="status" data-status role="status" aria-live="polite"></p>
       </div>
     </form>
@@ -108,9 +108,9 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
   }
 
   .channels a {
-    color: var(--burgundy);
+    color: var(--navy);
     text-decoration: none;
-    border-bottom: 2px solid var(--coral-tint);
+    border-bottom: 2px solid var(--blue-tint);
   }
 
   .form {
@@ -118,7 +118,7 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
     gap: 1.1rem;
     padding: clamp(1.25rem, 3vw, 2rem);
     border-radius: var(--radius);
-    background: var(--rose);
+    background: var(--mist);
     border: 1px solid var(--line);
   }
 
@@ -133,7 +133,7 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
     gap: 0.4rem;
     font-size: 0.85rem;
     font-weight: 700;
-    color: var(--burgundy);
+    color: var(--navy);
   }
 
   input,
@@ -155,13 +155,13 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
   select:focus,
   textarea:focus {
     outline: none;
-    border-color: var(--coral);
-    box-shadow: 0 0 0 3px var(--coral-tint);
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-tint);
   }
 
   input:user-invalid,
   select:user-invalid {
-    border-color: var(--coral);
+    border-color: var(--blue);
   }
 
   textarea {
@@ -182,7 +182,7 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
   }
 
   .status.is-error {
-    color: var(--burgundy);
+    color: var(--navy);
     font-weight: 600;
   }
 

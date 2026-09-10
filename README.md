@@ -1,6 +1,6 @@
-# GM Robotics IA
+# GM Robotiks IA
 
-Marketing site for GM Robotics IA, distributor and integrator of Pudu Robotics service robots in Mexico. Built with Astro (static output).
+Marketing site for GM Robotiks IA, distributor and integrator of Pudu Robotics service robots in Mexico. Built with Astro (static output).
 
 ## Commands
 
@@ -9,13 +9,14 @@ Marketing site for GM Robotics IA, distributor and integrator of Pudu Robotics s
 | `bun install` | Install dependencies |
 | `bun run dev` | Start the dev server at `localhost:4321` |
 | `bun run build` | Build the static site to `dist/` |
+| `bun run brand:build` | Rebuild logos, favicons, app icons, and the brand review kit |
 | `bun run preview` | Preview the production build |
 
 ## Structure
 
 ```text
 src/
-├── assets/brand/            # original logo file (source of truth)
+├── assets/brand/source/     # approved WhatsApp logo (source of truth)
 ├── components/              # Header, Hero, Visor, Showcase, Catalog, Cases, Process, Fleet, Docs, Contact, Footer
 ├── data/
 │   ├── robots.ts            # Pudu catalog, case videos and downloadable documents
@@ -38,6 +39,8 @@ public/
 ```
 
 ## Content notes
+
+- Brand exports and usage notes are in [output/brand-kit/README.md](output/brand-kit/README.md). Open [the asset preview](output/brand-kit/preview.html) locally to review color, white, icon, and favicon versions. The active master is `src/assets/brand/source/gm-robotiks-approved.jpg`; the older `gm-robotics-ia-original.jpg` is a legacy reference.
 
 - Product figures come from Pudu's official spec sheets and product pages (2025 brochure, 2026 cleaning catalog, September 2026 ET1 / GT-series pages). Update them in `src/data/robots.ts`.
 - Contact channels (`email`, `whatsapp`, `formEndpoint`) live in `src/data/site.ts`. The form posts to `formEndpoint` when set, falls back to a prefilled `mailto:` when only `email` is set, and otherwise shows a configuration notice.

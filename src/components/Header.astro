@@ -25,7 +25,7 @@ const { solid = false } = Astro.props;
     </nav>
 
     <div class="actions">
-      <a href="#contacto" class="btn btn-coral header-cta">Agendar demo</a>
+      <a href="#contacto" class="btn btn-white header-cta">Agendar demo</a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav" data-menu-toggle>
         <span class="sr-only">Abrir menú</span>
         <span class="bar"></span>
@@ -42,6 +42,8 @@ const { solid = false } = Astro.props;
     z-index: 50;
     color: var(--white);
     background: transparent;
+    /* Starts over the navy hero, so it wants the lifted accent. */
+    --accent: var(--blue-light);
     view-transition-name: site-header;
     transition:
       background-color 0.3s,
@@ -54,6 +56,7 @@ const { solid = false } = Astro.props;
   .header.is-solid {
     background: rgba(255, 255, 255, 0.92);
     color: var(--text);
+    --accent: var(--blue);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 1px 0 var(--line);
@@ -97,6 +100,17 @@ const { solid = false } = Astro.props;
     display: block;
   }
 
+  .header.is-scrolled .header-cta,
+  .header.is-solid .header-cta {
+    background: var(--navy);
+    color: var(--white);
+  }
+
+  .header.is-scrolled .header-cta:hover,
+  .header.is-solid .header-cta:hover {
+    background: var(--navy-deep);
+  }
+
   .nav ul {
     display: flex;
     gap: 2rem;
@@ -122,7 +136,7 @@ const { solid = false } = Astro.props;
     right: 0;
     bottom: 0;
     height: 2px;
-    background: var(--coral);
+    background: var(--accent);
     transform: scaleX(0);
     transform-origin: right;
     transition: transform 0.35s var(--ease-out);
@@ -199,8 +213,9 @@ const { solid = false } = Astro.props;
     .nav {
       position: absolute;
       inset: 4.75rem 0 auto 0;
-      background: var(--burgundy-ink);
+      background: var(--navy-ink);
       color: var(--white);
+      --accent: var(--blue-light);
       padding: 1rem var(--gutter) 1.5rem;
       transform: translateY(-8px);
       opacity: 0;

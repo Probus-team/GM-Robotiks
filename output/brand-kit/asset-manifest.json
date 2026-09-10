@@ -1,0 +1,146 @@
+[
+  {
+    "file": "public/brand/logo-full.png",
+    "bytes": 41969
+  },
+  {
+    "file": "public/brand/logo-full.svg",
+    "bytes": 13761
+  },
+  {
+    "file": "public/brand/logo-full-white.png",
+    "bytes": 41514
+  },
+  {
+    "file": "public/brand/logo-full-white.svg",
+    "bytes": 13761
+  },
+  {
+    "file": "public/brand/logo-full-mono.png",
+    "bytes": 44806
+  },
+  {
+    "file": "public/brand/logo-full-mono.svg",
+    "bytes": 13761
+  },
+  {
+    "file": "public/brand/logo-mark.png",
+    "bytes": 16123
+  },
+  {
+    "file": "public/brand/logo-mark.svg",
+    "bytes": 5003
+  },
+  {
+    "file": "public/brand/logo-mark-white.png",
+    "bytes": 14098
+  },
+  {
+    "file": "public/brand/logo-mark-white.svg",
+    "bytes": 5003
+  },
+  {
+    "file": "public/brand/logo-mark-mono.png",
+    "bytes": 16246
+  },
+  {
+    "file": "public/brand/logo-mark-mono.svg",
+    "bytes": 5003
+  },
+  {
+    "file": "public/brand/logo-mark-mono-white.png",
+    "bytes": 14098
+  },
+  {
+    "file": "public/brand/logo-mark-mono-white.svg",
+    "bytes": 5003
+  },
+  {
+    "file": "public/brand/wordmark.png",
+    "bytes": 11472
+  },
+  {
+    "file": "public/brand/wordmark.svg",
+    "bytes": 5092
+  },
+  {
+    "file": "public/brand/wordmark-white.png",
+    "bytes": 10582
+  },
+  {
+    "file": "public/brand/wordmark-white.svg",
+    "bytes": 5092
+  },
+  {
+    "file": "public/brand/logo-micro.png",
+    "bytes": 6226
+  },
+  {
+    "file": "public/brand/logo-micro.svg",
+    "bytes": 1314
+  },
+  {
+    "file": "public/brand/logo-micro-white.png",
+    "bytes": 5284
+  },
+  {
+    "file": "public/brand/logo-micro-white.svg",
+    "bytes": 1314
+  },
+  {
+    "file": "public/favicon-16.png",
+    "bytes": 272
+  },
+  {
+    "file": "public/favicon-32.png",
+    "bytes": 530
+  },
+  {
+    "file": "public/favicon-48.png",
+    "bytes": 743
+  },
+  {
+    "file": "public/favicon-64.png",
+    "bytes": 898
+  },
+  {
+    "file": "public/favicon-128.png",
+    "bytes": 1903
+  },
+  {
+    "file": "public/favicon-256.png",
+    "bytes": 4543
+  },
+  {
+    "file": "public/favicon.ico",
+    "bytes": 8991
+  },
+  {
+    "file": "public/favicon.svg",
+    "bytes": 1400
+  },
+  {
+    "file": "public/icon-192.png",
+    "bytes": 3872
+  },
+  {
+    "file": "public/icon-512.png",
+    "bytes": 14543
+  },
+  {
+    "file": "public/icon-512-maskable.png",
+    "bytes": 10036
+  },
+  {
+    "file": "public/apple-touch-icon.png",
+    "bytes": 2540
+  },
+  {
+    "file": "public/brand/icon-1024.png",
+    "bytes": 34298
+  },
+  {
+    "file": "public/og-default.png",
+    "bytes": 32975
+  }
+]

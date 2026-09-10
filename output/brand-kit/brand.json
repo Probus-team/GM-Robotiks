@@ -1,0 +1,25 @@
+{
+  "name": "GM Robotiks IA",
+  "shortName": "GM Robotiks",
+  "palette": {
+    "navy": "#123559",
+    "blue": "#2a7abc",
+    "white": "#ffffff"
+  },
+  "tagline": "Robots de servicio Pudu para México",
+  "alt": {
+    "full": "GM Robotiks IA",
+    "mark": "Monograma GM de GM Robotiks IA",
+    "micro": "G de GM Robotiks IA"
+  },
+  "source": "src/assets/brand/source/gm-robotiks-approved.jpg",
+  "provenance": {
+    "chat": "Mis Moragrega y C’s",
+    "pollQuestion": "Cual les gusta mas",
+    "option": "1",
+    "votesAtVerification": 5,
+    "imageMessageId": "3BEE19B229F97BBAF008",
+    "pollMessageId": "3B91C73EBAA2CA252414"
+  },
+  "method": "Original geometry extracted from JPEG. Inks normalized to sampled navy/blue; background removed. SVG paths traced at native resolution with subpixel simplification."
+}

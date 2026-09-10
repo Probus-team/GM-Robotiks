@@ -4,7 +4,7 @@ import BrandImage from './BrandImage.astro';
 const year = new Date().getFullYear();
 ---
 
-<footer class="footer">
+<footer class="footer on-dark">
   <div class="container inner">
     <div class="brand">
       <BrandImage variant="mark" loading="lazy" />
@@ -27,7 +27,7 @@ const year = new Date().getFullYear();
 
 <style>
   .footer {
-    background: var(--burgundy-ink);
+    background: var(--navy-ink);
     color: var(--on-dark-muted);
     padding-block: 3.5rem 2.5rem;
   }
@@ -65,7 +65,7 @@ const year = new Date().getFullYear();
   }
 
   nav a:hover {
-    color: var(--coral-hot);
+    color: var(--blue-light);
   }
 
   .legal {
