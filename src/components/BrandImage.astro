@@ -1,13 +1,13 @@
 ---
 import full from '../assets/brand/optimized/logo-full.webp';
-import full160 from '../assets/brand/optimized/logo-full-160.webp';
-import full240 from '../assets/brand/optimized/logo-full-240.webp';
+import full320 from '../assets/brand/optimized/logo-full-320.webp';
+import full480 from '../assets/brand/optimized/logo-full-480.webp';
 import white from '../assets/brand/optimized/logo-full-white.webp';
-import white160 from '../assets/brand/optimized/logo-full-white-160.webp';
-import white240 from '../assets/brand/optimized/logo-full-white-240.webp';
-import mark from '../assets/brand/optimized/logo-mark-white.webp';
-import mark176 from '../assets/brand/optimized/logo-mark-white-176.webp';
-import mark288 from '../assets/brand/optimized/logo-mark-white-288.webp';
+import white320 from '../assets/brand/optimized/logo-full-white-320.webp';
+import white480 from '../assets/brand/optimized/logo-full-white-480.webp';
+import mark from '../assets/brand/optimized/logo-mark.webp';
+import mark176 from '../assets/brand/optimized/logo-mark-176.webp';
+import mark288 from '../assets/brand/optimized/logo-mark-288.webp';
 
 interface Props {
   variant: 'full' | 'white' | 'mark';
@@ -16,14 +16,14 @@ interface Props {
 }
 
 const { variant, class: className, loading = 'eager' } = Astro.props;
-const sources = { full: [full160, full240, full], white: [white160, white240, white], mark: [mark176, mark288, mark] }[variant];
+const sources = { full: [full320, full480, full], white: [white320, white480, white], mark: [mark176, mark288, mark] }[variant];
 const original = sources[2];
 ---
 
 <img
   src={sources[1].src}
   srcset={sources.map((image) => `${image.src} ${image.width}w`).join(', ')}
-  sizes={variant === 'mark' ? '5.5rem' : '5.6rem'}
+  sizes={variant === 'mark' ? '5.5rem' : '9.2rem'}
   width={original.width}
   height={original.height}
   style={`aspect-ratio: ${original.width} / ${original.height}`}

@@ -1,62 +1,37 @@
-# GM Robotiks IA — approved logo asset kit
+# GM Robotiks IA brand assets
 
-Source: the blue logo selected as option 1 in the WhatsApp poll, with five votes at verification. The unchanged source is `approved-original.jpg`, also stored at `src/assets/brand/source/gm-robotiks-approved.jpg`.
+The master is the user's supplied blue robot logo, preserved unchanged in `approved-original.png` and `src/assets/brand/source/gm-robotiks-approved.png`. The source checksum and crop coordinates are recorded in `brand.json`.
 
-Open `preview.html` to compare the exports. The public files and the site's responsive WebP images have been replaced locally. Publishing still requires a commit and push through CI/CD.
-
-## Files
+Open `preview.html` to inspect every export, favicons at actual size, app masking, and the social card. `asset-review.png` is a compact contact sheet.
 
 | Asset | Location | Use |
 | --- | --- | --- |
-| Full logo, color / white / navy monochrome | `public/brand/logo-full*.svg` and `.png` | Complete approved lockup, including frame and side bars |
-| GM monogram, color / white / navy monochrome | `public/brand/logo-mark*.svg` and `.png` | Standalone symbol, without frame or descriptor |
-| Wordmark, navy / white | `public/brand/wordmark*.svg` and `.png` | Original ROBOTIKS IA lettering, extracted rather than retyped |
-| Small G symbol, navy / white | `public/brand/logo-micro*.svg` and `.png` | Compact favicon mark extracted from the original G |
-| Adaptive favicon | `public/favicon.svg` | White G on a navy tile; reads the same in light and dark browser themes |
-| Legacy favicon | `public/favicon.ico` | 16, 32, 48, 64, 128, and 256 px in one file |
-| PNG favicon fallbacks | `public/favicon-{16,32,48,64,128,256}.png` | White G on a navy tile; square corners below 32 px, rounded above |
-| Apple touch icon | `public/apple-touch-icon.png` | 180 × 180, white GM on full-bleed navy; iOS applies its own mask |
-| App icons | `public/icon-192.png`, `public/icon-512.png` | White GM on a rounded navy tile |
-| Maskable app icon | `public/icon-512-maskable.png` | 512 × 512, full-bleed navy with extra padding for circular or rounded masks |
-| Profile icon | `public/brand/icon-1024.png` | 1024 × 1024, white GM on full-bleed navy |
-| Social sharing card | `public/og-default.png` | 1200 × 630, logo, existing tagline, and website address |
-| Larger logo PNG | `logo-full-2400.png` | 2400 px wide, rendered from the traced SVG |
-| Responsive site assets | `src/assets/brand/optimized/*.webp` | Full, white, and mark variants in the existing size set |
-| Metadata and inventory | `brand.json`, `asset-manifest.json` | Colors, copy, source provenance, paths, and file sizes |
+| Full color logo | `public/brand/logo-full.{png,svg}` | Light backgrounds, original blue lettering and robot gradients |
+| Full logo for dark backgrounds | `public/brand/logo-full-white.{png,svg}` | Original color robot with white lettering |
+| Single-color full logo | `public/brand/logo-full-mono*.{png,svg}` | Navy or white silhouette for single-ink use |
+| Robot emblem only | `public/brand/logo-mark*.{png,svg}` | Color, white, navy monochrome, and white monochrome |
+| Lettering only | `public/brand/wordmark*.{png,svg}` | GM and Robotiks IA, original lettering in blue or white |
+| Compact mark | `public/brand/logo-micro*.{png,svg}` | Robot emblem, color or white; retained compact-mark filenames |
+| Browser icons | `public/favicon.svg`, `public/favicon.ico`, `public/favicon-{16,32,48,64,128,256}.png` | Blue robot on a white tile for light and dark browser themes |
+| Apple touch icon | `public/apple-touch-icon.png` | 180 × 180, opaque square; iOS applies the mask |
+| App icons | `public/icon-192.png`, `public/icon-512.png` | Rounded white tiles with the color emblem |
+| Maskable icon | `public/icon-512-maskable.png` | 512 × 512, opaque white with artwork inside the circular safe zone |
+| Profile icon | `public/brand/icon-1024.png` | 1024 × 1024 white tile |
+| Social card | `public/og-default.png`, `social-card.svg` | 1200 × 630, logo, tagline, and site address |
+| Large logo | `logo-full-2400.png` | Transparent PNG, 2400 px wide |
+| Site images | `src/assets/brand/optimized/*.webp` | Lossless responsive exports for header and footer |
+| Inventory | `asset-manifest.json` | Public asset paths and byte sizes |
 
-## Brand content
+## Fidelity and formats
 
-- Name: **GM Robotiks IA**. Short name: **GM Robotiks**.
-- Tagline: **Robots de servicio Pudu para México**.
-- Logo alt text: **GM Robotiks IA**. Decorative logos inside an already labelled link should use empty alt text.
-- Navy: **#123559**. Blue: **#2A7ABC**. White: **#FFFFFF**.
-- On screen the blue is used one step darker, **#2875B4** — same hue and saturation, 2% less lightness — so small text clears WCAG AA on white and on the pale `--mist` ground. Artwork keeps the exact **#2A7ABC**.
-- Pudu Robotics is a separate manufacturer name and retains its existing spelling.
+Exports crop the original artwork without retyping or redrawing it. Visible RGB gradients and transparency are preserved; near-invisible source flecks with alpha at or below 8/255 are removed. Robot eyes remain transparent. Dark-background full logos change only the lettering to white.
 
-Use the full-color logo on white or pale backgrounds. Use white versions on dark or photographic backgrounds. Keep clear space of at least one wordmark-letter height around a full logo. Preserve aspect ratio; do not stretch, crop off the frame or bars, add effects, or retype the lettering. At very small sizes use the G favicon instead of shrinking the full descriptor to unreadable text.
+Color SVGs embed PNG artwork to preserve the supplied gradients. They are portable SVG containers, **not editable vector masters**. Monochrome SVGs contain actual traced silhouette paths. The 2400 px PNG is an enlargement and does not add source detail. No image generation was needed.
 
-## Production method and fidelity
+Use the color lockup on white or pale backgrounds and the white-letter lockup on dark backgrounds. Keep the aspect ratio and leave clear space around the artwork. At favicon sizes, use the robot emblem rather than the complete name.
 
-The JPEG is the unchanged approved source. PNG exports preserve its geometry while removing the white background and normalizing JPEG color variation to the two sampled ink colors. White and monochrome variants retain the same alpha mask. SVG files contain actual traced paths, with simplification below one source pixel; they are derived vectors, not the designer's original vector master. The 2400 px export scales those paths and does not add source detail. The AI-generated checkerboard version is not used.
+The page's existing navy and accessible text colors remain in `src/styles/global.css`. Artwork uses the supplied blue/cyan gradient. Pudu product logos and manufacturer names are unchanged.
 
-Every icon is a filled navy tile carrying the mark in white. A navy-on-transparent mark disappeared against a dark browser tab or dark home screen; the tile gives each icon its own ground so it reads identically everywhere.
+## Rebuild and validate
 
-## Site palette
-
-The page palette is built from the same two inks, in `src/styles/global.css`:
-
-| Token | Value | Use |
-| --- | --- | --- |
-| `--navy` / `--navy-deep` / `--navy-ink` | `#123559` / `#0E2942` / `#0A1C2B` | Dark section grounds and hero gradients |
-| `--blue` | `#2875B4` | Eyebrows, links, tags and focus rings on light grounds |
-| `--blue-light` | `#6FB2EA` | The same accents on navy, where the logo blue only reaches 2.7:1 |
-| `--blue-tint` | `#DCEAF7` | Underlines and focus halos |
-| `--mist` / `--mist-2` | `#F4F7FA` / `#E6EDF4` | Pale section grounds and card plates |
-| `--text` / `--muted` | `#14212E` / `#5C6F80` | Body copy |
-| `--accent` | `--blue`, or `--blue-light` under `.on-dark` | One switch so eyebrows and focus rings stay legible on either ground |
-
-Primary actions are `.btn-white` (white fill, navy text) on navy grounds and `.btn-navy` (navy fill, white text) on light ones — both 12.5:1. Layout, type, spacing and motion are unchanged.
-
-## Rebuild
-
-Run `bun run brand:build` from the repository root. Sharp is pinned as an explicit development dependency. The script regenerates assets from the preserved JPEG without a network request or AI generation. If the source is replaced, review its dimensions and extraction regions before rebuilding.
+Run `bun run brand:build`, then `bun run test` and `bun run build`. Sharp is already pinned in the project. Rebuilding is deterministic and requires no image service or network access. If the master changes, update and verify extraction coordinates before rebuilding. Tests cover the source checksum, gradients, alpha, dark-background lettering, crop validation, icon sizes, mask safety, ICO entries, and renderable SVG exports.

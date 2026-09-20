@@ -1,16 +1,13 @@
 /* GM Robotiks IA — design tokens and base styles.
-   Two inks, taken straight from the approved logo: navy and blue. Everything
-   else is a shade of those or plain white. */
+   Page colors retain the existing accessible navy/blue palette.
+   Logo assets preserve the supplied blue/cyan gradients independently. */
 :root {
   --navy: #123559;
   --navy-deep: #0e2942;
   --navy-ink: #0a1c2b;
-  /* The logo ink is #2A7ABC. On screen it is used one step darker — same hue and
-     saturation, 2% less lightness — so eyebrow-sized text clears AA on white and
-     on --mist alike. The artwork itself keeps the exact ink. */
+  /* Small text uses the existing accessible blue on white and --mist. */
   --blue: #2875b4;
-  /* A lift of the logo blue. The logo blue itself only reaches 2.7:1 on navy,
-     so dark grounds use this instead (5.4:1). */
+  /* Lighter accent for text on navy grounds. */
   --blue-light: #6fb2ea;
   --blue-tint: #dceaf7;
   --white: #ffffff;
