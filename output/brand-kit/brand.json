@@ -3,23 +3,46 @@
   "shortName": "GM Robotiks",
   "palette": {
     "navy": "#123559",
-    "blue": "#2a7abc",
+    "blue": "#0345c5",
+    "cyan": "#4bd8ef",
     "white": "#ffffff"
   },
   "tagline": "Robots de servicio Pudu para México",
   "alt": {
     "full": "GM Robotiks IA",
-    "mark": "Monograma GM de GM Robotiks IA",
-    "micro": "G de GM Robotiks IA"
+    "mark": "Robot de GM Robotiks IA",
+    "micro": "Robot de GM Robotiks IA"
   },
-  "source": "src/assets/brand/source/gm-robotiks-approved.jpg",
+  "source": "src/assets/brand/source/gm-robotiks-approved.png",
   "provenance": {
-    "chat": "Mis Moragrega y C’s",
-    "pollQuestion": "Cual les gusta mas",
-    "option": "1",
-    "votesAtVerification": 5,
-    "imageMessageId": "3BEE19B229F97BBAF008",
-    "pollMessageId": "3B91C73EBAA2CA252414"
+    "source": "User-supplied image.png",
+    "sha256": "cd9196528f86c7c30a75db762a3cd25c88188d5f8c08e8cbc31a1b7721fb3ff9"
   },
-  "method": "Original geometry extracted from JPEG. Inks normalized to sampled navy/blue; background removed. SVG paths traced at native resolution with subpixel simplification."
+  "regions": {
+    "logo-full": [
+      70,
+      198,
+      1638,
+      534
+    ],
+    "logo-mark": [
+      70,
+      198,
+      588,
+      534
+    ],
+    "wordmark": [
+      666,
+      226,
+      1042,
+      479
+    ],
+    "logo-micro": [
+      70,
+      198,
+      588,
+      534
+    ]
+  },
+  "method": "Native PNG crops preserve RGB gradients and visible alpha. Alpha <= 8 is cleared. Dark-background lockup changes only lettering to white. Color SVGs embed PNG artwork; monochrome SVGs trace the silhouette. Enlarged PNGs do not add source detail."
 }
