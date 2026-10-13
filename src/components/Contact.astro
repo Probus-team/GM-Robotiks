@@ -1,116 +1,140 @@
 ---
+// Lead form, WhatsApp first. The client has no form service or inbox API yet,
+// so submitting opens WhatsApp with the lead already written to the sales
+// number; "Prefiero correo" opens the same text as an email. When
+// site.contact.formEndpoint is set, the form posts JSON there instead.
+import Icon from './Icon.astro';
 import { site } from '../data/site';
 import { families } from '../data/robots';
+import { whatsappUrl } from '../lib/whatsapp';
+
 const { email, whatsapp, formEndpoint } = site.contact;
-const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
+const directWhatsapp = whatsapp ? whatsappUrl(whatsapp, 'Hola, GM Robotiks. Quiero agendar una demo de robots Pudu.') : '';
 ---
 
-<section class="section contact" id="contacto">
-  <div class="container grid">
-    <div class="intro reveal">
-      <p class="eyebrow">Agendar demo</p>
-      <h2>Cuéntanos de tu operación.</h2>
-      <p class="lede">
-        Con el tipo de instalación y los metros o entregas por turno podemos decirte qué robot probar y qué
-        esperar de él. Te respondemos en menos de un día hábil.
-      </p>
-      {(email || waLink) && (
-        <ul class="channels">
-          {waLink && (
-            <li><a href={waLink} target="_blank" rel="noopener">WhatsApp</a></li>
-          )}
-          {email && (
-            <li><a href={`mailto:${email}`}>{email}</a></li>
-          )}
-        </ul>
-      )}
-    </div>
+<section class="contact" id="contacto" aria-labelledby="contact-title">
+  <div class="frame on-dark inner">
+    <div class="container grid">
+      <div class="intro">
+        <p class="eyebrow">Agenda demo</p>
+        <h2 id="contact-title">Cuéntanos de tu operación.</h2>
+        <p class="lede">
+          Con el tipo de instalación y los metros o entregas por turno te decimos qué robot probar y qué esperar
+          de él. Te respondemos en menos de un día hábil.
+        </p>
+        {(directWhatsapp || email) && (
+          <ul class="channels">
+            {directWhatsapp && (
+              <li>
+                <a class="btn btn-ghost-light" href={directWhatsapp} target="_blank" rel="noopener">
+                  <Icon name="whatsapp" /> Escríbenos por WhatsApp
+                </a>
+              </li>
+            )}
+            {email && (
+              <li>
+                <a class="link-arrow" href={`mailto:${email}`}>{email}</a>
+              </li>
+            )}
+          </ul>
+        )}
+      </div>
 
-    <form class="form reveal" data-contact-form data-endpoint={formEndpoint} data-email={email} novalidate>
-      <div class="row">
+      <form
+        class="form"
+        data-contact-form
+        data-endpoint={formEndpoint}
+        data-whatsapp={whatsapp}
+        data-email={email}
+        novalidate
+        aria-describedby="form-how"
+      >
+        <p class="how" id="form-how">
+          {formEndpoint
+            ? 'Te contactamos al correo o teléfono que dejes.'
+            : 'Al enviar se abre WhatsApp con tu mensaje listo; solo presionas enviar.'}
+        </p>
+        <div class="row">
+          <label>
+            <span>Nombre</span>
+            <input id="nombre" type="text" name="nombre" autocomplete="name" required />
+          </label>
+          <label>
+            <span>Empresa</span>
+            <input type="text" name="empresa" autocomplete="organization" required />
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            <span>Ciudad</span>
+            <input type="text" name="ciudad" autocomplete="address-level2" required />
+          </label>
+          <label>
+            <span>Correo <em>(opcional)</em></span>
+            <input type="email" name="correo" autocomplete="email" />
+          </label>
+        </div>
         <label>
-          <span>Nombre</span>
-          <input type="text" name="nombre" autocomplete="name" required />
+          <span>¿Qué necesitas resolver?</span>
+          <select id="linea" name="linea" required>
+            <option value="">Elige una línea</option>
+            {families.map((f) => (
+              <option value={f.id}>{f.name}: {f.short.charAt(0).toLowerCase() + f.short.slice(1)}</option>
+            ))}
+            <option value="varias">Varias líneas</option>
+            <option value="no-se">Aún no sé</option>
+          </select>
         </label>
         <label>
-          <span>Empresa</span>
-          <input type="text" name="empresa" autocomplete="organization" required />
+          <span>Cuéntanos del sitio <em>(opcional)</em></span>
+          <textarea id="mensaje" name="mensaje" rows="4" placeholder="Tipo de instalación, metros cuadrados o entregas por turno."></textarea>
         </label>
-      </div>
-      <div class="row">
-        <label>
-          <span>Correo</span>
-          <input type="email" name="correo" autocomplete="email" required />
-        </label>
-        <label>
-          <span>Teléfono o WhatsApp</span>
-          <input type="tel" name="telefono" autocomplete="tel" />
-        </label>
-      </div>
-      <label>
-        <span>¿Qué necesitas resolver?</span>
-        <select name="linea" required>
-          <option value="">Elige una línea</option>
-          {families.map((f) => (
-            <option value={f.id}>{f.name}: {f.short.toLowerCase()}</option>
-          ))}
-          <option value="varias">Varias líneas</option>
-        </select>
-      </label>
-      <label>
-        <span>Cuéntanos del sitio</span>
-        <textarea id="mensaje" name="mensaje" rows="4" placeholder="Tipo de instalación, metros cuadrados o entregas por turno, ciudad."></textarea>
-      </label>
-      <div class="foot">
-        <button type="submit" class="btn btn-navy">Enviar y agendar</button>
+        <div class="foot">
+          <button type="submit" class="btn btn-navy">
+            {formEndpoint ? 'Enviar' : <><Icon name="whatsapp" /> Enviar por WhatsApp</>}
+          </button>
+          {email && !formEndpoint && (
+            <button type="button" class="alt" data-send-email>Prefiero correo</button>
+          )}
+        </div>
         <p class="status" data-status role="status" aria-live="polite"></p>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </section>
 
 <style>
   .contact {
-    background: var(--white);
+    padding-block: var(--bezel);
+  }
+
+  .inner {
+    background:
+      radial-gradient(50rem 30rem at 0% 100%, rgba(42, 140, 255, 0.2), transparent 60%),
+      linear-gradient(200deg, var(--navy) 0%, var(--ink) 75%);
   }
 
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
     gap: clamp(2rem, 6vw, 6rem);
     align-items: start;
+    padding-block: clamp(3.5rem, 7vw, 6rem);
   }
 
   .intro {
     display: grid;
     gap: 1.25rem;
-    position: sticky;
-    top: 6rem;
-  }
-
-  h2 {
-    font-size: clamp(2rem, 4vw, 3.2rem);
-  }
-
-  .lede {
-    font-size: 1.125rem;
-    color: var(--muted);
-    max-width: 30em;
+    justify-items: start;
   }
 
   .channels {
     list-style: none;
-    margin: 0.5rem 0 0;
+    margin: 0.75rem 0 0;
     padding: 0;
     display: grid;
-    gap: 0.4rem;
-    font-weight: 700;
-  }
-
-  .channels a {
-    color: var(--navy);
-    text-decoration: none;
-    border-bottom: 2px solid var(--blue-tint);
+    gap: 1rem;
+    justify-items: start;
   }
 
   .form {
@@ -118,8 +142,14 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
     gap: 1.1rem;
     padding: clamp(1.25rem, 3vw, 2rem);
     border-radius: var(--radius);
-    background: var(--mist);
-    border: 1px solid var(--line);
+    background: var(--white);
+    color: var(--text);
+    --accent: var(--blue);
+  }
+
+  .how {
+    font-size: var(--fs-small);
+    color: var(--muted);
   }
 
   .row {
@@ -131,24 +161,31 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
   label {
     display: grid;
     gap: 0.4rem;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 700;
     color: var(--navy);
+  }
+
+  em {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--muted);
   }
 
   input,
   select,
   textarea {
-    font: inherit;
     font-weight: 400;
     font-size: 1rem;
     color: var(--text);
-    padding: 0.85rem 1rem;
+    padding: 0.8rem 0.95rem;
     border-radius: var(--radius-sm);
     border: 1.5px solid var(--line-strong);
     background: var(--white);
     width: 100%;
-    transition: border-color 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
   }
 
   input:focus,
@@ -156,12 +193,11 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
   textarea:focus {
     outline: none;
     border-color: var(--blue);
-    box-shadow: 0 0 0 3px var(--blue-tint);
+    box-shadow: 0 0 0 3px var(--ice-2);
   }
 
-  input:user-invalid,
-  select:user-invalid {
-    border-color: var(--blue);
+  [aria-invalid='true'] {
+    border-color: #b42828;
   }
 
   textarea {
@@ -173,26 +209,37 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .alt {
+    padding: 0.5rem 0;
+    border: 0;
+    background: none;
+    font-weight: 700;
+    color: var(--navy);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+
+  .status:empty {
+    display: none;
   }
 
   .status {
     font-size: 0.95rem;
-    color: var(--muted);
+    color: var(--navy);
+    font-weight: 600;
   }
 
   .status.is-error {
-    color: var(--navy);
-    font-weight: 600;
+    color: #b42828;
   }
 
   @media (max-width: 64rem) {
     .grid {
       grid-template-columns: 1fr;
-    }
-
-    .intro {
-      position: static;
     }
   }
 
@@ -200,12 +247,16 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
     .row {
       grid-template-columns: 1fr;
     }
+
+    .foot .btn {
+      width: 100%;
+    }
   }
 </style>
 
 <script>
   const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
-  const status = document.querySelector<HTMLElement>('[data-status]');
+  const status = form?.querySelector<HTMLElement>('[data-status]');
 
   const say = (text: string, error = false) => {
     if (!status) return;
@@ -213,24 +264,58 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
     status.classList.toggle('is-error', error);
   };
 
+  // Checks the required fields, marks the invalid ones and focuses the first.
+  const valid = () => {
+    if (!form) return false;
+    const fields = Array.from(form.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select, textarea'));
+    fields.forEach((field) => field.setAttribute('aria-invalid', String(!field.checkValidity())));
+    const first = fields.find((field) => !field.checkValidity());
+    if (first) {
+      first.focus();
+      say('Faltan datos: revisa los campos marcados.', true);
+      return false;
+    }
+    return true;
+  };
+
+  const lead = () => {
+    const data = new FormData(form!);
+    const get = (key: string) => String(data.get(key) ?? '').trim();
+    const select = form!.querySelector<HTMLSelectElement>('select[name="linea"]');
+    const line = select?.selectedOptions[0]?.textContent?.trim() ?? get('linea');
+    return {
+      fields: Object.fromEntries(Array.from(data.entries(), ([k, v]) => [k, String(v).trim()])),
+      text: [
+        `Hola, GM Robotiks. Soy ${get('nombre')}, de ${get('empresa')} (${get('ciudad')}).`,
+        `Me interesa: ${line}.`,
+        get('mensaje'),
+        get('correo') && `Correo: ${get('correo')}`,
+        `Enviado desde el formulario de ${location.host}`,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      subject: `Demo de robots Pudu · ${get('empresa')}`,
+    };
+  };
+
+  form?.addEventListener('input', (event) => {
+    const field = event.target as HTMLInputElement;
+    if (field.getAttribute('aria-invalid') === 'true' && field.checkValidity()) field.setAttribute('aria-invalid', 'false');
+  });
+
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      say('Faltan datos obligatorios.', true);
-      return;
-    }
-    const data = new FormData(form);
+    if (!valid()) return;
+    const { fields, text } = lead();
     const endpoint = form.dataset.endpoint;
-    const email = form.dataset.email;
 
     if (endpoint) {
       say('Enviando…');
       try {
         const res = await fetch(endpoint, {
           method: 'POST',
-          body: data,
-          headers: { Accept: 'application/json' },
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(fields),
         });
         if (!res.ok) throw new Error(String(res.status));
         form.reset();
@@ -241,15 +326,17 @@ const waLink = whatsapp ? `https://wa.me/${whatsapp}` : '';
       return;
     }
 
-    if (email) {
-      const lines = Array.from(data.entries()).map(([k, v]) => `${k}: ${String(v)}`);
-      const subject = encodeURIComponent(`Demo de robots Pudu · ${data.get('empresa') ?? ''}`);
-      const body = encodeURIComponent(lines.join('\n'));
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-      say('Se abrió tu correo con los datos listos para enviar.');
-      return;
-    }
+    const url = `https://wa.me/${form.dataset.whatsapp}?text=${encodeURIComponent(text)}`;
+    const opened = window.open(url, '_blank');
+    if (opened) opened.opener = null;
+    else window.location.href = url;
+    say('Abrimos WhatsApp con tu mensaje listo. Solo falta que lo envíes.');
+  });
 
-    say('El formulario aún no tiene destino configurado (site.ts → contact).', true);
+  form?.querySelector('[data-send-email]')?.addEventListener('click', () => {
+    if (!valid()) return;
+    const { text, subject } = lead();
+    window.location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+    say('Abrimos tu correo con el mensaje listo para enviar.');
   });
 </script>

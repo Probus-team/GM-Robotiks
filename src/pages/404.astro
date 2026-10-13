@@ -1,0 +1,70 @@
+---
+// Served by Cloudflare for unknown paths (wrangler.jsonc: not_found_handling).
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Visor from '../components/Visor.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+---
+
+<Layout title={`Página no encontrada · ${site.name}`} description="Esta dirección no existe en gmrobotiks.com." noindex>
+  <Header />
+  <main id="contenido">
+    <section class="lost">
+      <div class="frame on-dark inner">
+        <div class="container content">
+          <Visor class="big-visor" label="Robot GM buscando la página" />
+          <h1>Este pasillo no está en el mapa.</h1>
+          <p class="lede">La página que buscas no existe o cambió de dirección.</p>
+          <div class="cta">
+            <a class="btn btn-white" href="/robots/">Ver los robots <Icon name="arrow" /></a>
+            <a class="btn btn-ghost-light" href="/">Ir al inicio</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .lost {
+    padding-top: var(--bezel);
+  }
+
+  .inner {
+    display: grid;
+    align-items: center;
+    min-height: min(44rem, calc(100svh - 2 * var(--bezel)));
+    background:
+      radial-gradient(40rem 30rem at 80% 100%, rgba(42, 140, 255, 0.25), transparent 60%),
+      linear-gradient(160deg, var(--navy), var(--ink));
+  }
+
+  .content {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+    padding-block: 8rem 4rem;
+  }
+
+  :global(.big-visor) {
+    --w: clamp(4rem, 9vw, 7rem);
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 5.5vw, 5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    max-width: 12em;
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+</style>

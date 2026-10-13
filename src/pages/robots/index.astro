@@ -1,12 +1,14 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import Catalog from '../components/Catalog.astro';
-import Docs from '../components/Docs.astro';
-import Contact from '../components/Contact.astro';
-import Footer from '../components/Footer.astro';
-import { site } from '../data/site';
-import { robots } from '../data/robots';
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Catalog from '../../components/Catalog.astro';
+import Docs from '../../components/Docs.astro';
+import Contact from '../../components/Contact.astro';
+import Footer from '../../components/Footer.astro';
+import { site } from '../../data/site';
+import { robots } from '../../data/robots';
+import { robotPath } from '../../data/seo';
+
 const catalogUrl = new URL('/robots/', Astro.site).href;
 const structuredData = [
   { '@type': 'BreadcrumbList', itemListElement: [
@@ -16,7 +18,7 @@ const structuredData = [
   { '@type': 'ItemList', '@id': `${catalogUrl}#catalog`, name: 'Catálogo de robots Pudu',
     numberOfItems: robots.length, itemListElement: robots.map((robot, index) => ({
       '@type': 'ListItem', position: index + 1, name: robot.name,
-      description: robot.summary, url: `${catalogUrl}#${robot.id}`,
+      url: new URL(robotPath(robot.id), Astro.site).href,
     })) },
 ];
 ---
@@ -24,10 +26,11 @@ const structuredData = [
 <Layout
   title={`Catálogo de robots Pudu · ${site.name}`}
   description={`Los ${robots.length} robots Pudu de limpieza, entrega, logística y exteriores que GM Robotiks IA integra en México, con especificaciones del fabricante y fichas técnicas.`}
+  pageType="CollectionPage"
   structuredData={structuredData}
 >
-  <Header solid />
-  <main>
+  <Header />
+  <main id="contenido">
     <Catalog />
     <Docs />
     <Contact />

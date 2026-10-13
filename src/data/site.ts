@@ -9,13 +9,17 @@ export const site = {
   contact: {
     email: 'info@gmrobotiks.com',
     whatsapp: '523319566711', // E.164 digits only, without the leading +
-    formEndpoint: '', // POST endpoint for the contact form (Formspree, own API, etc.)
+    // Optional POST endpoint for the contact form. Leave empty to send leads
+    // through WhatsApp (see Contact.astro); set it once a server-side inbox exists.
+    formEndpoint: '',
   },
   // Absolute paths so the links work from every page.
   nav: [
-    { href: '/robots/', label: 'Catálogo' },
+    { href: '/robots/', label: 'Robots' },
+    { href: '/#ahorro', label: 'Calculadora' },
     { href: '/#casos', label: 'En operación' },
     { href: '/#proceso', label: 'Cómo trabajamos' },
-    { href: '/#contacto', label: 'Contacto' },
   ],
+  /** The one main action in the floating nav. */
+  cta: { href: '/#contacto', label: 'Agenda demo' },
 };

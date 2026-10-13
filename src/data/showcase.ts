@@ -9,10 +9,13 @@ export interface Panel {
   kicker: string;
   title: string;
   detail: string;
-  /** The one figure worth remembering for this line. */
+  /** The one figure worth remembering for this line, from Pudu's spec sheets. */
   figure: string;
   figureLabel: string;
-  media: { type: 'video'; src: string; poster: string } | { type: 'image'; src: string };
+  /** Robot the figure belongs to; the figure links to its page. */
+  figureRobot: string;
+  /** Images are scene ids in src/assets/scenes. */
+  media: { type: 'video'; src: string; poster: string } | { type: 'image'; scene: string };
   credit: string;
 }
 
@@ -24,9 +27,10 @@ export const panels: Panel[] = [
     detail:
       'CC1, MT1, ET1 y BG1 barren, friegan y aspiran entre maquinaria y personal, y vuelven solos a su estación.',
     figure: '2,000',
-    figureLabel: 'm² por hora, BG1',
+    figureLabel: 'm² por hora con la BG1, según Pudu',
+    figureRobot: 'bg1',
     media: { type: 'video', src: '/media/loops/limpieza.mp4', poster: '/media/loops/limpieza-poster.webp' },
-    credit: 'CC1 en planta electrónica',
+    credit: 'CC1 en una planta electrónica · video de Pudu Robotics',
   },
   {
     family: 'entrega',
@@ -35,9 +39,10 @@ export const panels: Panel[] = [
     detail:
       'BellaBot, PuduBot 2, KettyBot y FlashBot reparten en comedores, laboratorios, hoteles y pisos de venta.',
     figure: '15 h',
-    figureLabel: 'de autonomía, PuduBot 2',
+    figureLabel: 'de autonomía de la PuduBot 2, según Pudu',
+    figureRobot: 'pudubot-2',
     media: { type: 'video', src: '/media/loops/entrega.mp4', poster: '/media/loops/entrega-poster.webp' },
-    credit: 'PuduBot 2 en Shaw Lab Group',
+    credit: 'PuduBot 2 en Shaw Lab Group, Canadá · video de Pudu Robotics',
   },
   {
     family: 'logistica',
@@ -46,9 +51,10 @@ export const panels: Panel[] = [
     detail:
       'T300, T600 y MP2000 mueven materiales entre estaciones y hablan VDA5050 con tu sistema de flota.',
     figure: '2,000 kg',
-    figureLabel: 'por tarima, MP2000',
+    figureLabel: 'por tarima con el MP2000, según Pudu',
+    figureRobot: 'mp2000',
     media: { type: 'video', src: '/media/loops/logistica.mp4', poster: '/media/loops/logistica-poster.webp' },
-    credit: 'T300 en manufactura',
+    credit: 'T300 en una planta de manufactura · video de Pudu Robotics',
   },
   {
     family: 'exteriores',
@@ -57,8 +63,9 @@ export const panels: Panel[] = [
     detail:
       'GT3, GT5 y GT7 mapean solos, recogen lo cortado y cruzan de una zona a otra sin operador.',
     figure: '16 acres',
-    figureLabel: 'por carga, GT5',
-    media: { type: 'image', src: '/media/hero/gt5-field.webp' },
-    credit: 'GT5',
+    figureLabel: 'por carga con el GT5, según Pudu',
+    figureRobot: 'gt5',
+    media: { type: 'image', scene: 'gt5' },
+    credit: 'GT5 · imagen de Pudu Robotics',
   },
 ];

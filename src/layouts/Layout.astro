@@ -7,14 +7,29 @@ import { canonicalPath } from '../data/seo';
 interface Props {
   title?: string;
   description?: string;
+  /** schema.org type for the page node: WebPage, CollectionPage, ItemPage. */
+  pageType?: string;
   structuredData?: Record<string, unknown>[];
+  /** Absolute or root-relative 1200×630 image for link previews. */
+  socialImage?: string;
+  socialImageAlt?: string;
+  /** Keep the page out of search results (404). */
+  noindex?: boolean;
 }
 
-const { title = `${site.name} · ${site.tagline}`, description = site.description, structuredData = [] } = Astro.props;
+const {
+  title = `${site.name} · ${site.tagline}`,
+  description = site.description,
+  pageType = 'WebPage',
+  structuredData = [],
+  socialImage: socialImagePath = '/og-default.png',
+  socialImageAlt = `${site.name} — robots de servicio Pudu en México`,
+  noindex = false,
+} = Astro.props;
 if (!Astro.site) throw new Error('A canonical site URL is required for page metadata.');
 const canonical = new URL(canonicalPath(Astro.url.pathname), Astro.site).href;
 const home = new URL('/', Astro.site).href;
-const socialImage = new URL('/og-default.png', Astro.site).href;
+const socialImage = new URL(socialImagePath, Astro.site).href;
 const organizationId = `${home}#organization`;
 const graph = [
   {
@@ -29,7 +44,7 @@ const graph = [
   },
   { '@type': 'WebSite', '@id': `${home}#website`, url: home, name: site.name,
     alternateName: 'GM Robotiks', inLanguage: 'es-MX', publisher: { '@id': organizationId } },
-  { '@type': Astro.url.pathname.startsWith('/robots') ? 'CollectionPage' : 'WebPage',
+  { '@type': pageType,
     '@id': `${canonical}#webpage`, url: canonical, name: title, description,
     inLanguage: 'es-MX', isPartOf: { '@id': `${home}#website` }, about: { '@id': organizationId } },
   ...structuredData,
@@ -44,10 +59,10 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="theme-color" content="#123559" />
+    <meta name="robots" content={noindex ? 'noindex' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+    <meta name="theme-color" content="#0a1c2b" />
     <meta name="generator" content={Astro.generator} />
-    {canonical && <link rel="canonical" href={canonical} />}
+    {!noindex && <link rel="canonical" href={canonical} />}
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
     <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg" />
@@ -65,22 +80,24 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
     <meta property="og:image" content={socialImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={`${site.name} — robots de servicio Pudu en México`} />
+    <meta property="og:image:alt" content={socialImageAlt} />
     <meta property="og:locale" content={site.locale} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage} />
-    <meta name="twitter:image:alt" content={`${site.name} — robots de servicio Pudu en México`} />
+    <meta name="twitter:image:alt" content={socialImageAlt} />
     <script type="application/ld+json" set:html={jsonLd} />
 
     <Font cssVariable="--font-display" preload={[{ subset: 'latin', style: 'normal' }]} />
     <Font cssVariable="--font-body" preload={[{ subset: 'latin', style: 'normal' }]} />
+    <slot name="head" />
     <script is:inline>
       document.documentElement.classList.add('js');
     </script>
   </head>
   <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <slot />
     <script>
       // Scroll reveal. Containers with [data-stagger] number their children so
@@ -89,7 +106,7 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
         Array.from(group.children).forEach((child, i) => (child as HTMLElement).style.setProperty('--i', String(i)));
       });
 
-      const items = document.querySelectorAll<HTMLElement>('.reveal, .reveal-clip, .reveal-lines');
+      const items = document.querySelectorAll<HTMLElement>('.reveal, .reveal-frame');
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce || !('IntersectionObserver' in window)) {
         items.forEach((el) => el.classList.add('is-visible'));
@@ -103,7 +120,7 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
               }
             }
           },
-          { rootMargin: '0px 0px -8% 0px', threshold: 0.1 },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
         );
         items.forEach((el) => io.observe(el));
       }

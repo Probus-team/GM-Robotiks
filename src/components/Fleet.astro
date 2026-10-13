@@ -1,6 +1,10 @@
 ---
 // Pudu Link and Pudu Cloud are the manufacturer's fleet tools; every robot in
 // the catalog reports to them.
+import { Picture } from 'astro:assets';
+import dashboard from '../assets/software/pudu-cloud-dashboard.webp';
+import phone from '../assets/software/pudu-link-fleet.webp';
+
 const points = [
   ['Tareas desde el teléfono', 'Asigna rutas, horarios y zonas desde Pudu Link, sin computadora en piso.'],
   ['Métricas por robot', 'Metros limpiados, entregas, agua y energía por turno, en Pudu Cloud.'],
@@ -9,11 +13,11 @@ const points = [
 ];
 ---
 
-<section class="section fleet">
+<section class="section fleet" aria-labelledby="fleet-title">
   <div class="container grid">
     <div class="text" data-stagger>
       <p class="eyebrow reveal">Flota conectada</p>
-      <h2 class="reveal">Toda la flota en una pantalla que cabe en el bolsillo.</h2>
+      <h2 id="fleet-title" class="reveal">Toda la flota en una pantalla que cabe en el bolsillo.</h2>
       <p class="lede reveal">
         Los robots Pudu reportan a Pudu Link y Pudu Cloud. Tú ves lo que hicieron; nosotros vemos lo que
         necesitan.
@@ -29,10 +33,10 @@ const points = [
     </div>
 
     <div class="shots" aria-hidden="true">
-      <div class="dash-wrap reveal-clip">
-        <img class="dash" src="/media/software/pudu-cloud-dashboard.webp" alt="" width="1600" height="703" loading="lazy" />
+      <div class="dash-wrap reveal-frame">
+        <Picture class="dash" src={dashboard} alt="" widths={[640, 960, 1280, 1600]} sizes="(max-width: 64rem) 92vw, 46vw" formats={['avif']} fallbackFormat="webp" loading="lazy" />
       </div>
-      <img class="phone reveal" src="/media/software/pudu-link-fleet.webp" alt="" width="900" height="1950" loading="lazy" />
+      <Picture class="phone reveal" src={phone} alt="" widths={[240, 360, 480]} sizes="(max-width: 64rem) 30vw, 15vw" formats={['avif']} fallbackFormat="webp" loading="lazy" />
     </div>
   </div>
 </section>
@@ -56,12 +60,7 @@ const points = [
   }
 
   h2 {
-    font-size: clamp(2rem, 4vw, 3.2rem);
-  }
-
-  .lede {
-    font-size: 1.125rem;
-    color: var(--muted);
+    color: var(--navy);
   }
 
   .points {
@@ -82,6 +81,7 @@ const points = [
   .points strong {
     font-family: var(--font-display);
     font-size: 1.15rem;
+    color: var(--navy);
   }
 
   .points span {
@@ -94,14 +94,14 @@ const points = [
     padding: 2rem 0 3rem;
   }
 
-  .dash {
+  .shots :global(.dash) {
     width: 100%;
     border-radius: var(--radius-sm);
     border: 1px solid var(--line);
     box-shadow: 0 40px 60px -40px rgba(10, 28, 43, 0.4);
   }
 
-  .phone {
+  .shots :global(.phone) {
     position: absolute;
     right: -1rem;
     bottom: 0;
@@ -117,7 +117,7 @@ const points = [
 
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-      .phone.is-visible {
+      .shots :global(.phone.is-visible) {
         animation: phone-drift linear both;
         animation-timeline: view();
         animation-range: entry 0% exit 100%;

@@ -1,0 +1,729 @@
+---
+// "¿Cuánto te cuesta limpiar/servir?" The floor plan beside the sliders draws
+// what the estimate assumes: a cleaning robot covers the middle of the floor in
+// back-and-forth lanes while the edges stay manual, or a delivery robot takes
+// most kitchen-to-table trips. The math lives in src/lib/roi.ts.
+import Icon from './Icon.astro';
+import { defaultAssumptions as a } from '../lib/roi';
+
+const percent = (share: number) => Math.round(share * 100);
+---
+
+<section class="savings" id="ahorro" aria-labelledby="roi-title">
+  <div class="frame on-dark roi reveal-frame" data-roi>
+    <div class="container grid">
+      <div class="head">
+        <p class="eyebrow">Calculadora de ahorro</p>
+        <h2 id="roi-title">¿Cuánto te cuesta <span class="verb" data-verb>limpiar</span>?</h2>
+        <div class="mode" role="radiogroup" aria-label="Qué quieres calcular">
+          <label><input type="radio" name="roi-mode" value="limpiar" checked data-mode /> <span>Limpiar pisos</span></label>
+          <label><input type="radio" name="roi-mode" value="servir" data-mode /> <span>Servir mesas</span></label>
+        </div>
+      </div>
+
+      <figure class="plan">
+        <svg viewBox="0 0 640 420" role="img" aria-labelledby="plan-caption" data-plan>
+          <defs>
+            <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(111,178,234,0.45)" stroke-width="2" />
+            </pattern>
+          </defs>
+          <g data-plan-layer></g>
+          <g class="robot" data-plan-robot>
+            <rect x="-11" y="-8" width="22" height="16" rx="5" fill="#fff" />
+            <rect x="-6" y="-4.5" width="4" height="9" rx="2" fill="#2a8cff" />
+            <rect x="2" y="-4.5" width="4" height="9" rx="2" fill="#2a8cff" />
+          </g>
+        </svg>
+        <figcaption id="plan-caption" data-plan-caption>Plano ilustrativo.</figcaption>
+      </figure>
+
+      <div class="controls">
+        <div class="fields" data-for="limpiar">
+          <label class="field">
+            <span class="field-label">Superficie que se limpia</span>
+            <output class="field-value tabular" data-out="area">2,000 m²</output>
+            <input type="range" min="200" max="20000" step="100" value="2000" data-input="area" />
+          </label>
+          <label class="field">
+            <span class="field-label">Veces que se limpia al día</span>
+            <output class="field-value tabular" data-out="passes">2 veces</output>
+            <input type="range" min="1" max="3" step="1" value="2" data-input="passes" />
+          </label>
+        </div>
+        <div class="fields" data-for="servir" hidden>
+          <label class="field">
+            <span class="field-label">Viajes de cocina a mesa por turno</span>
+            <output class="field-value tabular" data-out="trips">120 viajes</output>
+            <input type="range" min="20" max="400" step="10" value="120" data-input="trips" />
+          </label>
+          <label class="field">
+            <span class="field-label">Turnos al día</span>
+            <output class="field-value tabular" data-out="shifts">2 turnos</output>
+            <input type="range" min="1" max="3" step="1" value="2" data-input="shifts" />
+          </label>
+        </div>
+        <label class="field">
+          <span class="field-label">Costo mensual por persona, con prestaciones</span>
+          <output class="field-value tabular" data-out="wage">$11,000</output>
+          <input type="range" min="7000" max="30000" step="500" value="11000" data-input="wage" />
+        </label>
+      </div>
+
+      <div class="result">
+        <p class="r-label">Trabajo que un robot puede absorber</p>
+        <p class="r-value"><span class="tabular" data-r="savings">$0</span> <span class="r-unit">al mes</span></p>
+        <ul class="r-facts">
+          <li><b class="tabular" data-r="hours">0</b> horas-persona al mes que tu equipo puede dedicar a otra cosa</li>
+          <li data-for="limpiar"><b class="tabular" data-r="robots">1</b> CC1 trabajando <b class="tabular" data-r="robot-hours">0</b> h al día</li>
+          <li>Hoy pagas cerca de <b class="tabular" data-r="current">$0</b> al mes por esta tarea</li>
+        </ul>
+        <button type="button" class="btn btn-white" data-roi-cta>Agenda demo con estos números <Icon name="arrow" /></button>
+        <p class="r-note">No restamos el precio del robot. Compra o renta, lo comparamos contigo en la cotización.</p>
+        <p class="sr-only" aria-live="polite" data-announce></p>
+      </div>
+
+      <details class="assumptions">
+        <summary>Supuestos del cálculo <span>Puedes cambiar los marcados</span></summary>
+        <ul data-for="limpiar">
+          <li>
+            Una persona trapea
+            <input type="number" min="50" max="1000" step="10" value={a.cleaning.manualRate} data-assume="manualRate" aria-label="Metros cuadrados por hora que trapea una persona" />
+            m² por hora.
+          </li>
+          <li>
+            El robot cubre el
+            <input type="number" min="10" max="100" step="5" value={percent(a.cleaning.robotShare)} data-assume="cleaningShare" aria-label="Porcentaje del piso que cubre el robot" />
+            % del piso; orillas, esquinas y bajo muebles siguen a mano.
+          </li>
+          <li>
+            Alguien dedica
+            <input type="number" min="0" max="240" step="5" value={a.cleaning.supervisionHoursPerRobotDay * 60} data-assume="supervision" aria-label="Minutos al día de supervisión por robot" />
+            min al día a cada robot para vaciar tanques y moverlo de zona.
+          </li>
+          <li>El robot avanza {a.cleaning.robotRate} m² por hora: el mínimo que Pudu publica para el CC1 (700–1,000 m²/h). Cada robot trabaja hasta {a.cleaning.robotHoursPerDay} h al día.</li>
+        </ul>
+        <ul data-for="servir" hidden>
+          <li>
+            Un viaje de ida y vuelta a la mesa toma
+            <input type="number" min="0.5" max="10" step="0.5" value={a.serving.minutesPerTrip} data-assume="minutesPerTrip" aria-label="Minutos por viaje de ida y vuelta" />
+            min a pie.
+          </li>
+          <li>
+            El robot hace el
+            <input type="number" min="10" max="100" step="5" value={percent(a.serving.robotShare)} data-assume="servingShare" aria-label="Porcentaje de viajes que hace el robot" />
+            % de los viajes; terrazas, escaleras y platos especiales siguen con una persona.
+          </li>
+        </ul>
+        <ul>
+          <li>Jornada de 8 h, {a.workDays} días al mes: {a.hoursPerMonth} horas pagadas por persona.</li>
+          <li>Redondeamos a cientos de pesos. En el piloto medimos tus números reales.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</section>
+
+<style>
+  .savings {
+    padding-block: var(--bezel);
+  }
+
+  .roi {
+    background:
+      radial-gradient(60rem 40rem at 100% 0%, rgba(42, 140, 255, 0.18), transparent 60%),
+      linear-gradient(160deg, var(--navy) 0%, var(--ink) 70%);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-areas:
+      'head head'
+      'plan controls'
+      'plan result'
+      'assume assume';
+    gap: clamp(1.5rem, 3vw, 2.5rem) clamp(2rem, 5vw, 4.5rem);
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .head {
+    grid-area: head;
+    display: grid;
+    gap: 1.1rem;
+    justify-items: start;
+  }
+
+  h2 {
+    font-size: var(--fs-h2);
+  }
+
+  .verb {
+    color: var(--sky);
+  }
+
+  .mode {
+    display: inline-flex;
+    padding: 0.3rem;
+    gap: 0.25rem;
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--line-dark);
+  }
+
+  .mode label {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .mode input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .mode span {
+    display: block;
+    padding: 0.6rem 1rem;
+    border-radius: 0.65rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.78);
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+  }
+
+  .mode input:checked + span {
+    background: var(--white);
+    color: var(--navy);
+  }
+
+  .mode input:focus-visible + span {
+    outline: 3px solid var(--sky);
+    outline-offset: 2px;
+  }
+
+  /* Floor plan */
+  .plan {
+    grid-area: plan;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+  }
+
+  .plan svg {
+    width: 100%;
+    height: auto;
+    border-radius: 1rem;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px) 0 0 / 20px 20px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px) 0 0 / 20px 20px,
+      rgba(10, 28, 43, 0.55);
+    border: 1px solid var(--line-dark);
+    font-family: var(--font-body);
+  }
+
+  .plan figcaption {
+    font-size: var(--fs-small);
+    color: var(--on-dark-muted);
+  }
+
+  .plan :global(.route) {
+    fill: none;
+    stroke: var(--volt);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .plan :global(.route-done) {
+    fill: none;
+    stroke: var(--sky);
+    stroke-width: 6;
+    stroke-opacity: 0.25;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .plan :global(.label) {
+    fill: rgba(255, 255, 255, 0.82);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .plan :global(.chip) {
+    fill: var(--white);
+  }
+
+  .plan :global(.chip-text) {
+    fill: var(--navy);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .robot {
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+  }
+
+  /* Sliders and result */
+  .controls {
+    grid-area: controls;
+    display: grid;
+    gap: 1.4rem;
+    align-content: start;
+  }
+
+  .fields {
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .fields[hidden],
+  [data-for][hidden] {
+    display: none;
+  }
+
+  .field {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.55rem 1rem;
+    align-items: baseline;
+  }
+
+  .field-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .field-value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+
+  input[type='range'] {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 1.75rem;
+    margin: 0;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    --fill: 50%;
+  }
+
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--volt) var(--fill), rgba(255, 255, 255, 0.18) var(--fill));
+  }
+
+  input[type='range']::-moz-range-track {
+    height: 6px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--volt) var(--fill), rgba(255, 255, 255, 0.18) var(--fill));
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: calc(3px - 0.75rem);
+    border-radius: 50%;
+    background: var(--white);
+    border: 4px solid var(--volt);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--white);
+    border: 4px solid var(--volt);
+  }
+
+  input[type='range']:focus-visible {
+    outline: 3px solid var(--sky);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+
+  .result {
+    grid-area: result;
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+    justify-items: start;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line-dark);
+  }
+
+  .r-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--sky);
+  }
+
+  .r-value {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.6rem;
+    line-height: 0.95;
+  }
+
+  .r-value [data-r='savings'] {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--fs-figure);
+    letter-spacing: -0.04em;
+  }
+
+  .r-unit {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--on-dark-muted);
+  }
+
+  .r-facts {
+    list-style: none;
+    margin: 0 0 0.5rem;
+    padding: 0;
+    display: grid;
+    gap: 0.45rem;
+    color: var(--on-dark-muted);
+    font-size: 0.98rem;
+  }
+
+  .r-facts b {
+    color: var(--white);
+  }
+
+  .r-note {
+    font-size: var(--fs-small);
+    color: var(--on-dark-muted);
+    max-width: 30em;
+  }
+
+  /* Assumptions */
+  .assumptions {
+    grid-area: assume;
+    border-top: 1px solid var(--line-dark);
+    padding-top: 1.25rem;
+    color: var(--on-dark-muted);
+    font-size: 0.98rem;
+  }
+
+  .assumptions summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--white);
+    width: fit-content;
+  }
+
+  .assumptions summary span {
+    font-weight: 400;
+    color: var(--on-dark-muted);
+    margin-left: 0.5rem;
+  }
+
+  .assumptions ul {
+    margin: 1rem 0 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: 0.6rem;
+    max-width: 60rem;
+  }
+
+  .assumptions input {
+    width: 4.75rem;
+    padding: 0.3rem 0.5rem;
+    margin-inline: 0.2rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .assumptions input:focus-visible {
+    outline: 3px solid var(--sky);
+    outline-offset: 1px;
+  }
+
+  @media (max-width: 60rem) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'head'
+        'plan'
+        'controls'
+        'result'
+        'assume';
+    }
+  }
+
+  @media (max-width: 26rem) {
+    .mode span {
+      padding-inline: 0.75rem;
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+<script>
+  import { defaultAssumptions, estimateCleaning, estimateServing, roundMoney, type Assumptions } from '../lib/roi';
+
+  const root = document.querySelector<HTMLElement>('[data-roi]');
+  if (root) {
+    const svg = root.querySelector<SVGSVGElement>('[data-plan]')!;
+    const layer = root.querySelector<SVGGElement>('[data-plan-layer]')!;
+    const robot = root.querySelector<SVGGElement>('[data-plan-robot]')!;
+    const caption = root.querySelector<HTMLElement>('[data-plan-caption]')!;
+    const announce = root.querySelector<HTMLElement>('[data-announce]')!;
+    const verb = root.querySelector<HTMLElement>('[data-verb]')!;
+    const inputs = Object.fromEntries(
+      Array.from(root.querySelectorAll<HTMLInputElement>('[data-input]'), (el) => [el.dataset.input!, el]),
+    );
+    const outs = Object.fromEntries(Array.from(root.querySelectorAll<HTMLElement>('[data-out]'), (el) => [el.dataset.out!, el]));
+    const results = Object.fromEntries(Array.from(root.querySelectorAll<HTMLElement>('[data-r]'), (el) => [el.dataset.r!, el]));
+    const assumeInputs = Array.from(root.querySelectorAll<HTMLInputElement>('[data-assume]'));
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const NS = 'http://www.w3.org/2000/svg';
+
+    const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
+    const number = new Intl.NumberFormat('es-MX', { maximumFractionDigits: 0 });
+    const decimal = new Intl.NumberFormat('es-MX', { maximumFractionDigits: 1 });
+    const mxn = (value: number) => money.format(value).replace('MX', '');
+
+    let mode: 'limpiar' | 'servir' = 'limpiar';
+    const value = (key: string) => Number(inputs[key]?.value ?? 0);
+
+    const assumptions = (): Assumptions => {
+      const read = (key: string, fallback: number) => {
+        const el = assumeInputs.find((input) => input.dataset.assume === key);
+        const n = Number(el?.value);
+        return Number.isFinite(n) && n > 0 ? n : fallback;
+      };
+      const d = defaultAssumptions;
+      return {
+        ...d,
+        cleaning: {
+          ...d.cleaning,
+          manualRate: read('manualRate', d.cleaning.manualRate),
+          robotShare: Math.min(1, read('cleaningShare', d.cleaning.robotShare * 100) / 100),
+          // Zero minutes is a valid answer here, so read it without the > 0 fallback.
+          supervisionHoursPerRobotDay: Math.max(0, assumeInputs.find((i) => i.dataset.assume === 'supervision')?.valueAsNumber || 0) / 60,
+        },
+        serving: {
+          minutesPerTrip: read('minutesPerTrip', d.serving.minutesPerTrip),
+          robotShare: Math.min(1, read('servingShare', d.serving.robotShare * 100) / 100),
+        },
+      };
+    };
+
+    const el = (name: string, attrs: Record<string, string | number>, text?: string) => {
+      const node = document.createElementNS(NS, name);
+      for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
+      if (text) node.textContent = text;
+      layer.appendChild(node);
+      return node;
+    };
+
+    const chip = (x: number, y: number, text: string) => {
+      const w = text.length * 8 + 18;
+      el('rect', { x: x - w, y, width: w, height: 26, rx: 13, class: 'chip' });
+      el('text', { x: x - w / 2, y: y + 18, 'text-anchor': 'middle', class: 'chip-text' }, text);
+    };
+
+    // The path the robot marker follows, and how far along it is.
+    let route: SVGPathElement | null = null;
+    let distance = 0;
+    let last = 0;
+    let frame = 0;
+    let visible = false;
+
+    const drawCleaning = (area: number, passes: number, share: number) => {
+      // Plan proportions 5:3; its real size follows the slider.
+      const t = Math.sqrt((area - 200) / (20000 - 200));
+      const w = 250 + 330 * t;
+      const h = w * 0.6;
+      const x = (640 - w) / 2;
+      const y = (420 - h) / 2 + 8;
+      el('rect', { x, y, width: w, height: h, rx: 6, fill: 'url(#hatch)', stroke: 'rgba(255,255,255,0.55)', 'stroke-width': 2 });
+      const k = Math.sqrt(share);
+      const iw = w * k;
+      const ih = h * k;
+      const ix = x + (w - iw) / 2;
+      const iy = y + (h - ih) / 2;
+      el('rect', { x: ix, y: iy, width: iw, height: ih, fill: 'rgba(10,28,43,0.92)' });
+      const lane = 14;
+      const lanes = Math.max(2, Math.floor((ih - 8) / lane));
+      let d = `M ${ix + 6} ${iy + 6}`;
+      for (let i = 0; i < lanes; i++) {
+        const yy = iy + 6 + i * lane;
+        d += ` H ${i % 2 ? ix + 6 : ix + iw - 6}`;
+        if (i < lanes - 1) d += ` V ${yy + lane}`;
+      }
+      route = el('path', { d, class: 'route' }) as SVGPathElement;
+      const meters = Math.sqrt(area / 0.6);
+      el('text', { x: x, y: y - 10, class: 'label' }, `${number.format(meters)} m`);
+      el('text', { x: x + w + 8, y: y + 14, class: 'label' }, `${number.format(meters * 0.6)} m`);
+      chip(632, 12, `×${passes} al día`);
+      caption.textContent = `Plano ilustrativo de ${number.format(area)} m² (unos ${number.format(meters)} × ${number.format(meters * 0.6)} m). El robot recorre el centro en carriles; lo rayado son orillas que siguen a mano.`;
+    };
+
+    const drawServing = (trips: number, shifts: number, share: number) => {
+      el('rect', { x: 24, y: 40, width: 120, height: 340, rx: 8, fill: 'rgba(255,255,255,0.1)', stroke: 'rgba(255,255,255,0.55)', 'stroke-width': 2 });
+      el('text', { x: 84, y: 215, 'text-anchor': 'middle', class: 'label' }, 'Cocina');
+      const tables = Math.max(4, Math.min(24, Math.round(trips / 12)));
+      const cols = Math.ceil(Math.sqrt(tables * 1.6));
+      const rows = Math.ceil(tables / cols);
+      const robotTables = Math.round(tables * share);
+      const spots: [number, number][] = [];
+      for (let i = 0; i < tables; i++) {
+        const c = i % cols;
+        const r = Math.floor(i / cols);
+        spots.push([200 + (c + 0.5) * (410 / cols), 40 + (r + 0.5) * (340 / rows)]);
+      }
+      // Nearest tables first: those are the ones the robot takes in the estimate.
+      spots.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+      const pass: [number, number] = [144, 210];
+      let d = `M ${pass[0]} ${pass[1]}`;
+      spots.forEach(([cx, cy], i) => {
+        const byRobot = i < robotTables;
+        if (byRobot) {
+          el('line', { x1: pass[0], y1: pass[1], x2: cx, y2: cy, stroke: 'rgba(42,140,255,0.35)', 'stroke-width': 1.5 });
+          d += ` L ${cx} ${cy} L ${pass[0]} ${pass[1]}`;
+        }
+        el('circle', {
+          cx, cy, r: 13,
+          fill: byRobot ? 'rgba(42,140,255,0.9)' : 'transparent',
+          stroke: byRobot ? 'none' : 'rgba(255,255,255,0.6)',
+          'stroke-width': 2,
+          'stroke-dasharray': byRobot ? 'none' : '4 4',
+        });
+      });
+      route = el('path', { d, fill: 'none', stroke: 'none' }) as SVGPathElement;
+      chip(632, 12, `×${shifts} ${shifts === 1 ? 'turno' : 'turnos'}`);
+      caption.textContent = `Plano ilustrativo: ${tables} mesas. El robot lleva lo de las mesas en azul; las punteadas siguen con una persona.`;
+    };
+
+    const tick = (now: number) => {
+      frame = 0;
+      if (!route || !visible) return;
+      const length = route.getTotalLength();
+      distance = (distance + ((now - (last || now)) / 1000) * 110) % length;
+      last = now;
+      const p = route.getPointAtLength(distance);
+      robot.setAttribute('transform', `translate(${p.x} ${p.y})`);
+      frame = requestAnimationFrame(tick);
+    };
+
+    const placeRobot = () => {
+      if (!route) return;
+      const p = route.getPointAtLength(reduce ? 0 : distance % route.getTotalLength());
+      robot.setAttribute('transform', `translate(${p.x} ${p.y})`);
+      if (!reduce && visible && !frame) {
+        last = 0;
+        frame = requestAnimationFrame(tick);
+      }
+    };
+
+    const fill = (input: HTMLInputElement) => {
+      const min = Number(input.min);
+      const max = Number(input.max);
+      input.style.setProperty('--fill', `${((Number(input.value) - min) / (max - min)) * 100}%`);
+    };
+
+    let announceTimer = 0;
+    let summary = '';
+
+    const update = () => {
+      Object.values(inputs).forEach(fill);
+      outs.area.textContent = `${number.format(value('area'))} m²`;
+      outs.passes.textContent = `${value('passes')} ${value('passes') === 1 ? 'vez' : 'veces'}`;
+      outs.trips.textContent = `${number.format(value('trips'))} viajes`;
+      outs.shifts.textContent = `${value('shifts')} ${value('shifts') === 1 ? 'turno' : 'turnos'}`;
+      outs.wage.textContent = mxn(value('wage'));
+
+      const a = assumptions();
+      layer.replaceChildren();
+      let savings: number;
+      if (mode === 'limpiar') {
+        const est = estimateCleaning({ area: value('area'), passes: value('passes'), wage: value('wage') }, a);
+        savings = roundMoney(est.savings);
+        results.hours.textContent = number.format(est.freedHours);
+        results.current.textContent = mxn(roundMoney(est.currentCost));
+        results.robots.textContent = String(est.robots);
+        results['robot-hours'].textContent = decimal.format(est.robotHoursPerDay / est.robots);
+        drawCleaning(value('area'), value('passes'), a.cleaning.robotShare);
+        summary = `Limpieza de ${number.format(value('area'))} m², ${outs.passes.textContent} al día, costo por persona de ${mxn(value('wage'))} al mes. Estimado: ${mxn(savings)} al mes de trabajo que un robot puede absorber (${number.format(est.freedHours)} horas-persona), sin restar el precio del robot.`;
+      } else {
+        const est = estimateServing({ trips: value('trips'), shifts: value('shifts'), wage: value('wage') }, a);
+        savings = roundMoney(est.savings);
+        results.hours.textContent = number.format(est.freedHours);
+        results.current.textContent = mxn(roundMoney(est.currentCost));
+        drawServing(value('trips'), value('shifts'), a.serving.robotShare);
+        summary = `Servicio con ${number.format(value('trips'))} viajes de cocina a mesa por turno, ${outs.shifts.textContent}, costo por persona de ${mxn(value('wage'))} al mes. Estimado: ${mxn(savings)} al mes de trabajo que un robot puede absorber (${number.format(est.freedHours)} horas-persona), sin restar el precio del robot.`;
+      }
+      results.savings.textContent = mxn(savings);
+      placeRobot();
+      clearTimeout(announceTimer);
+      announceTimer = window.setTimeout(() => {
+        announce.textContent = `${mxn(savings)} al mes de trabajo que un robot puede absorber.`;
+      }, 700);
+    };
+
+    const setMode = (next: 'limpiar' | 'servir') => {
+      mode = next;
+      verb.textContent = next;
+      root.querySelectorAll<HTMLElement>('[data-for]').forEach((node) => {
+        node.hidden = node.dataset.for !== next;
+      });
+      distance = 0;
+      update();
+    };
+
+    root.querySelectorAll<HTMLInputElement>('[data-mode]').forEach((radio) =>
+      radio.addEventListener('change', () => setMode(radio.value as 'limpiar' | 'servir')),
+    );
+    Object.values(inputs).forEach((input) => input.addEventListener('input', update));
+    assumeInputs.forEach((input) => input.addEventListener('input', update));
+
+    // Animate only while the plan is on screen.
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) placeRobot();
+      else if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    }).observe(svg);
+
+    // "Agenda demo" carries the estimate into the contact form.
+    root.querySelector('[data-roi-cta]')?.addEventListener('click', () => {
+      const message = document.querySelector<HTMLTextAreaElement>('#mensaje');
+      const line = document.querySelector<HTMLSelectElement>('#linea');
+      if (message) message.value = `${summary}\nQuiero agendar una demo.`;
+      if (line) line.value = mode === 'limpiar' ? 'limpieza' : 'entrega';
+      const contact = document.getElementById('contacto');
+      if (contact) {
+        contact.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+        document.querySelector<HTMLInputElement>('#nombre')?.focus({ preventScroll: true });
+      } else {
+        window.location.href = '/#contacto';
+      }
+    });
+
+    update();
+  }
+</script>

@@ -1,17 +1,19 @@
 ---
-// Full-screen media, one panel per robot line. Panels are sticky, so each
-// one slides over the previous as you scroll; the loop under it only plays
-// while its panel is the one on screen. The last panel hands off to the
-// full catalog at /robots.
+// Full-screen media, one inset frame per robot line. Panels are sticky, so
+// each frame slides over the previous one as you scroll, and the covered one
+// shrinks back a little; the loop under a panel only plays while it is the one
+// on screen. Every clip is Pudu Robotics' footage and says so in its credit.
+import { Picture } from 'astro:assets';
+import Icon from './Icon.astro';
 import { panels } from '../data/showcase';
 import { families, robots } from '../data/robots';
+import { scene } from '../lib/media';
 
 const withCounts = panels.map((p) => ({
   ...p,
   count: robots.filter((r) => r.family === p.family).length,
   familyName: families.find((f) => f.id === p.family)!.name,
 }));
-const models = robots.map((r) => r.name.replace('PUDU ', ''));
 ---
 
 <section class="showcase on-dark" id="lineas" aria-label="Robots en acción, por línea" data-showcase>
@@ -22,71 +24,56 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
   </ol>
 
   {withCounts.map((p, i) => (
-    <article class="panel" data-panel={p.family} style={`--n:${i}`}>
-      <div class="media">
-        {p.media.type === 'video' ? (
-          <video
-            data-src={p.media.src}
-            poster={p.media.poster}
-            muted
-            loop
-            playsinline
-            preload="none"
-            aria-hidden="true"
-            data-loop
-          ></video>
-        ) : (
-          <img src={p.media.src} alt="" width="2000" height="1125" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" class="still" />
-        )}
-      </div>
-      <div class="scrim" aria-hidden="true"></div>
-
-      <div class="container content">
-        <p class="kicker"><span class="fam">{p.kicker}</span><span class="sep"></span><span class="count">{p.count} modelos</span></p>
-        <h2>{p.title}</h2>
-        <p class="detail">{p.detail}</p>
-        <div class="foot">
-          <a href={`/robots/#${p.family}`} class="btn btn-white">Ver los {p.count} modelos</a>
-          <p class="figure"><b>{p.figure}</b><span>{p.figureLabel}</span></p>
+    <article class="panel" data-panel={p.family} style={`--n:${i}`} aria-labelledby={`panel-${p.family}`}>
+      <div class="frame panel-frame">
+        <div class="media">
+          {p.media.type === 'video' ? (
+            <video
+              data-src={p.media.src}
+              poster={p.media.poster}
+              muted
+              loop
+              playsinline
+              preload="none"
+              aria-hidden="true"
+              data-loop
+            ></video>
+          ) : (
+            <Picture
+              src={scene(p.media.scene)}
+              alt=""
+              widths={[640, 960, 1280, 1600, 2000]}
+              sizes="100vw"
+              formats={['avif']} fallbackFormat="webp"
+              class="still"
+              loading="lazy"
+              decoding="async"
+            />
+          )}
         </div>
+        <div class="scrim" aria-hidden="true"></div>
+
+        <div class="container content">
+          <p class="kicker"><span class="fam">{p.kicker}</span><span class="sep"></span><span class="count">{p.count} modelos</span></p>
+          <h2 id={`panel-${p.family}`}>{p.title}</h2>
+          <p class="detail">{p.detail}</p>
+          <div class="foot">
+            <a href={`/robots/#${p.family}`} class="btn btn-white">Ver los {p.count} modelos <Icon name="arrow" /></a>
+            <a class="figure" href={`/robots/${p.figureRobot}/`}><b>{p.figure}</b><span>{p.figureLabel}</span></a>
+          </div>
+        </div>
+        <p class="credit">{p.credit}</p>
       </div>
-      <p class="credit">{p.credit}</p>
     </article>
   ))}
-
-  <article class="panel panel-all" data-panel="all" style={`--n:${withCounts.length}`}>
-    <div class="media">
-      <img src="/media/hero/pudu-family.webp" alt="" width="1800" height="1012" loading="lazy" decoding="async" class="still" />
-    </div>
-    <div class="scrim scrim-all" aria-hidden="true"></div>
-
-    <div class="content content-all">
-      <div class="container">
-        <p class="kicker"><span class="fam">Catálogo completo</span><span class="sep"></span><span class="count">{robots.length} modelos</span></p>
-        <h2>Todos los Pudu, con sus números.</h2>
-      </div>
-      <div class="ticker" aria-hidden="true">
-        <div class="track">
-          {[...models, ...models].map((m) => <span>{m}</span>)}
-        </div>
-        <div class="track reverse">
-          {[...models, ...models].reverse().map((m) => <span>{m}</span>)}
-        </div>
-      </div>
-      <div class="container foot">
-        <a href="/robots/" class="btn btn-white">Ver el catálogo completo</a>
-        <a href="/#contacto" class="btn btn-ghost-light">Pedir recomendación</a>
-      </div>
-    </div>
-  </article>
 </section>
 
 <style>
   .showcase {
     position: relative;
     overflow: clip; /* keeps the rail inside the section; clip (unlike hidden) leaves sticky intact */
-    background: var(--navy-ink);
     color: var(--white);
+    background: var(--white);
   }
 
   .panel {
@@ -94,33 +81,40 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
     top: 0;
     height: 100vh;
     height: 100svh;
-    overflow: hidden;
+    padding: var(--bezel);
     display: grid;
-    align-items: end;
-    isolation: isolate;
-    background: var(--navy-ink);
     /* --cover: how much the next panel already covers this one (0–1), set by script */
     --cover: 0;
+  }
+
+  .panel-frame {
+    display: grid;
+    align-items: end;
+    height: 100%;
+    margin: 0;
+    transform: scale(calc(1 - var(--cover) * 0.06));
+    transform-origin: 50% 0%;
+    filter: brightness(calc(1 - var(--cover) * 0.55));
+    transition:
+      transform 0.1s linear,
+      filter 0.1s linear;
   }
 
   .media {
     position: absolute;
     inset: 0;
     z-index: 0;
-    transform: scale(calc(1 + var(--cover) * 0.08));
-    filter: brightness(calc(1 - var(--cover) * 0.6));
-    transition: transform 0.1s linear, filter 0.1s linear;
   }
 
   .media video,
-  .media .still {
+  .media :global(.still) {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
   /* Stills get a slow drift so the panel is never fully static. */
-  .panel.is-active .still {
+  .panel.is-active :global(.still) {
     animation: kenburns 18s ease-in-out infinite alternate;
   }
 
@@ -138,13 +132,8 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
     inset: 0;
     z-index: 1;
     background:
-      linear-gradient(180deg, rgba(10, 28, 43, 0.35) 0%, transparent 30%, transparent 55%, rgba(10, 28, 43, 0.85) 100%),
-      linear-gradient(90deg, rgba(10, 28, 43, 0.55) 0%, transparent 60%);
-  }
-
-  .scrim-all {
-    background:
-      linear-gradient(180deg, rgba(10, 28, 43, 0.75) 0%, rgba(10, 28, 43, 0.45) 50%, rgba(10, 28, 43, 0.9) 100%);
+      linear-gradient(180deg, rgba(10, 28, 43, 0.3) 0%, transparent 28%, transparent 50%, rgba(10, 28, 43, 0.88) 100%),
+      linear-gradient(90deg, rgba(10, 28, 43, 0.6) 0%, transparent 62%);
   }
 
   .content {
@@ -153,7 +142,7 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
     display: grid;
     justify-items: start;
     gap: 1.1rem;
-    padding-bottom: clamp(3.5rem, 8vh, 6rem);
+    padding-bottom: clamp(3.5rem, 9vh, 6.5rem);
   }
 
   .content > * {
@@ -178,14 +167,14 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    font-size: 0.8rem;
+    font-size: var(--fs-label);
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
   .kicker .fam {
-    color: var(--blue-light);
+    color: var(--sky);
   }
 
   .kicker .sep {
@@ -199,18 +188,15 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
   }
 
   h2 {
-    font-size: clamp(2.2rem, 5.4vw, 4.6rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 0.98;
+    font-size: clamp(2.2rem, 5.2vw, 4.8rem);
     max-width: 12em;
     text-shadow: 0 2px 30px rgba(10, 28, 43, 0.5);
   }
 
   .detail {
-    font-size: clamp(1.05rem, 1.4vw, 1.25rem);
-    color: rgba(226, 238, 248, 0.88);
-    max-width: 34em;
+    font-size: var(--fs-lede);
+    color: rgba(226, 238, 248, 0.9);
+    max-width: 32em;
   }
 
   .foot {
@@ -224,83 +210,34 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
   .figure {
     display: grid;
     line-height: 1.1;
+    text-decoration: none;
+    padding-left: 1.25rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.28);
   }
 
   .figure b {
     font-family: var(--font-display);
-    font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+    font-size: clamp(1.7rem, 2.8vw, 2.6rem);
     font-weight: 800;
     letter-spacing: -0.03em;
-    color: var(--white);
   }
 
   .figure span {
-    font-size: 0.82rem;
+    font-size: var(--fs-label);
     color: var(--on-dark-muted);
+  }
+
+  .figure:hover span {
+    text-decoration: underline;
   }
 
   .credit {
     position: absolute;
     z-index: 2;
-    left: var(--gutter);
-    bottom: 1.25rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.55);
-  }
-
-  /* Closing panel */
-  .panel-all {
-    align-items: center;
-  }
-
-  .content-all {
-    width: 100%;
-    justify-items: stretch;
-    gap: 2rem;
-    padding-bottom: 0;
-  }
-
-  .content-all h2 {
-    max-width: 14em;
-    margin-top: 0.75rem;
-  }
-
-  .ticker {
-    display: grid;
-    gap: 0.75rem;
-    overflow: hidden;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-  }
-
-  .track {
-    display: flex;
-    gap: 2.5rem;
-    width: max-content;
-    padding-inline: 1.25rem;
-    font-family: var(--font-display);
-    font-size: clamp(1.4rem, 3vw, 2.4rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-    animation: marquee 60s linear infinite;
-  }
-
-  .track.reverse {
-    animation-direction: reverse;
-    color: rgba(255, 255, 255, 0.35);
-  }
-
-  .track span::after {
-    content: '·';
-    margin-left: 2.5rem;
-    color: var(--blue-light);
-  }
-
-  .panel-all:hover .track {
-    animation-play-state: paused;
+    right: clamp(1rem, 2.5vw, 2rem);
+    bottom: clamp(1rem, 2.5vw, 1.75rem);
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.66);
   }
 
   /* Progress rail */
@@ -317,16 +254,12 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
     transform: translateY(-50%);
     width: max-content;
     margin-left: auto;
-    margin-right: var(--gutter);
+    margin-right: calc(var(--bezel) + var(--gutter));
+    transition: opacity 0.4s;
   }
 
   .rail.is-off {
     opacity: 0;
-    pointer-events: none;
-  }
-
-  .rail {
-    transition: opacity 0.4s;
   }
 
   .rail li {
@@ -334,11 +267,15 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
     flex-direction: row-reverse;
     align-items: center;
     gap: 0.6rem;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.45);
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.5rem;
+    /* A dark chip keeps the label legible over light footage (sky, white walls). */
+    background: rgba(10, 28, 43, 0.72);
+    color: rgba(255, 255, 255, 0.82);
     transition: color 0.3s;
   }
 
@@ -358,7 +295,7 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
 
   .rail li.is-current .rail-bar {
     width: 2.5rem;
-    background: var(--blue-light);
+    background: var(--sky);
   }
 
   @media (min-width: 64rem) {
@@ -368,23 +305,35 @@ const models = robots.map((r) => r.name.replace('PUDU ', ''));
   }
 
   @media (max-width: 40rem) {
-    .credit {
-      display: none;
+    .scrim {
+      background:
+        linear-gradient(0deg, rgba(10, 28, 43, 0.94) 0%, rgba(10, 28, 43, 0.6) 50%, rgba(10, 28, 43, 0.1) 78%),
+        linear-gradient(180deg, rgba(10, 28, 43, 0.35) 0%, transparent 20%);
     }
 
-    .figure b {
-      font-size: 1.5rem;
+    .credit {
+      left: var(--gutter);
+      right: auto;
+      bottom: 1rem;
+    }
+
+    .content {
+      padding-bottom: 3.5rem;
+    }
+
+    .figure {
+      padding-left: 0;
+      border-left: 0;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .media {
+    .panel-frame {
       transform: none;
       filter: none;
     }
 
-    .panel.is-active .still,
-    .track {
+    .panel.is-active :global(.still) {
       animation: none;
     }
 

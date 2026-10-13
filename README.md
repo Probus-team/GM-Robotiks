@@ -17,24 +17,36 @@ Marketing site for GM Robotiks IA, distributor and integrator of Pudu Robotics s
 ```text
 src/
 ├── assets/brand/source/     # approved transparent robot logo (source of truth)
-├── components/              # Header, Hero, Visor, Showcase, Catalog, Cases, Process, Fleet, Docs, Contact, Footer
+├── assets/robots/           # robot cut-outs, one <id>.webp per robot (SOURCES.md lists provenance)
+├── assets/scenes/           # robots in context, one <id>.webp where available
+├── assets/software/         # Pudu Link / Pudu Cloud screenshots
+├── components/              # Header, Hero, Visor, Showcase, Lineup, Savings, Proof, Process, Fleet,
+│                            # Catalog, Docs, Contact, Footer, Icon, BrandImage
 ├── data/
-│   ├── robots.ts            # Pudu catalog, case videos and downloadable documents
+│   ├── robots.ts            # Pudu catalog: specs, key figures, use cases, case videos, documents
+│   ├── deployments.ts       # Mexican client deployments (empty until the client provides them)
 │   ├── showcase.ts          # full-screen home panels, one per robot line
-│   └── site.ts              # site name, nav, contact channels
-├── layouts/Layout.astro     # head, favicons, fonts, scroll reveal
+│   ├── seo.ts               # canonical pages for the sitemap and robot page titles
+│   └── site.ts              # site name, nav, main button, contact channels
+├── lib/
+│   ├── media.ts             # resolves robot cut-outs and scenes by id
+│   ├── roi.ts               # savings calculator math and its assumptions
+│   └── whatsapp.ts          # WhatsApp links with a prewritten message
+├── layouts/Layout.astro     # head, metadata, JSON-LD, fonts, scroll reveal
 ├── pages/
-│   ├── index.astro          # home: hero, full-screen showcase, cases, process, fleet, contact
-│   └── robots.astro         # full catalog with filters (/robots#limpieza preselects a line), docs, contact
-└── styles/global.css        # design tokens, reveal variants, base styles
+│   ├── index.astro          # home: video hero, showcase, lineup, calculator, proof, process, fleet, contact
+│   ├── robots/index.astro   # catalog by line, documents, contact (/robots/#limpieza jumps to a line)
+│   ├── robots/[id].astro    # one page per robot, with Product JSON-LD
+│   ├── og/[id].jpg.ts       # 1200×630 link-preview image per robot, built with sharp
+│   └── 404.astro
+└── styles/global.css        # design tokens, type scale, frames, buttons, reveals
 public/
 ├── brand/                   # logo lockups: full, mark, wordmark, white and mono variants
 ├── favicon.ico              # 16–256 px multi-size icon, plus PNG favicons and app icons
-├── media/robots/            # product images (webp)
+├── media/hero/              # home video montage (3 sizes) and posters
 ├── media/cases/             # web-encoded case videos and posters
 ├── media/loops/             # short muted cuts of the case videos for the home showcase
 ├── media/docs/              # official Pudu PDFs
-├── media/hero/, media/software/
 └── site.webmanifest
 ```
 
@@ -42,9 +54,31 @@ public/
 
 - Brand exports and usage notes are in [output/brand-kit/README.md](output/brand-kit/README.md). Open [the asset preview](output/brand-kit/preview.html) locally to review color, white, icon, and favicon versions. The active master is `src/assets/brand/source/gm-robotiks-approved.png`; the older `gm-robotics-ia-original.jpg` is a legacy reference.
 
-- Product figures come from Pudu's official spec sheets and product pages (2025 brochure, 2026 cleaning catalog, September 2026 ET1 / GT-series pages). Update them in `src/data/robots.ts`.
-- Contact channels (`email`, `whatsapp`, `formEndpoint`) live in `src/data/site.ts`. The form posts to `formEndpoint` when set, falls back to a prefilled `mailto:` when only `email` is set, and otherwise shows a configuration notice.
+- Product figures come from Pudu's official spec sheets and product pages (2025 brochure, 2026 cleaning catalog, September 2026 ET1 / GT-series pages). Update them in `src/data/robots.ts`. Each robot has three `keyFigures` (shown large on its page) and its `useCases`; pages, the sitemap and `llms.txt` are generated from this file.
+- Images go through `astro:assets` (`<Picture>`, AVIF with WebP fallback, `srcset`). To add or improve a robot image, drop `<id>.webp` into `src/assets/robots/` (transparent, trimmed) or `src/assets/scenes/`. Record where it came from in `src/assets/robots/SOURCES.md`.
+- Every photo and video is Pudu Robotics' material and is credited as such. Case videos are marked `deployment` (shot at a Pudu customer site) or `promo` (product video).
+- Mexican deployments go in `src/data/deployments.ts`, only with the client's written permission, our own site photos and a number measured in the client's pilot. While the list is empty, the home page shows marked placeholder slots on preview and local hosts only; `gmrobotiks.com` hides them.
+- The savings calculator's math and assumptions live in `src/lib/roi.ts` and are listed next to the result on the page. It does not subtract the robot's price.
+- Contact channels (`email`, `whatsapp`, `formEndpoint`) live in `src/data/site.ts`. The form is WhatsApp-first: submitting opens WhatsApp with the lead written out for the sales number, and "Prefiero correo" opens the same text as an email. If `formEndpoint` is set, the form posts JSON there instead. "Cotizar" buttons on robot pages and catalog tiles open WhatsApp with a message for that robot.
 - Fonts (Bricolage Grotesque, Figtree) are fetched at build time through Astro's fonts API, configured in `astro.config.mjs`.
+
+## Home video montage
+
+`public/media/hero/montage-{1600,1280,540}.mp4` is 10.5 s of Pudu footage
+without burned-in captions: ET1 in a store (`et1.mp4` 37.0–38.45 s), T300 on a
+production line (`public/media/cases/t300.mp4` 61–64 s, Pudu logo cropped),
+GT5 (3.1–5.1 s), GT7 (11.0–12.9 s) and ET1 in a lobby (79.8–81.85 s). The 540
+version is a portrait crop for phones. Shot start times and captions are in
+`src/components/Hero.astro`; keep them in sync when re-cutting. Encode each shot
+with `-an -vf "crop=…,scale=1600:900,fps=30"`, concatenate, then:
+
+```sh
+ffmpeg -f concat -safe 0 -i shots.txt -c:v libx264 -preset veryslow -crf 26 \
+  -pix_fmt yuv420p -movflags +faststart -an public/media/hero/montage-1600.mp4
+```
+
+Keep each file under 3 MB (a test enforces under 5 MB) and export a frame
+about 1.2 s in as `montage-poster-<size>.webp`.
 
 ## Deployment
 
