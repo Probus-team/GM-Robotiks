@@ -70,8 +70,9 @@ const directWhatsapp = whatsapp ? whatsappUrl(whatsapp, 'Hola, GM Robotiks. Quie
             <input type="text" name="ciudad" autocomplete="address-level2" required />
           </label>
           <label>
-            <span>Correo <em>(opcional)</em></span>
-            <input type="email" name="correo" autocomplete="email" />
+            {/* WhatsApp and email hand-offs already carry the sender; a POST does not, so it needs an address. */}
+            <span>Correo {!formEndpoint && <em>(opcional)</em>}</span>
+            <input type="email" name="correo" autocomplete="email" required={Boolean(formEndpoint)} />
           </label>
         </div>
         <label>

@@ -303,6 +303,10 @@ const counts = families.map((f) => ({
     background: rgba(10, 28, 43, 0.7);
   }
 
+  .pause[hidden] {
+    display: none;
+  }
+
   .pause .i-play,
   .pause[aria-pressed='true'] .i-pause {
     display: none;
@@ -468,51 +472,82 @@ const counts = families.map((f) => ({
     if (captionWhere) captionWhere.textContent = shots[i].where;
   };
 
+  // One place decides whether the video plays: it needs the page loaded, the
+  // hero on screen, the tab visible and no pause from the visitor. The source
+  // is attached the first time all of that is true, so a visit that lands
+  // further down the page (/#contacto) never downloads it.
+  let loaded = false;
+  // Set by the observer, which reports the initial state right after observe().
+  let inView = false;
+  let userPaused = false;
+
   const setPaused = (paused: boolean) => {
     toggle?.setAttribute('aria-pressed', String(paused));
     if (toggleLabel) toggleLabel.textContent = paused ? 'Reproducir video' : 'Pausar video';
   };
 
-  const start = () => {
-    if (!video || video.src) return;
-    const src = pickSource(video);
-    if (!src) return;
-    video.src = src;
-    video.addEventListener('playing', () => video.classList.add('is-playing'), { once: true });
-    video.addEventListener('timeupdate', () => {
+  const attach = (v: HTMLVideoElement) => {
+    const src = pickSource(v);
+    if (!src) return false;
+    v.src = src;
+    v.addEventListener('playing', () => v.classList.add('is-playing'), { once: true });
+    v.addEventListener('timeupdate', () => {
       let i = 0;
       shots.forEach((s, n) => {
-        if (video.currentTime >= s.at) i = n;
+        if (v.currentTime >= s.at) i = n;
       });
       showShot(i);
     });
-    video.play().then(() => {
+    return true;
+  };
+
+  const play = (v: HTMLVideoElement) =>
+    v.play().then(() => {
       if (toggle) toggle.hidden = false;
     }).catch(() => {});
+
+  // The first download waits until the hero has stayed on screen for a moment:
+  // landing on /#contacto smooth-scrolls past it, and that should not count.
+  let attachTimer = 0;
+  const sync = () => {
+    if (!video || reduce || saveData || !loaded) return;
+    const shouldPlay = inView && !document.hidden && !userPaused;
+    if (!shouldPlay) {
+      clearTimeout(attachTimer);
+      attachTimer = 0;
+      if (!video.paused) video.pause();
+      return;
+    }
+    if (video.src) {
+      play(video);
+      return;
+    }
+    if (attachTimer) return;
+    attachTimer = window.setTimeout(() => {
+      attachTimer = 0;
+      if (inView && !document.hidden && !userPaused && attach(video)) play(video);
+    }, 600);
   };
 
   toggle?.addEventListener('click', () => {
-    if (!video) return;
-    if (video.paused) {
-      video.play().catch(() => {});
-      setPaused(false);
-    } else {
-      video.pause();
-      setPaused(true);
-    }
+    userPaused = !userPaused;
+    setPaused(userPaused);
+    sync();
   });
 
-  // Pause off screen and in background tabs; resume only if the visitor did not pause it.
+  document.addEventListener('visibilitychange', sync);
+
   if (video && 'IntersectionObserver' in window) {
     new IntersectionObserver(([entry]) => {
-      if (!video.src || toggle?.getAttribute('aria-pressed') === 'true') return;
-      if (entry.isIntersecting && !document.hidden) video.play().catch(() => {});
-      else video.pause();
+      inView = entry.isIntersecting;
+      sync();
     }).observe(video);
   }
 
-  if (video && !reduce && !saveData) {
-    if (document.readyState === 'complete') setTimeout(start, 200);
-    else window.addEventListener('load', () => setTimeout(start, 200), { once: true });
-  }
+  const start = () => {
+    loaded = true;
+    sync();
+  };
+  if (document.readyState === 'complete') setTimeout(start, 200);
+  else window.addEventListener('load', () => setTimeout(start, 200), { once: true });
 </script>

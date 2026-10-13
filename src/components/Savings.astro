@@ -40,38 +40,38 @@ const percent = (share: number) => Math.round(share * 100);
 
       <div class="controls">
         <div class="fields" data-for="limpiar">
-          <label class="field">
+          <label class="field" for="roi-area">
             <span class="field-label">Superficie que se limpia</span>
-            <output class="field-value tabular" data-out="area">2,000 m²</output>
-            <input type="range" min="200" max="20000" step="100" value="2000" data-input="area" />
+            <output class="field-value tabular" data-out="area" for="roi-area">2,000 m²</output>
+            <input type="range" min="200" max="20000" step="100" value="2000" data-input="area" id="roi-area" />
           </label>
-          <label class="field">
+          <label class="field" for="roi-passes">
             <span class="field-label">Veces que se limpia al día</span>
-            <output class="field-value tabular" data-out="passes">2 veces</output>
-            <input type="range" min="1" max="3" step="1" value="2" data-input="passes" />
+            <output class="field-value tabular" data-out="passes" for="roi-passes">2 veces</output>
+            <input type="range" min="1" max="3" step="1" value="2" data-input="passes" id="roi-passes" />
           </label>
         </div>
         <div class="fields" data-for="servir" hidden>
-          <label class="field">
+          <label class="field" for="roi-trips">
             <span class="field-label">Viajes de cocina a mesa por turno</span>
-            <output class="field-value tabular" data-out="trips">120 viajes</output>
-            <input type="range" min="20" max="400" step="10" value="120" data-input="trips" />
+            <output class="field-value tabular" data-out="trips" for="roi-trips">120 viajes</output>
+            <input type="range" min="20" max="400" step="10" value="120" data-input="trips" id="roi-trips" />
           </label>
-          <label class="field">
+          <label class="field" for="roi-shifts">
             <span class="field-label">Turnos al día</span>
-            <output class="field-value tabular" data-out="shifts">2 turnos</output>
-            <input type="range" min="1" max="3" step="1" value="2" data-input="shifts" />
+            <output class="field-value tabular" data-out="shifts" for="roi-shifts">2 turnos</output>
+            <input type="range" min="1" max="3" step="1" value="2" data-input="shifts" id="roi-shifts" />
           </label>
         </div>
-        <label class="field">
+        <label class="field" for="roi-wage">
           <span class="field-label">Costo mensual por persona, con prestaciones</span>
-          <output class="field-value tabular" data-out="wage">$11,000</output>
-          <input type="range" min="7000" max="30000" step="500" value="11000" data-input="wage" />
+          <output class="field-value tabular" data-out="wage" for="roi-wage">$11,000</output>
+          <input type="range" min="7000" max="30000" step="500" value="11000" data-input="wage" id="roi-wage" />
         </label>
       </div>
 
       <div class="result">
-        <p class="r-label">Trabajo que un robot puede absorber</p>
+        <p class="r-label" data-r="label">Trabajo que un robot puede absorber</p>
         <p class="r-value"><span class="tabular" data-r="savings">$0</span> <span class="r-unit">al mes</span></p>
         <ul class="r-facts">
           <li><b class="tabular" data-r="hours">0</b> horas-persona al mes que tu equipo puede dedicar a otra cosa</li>
@@ -434,6 +434,10 @@ const percent = (share: number) => Math.round(share * 100);
     margin-left: 0.5rem;
   }
 
+  .assumptions ul[hidden] {
+    display: none;
+  }
+
   .assumptions ul {
     margin: 1rem 0 0;
     padding-left: 1.2rem;
@@ -452,6 +456,10 @@ const percent = (share: number) => Math.round(share * 100);
     color: var(--white);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
+  }
+
+  .assumptions input[aria-invalid='true'] {
+    border-color: #ffb4a8;
   }
 
   .assumptions input:focus-visible {
@@ -508,10 +516,15 @@ const percent = (share: number) => Math.round(share * 100);
     const value = (key: string) => Number(inputs[key]?.value ?? 0);
 
     const assumptions = (): Assumptions => {
+      // Typed values outside an input's min/max are clamped, and the input is
+      // marked invalid until it is back in range.
       const read = (key: string, fallback: number) => {
         const el = assumeInputs.find((input) => input.dataset.assume === key);
-        const n = Number(el?.value);
-        return Number.isFinite(n) && n > 0 ? n : fallback;
+        const n = el?.value.trim() ? Number(el.value) : NaN;
+        if (!el || !Number.isFinite(n)) return fallback;
+        const bounded = Math.min(Number(el.max), Math.max(Number(el.min), n));
+        el.setAttribute('aria-invalid', String(bounded !== n));
+        return bounded;
       };
       const d = defaultAssumptions;
       return {
@@ -520,8 +533,7 @@ const percent = (share: number) => Math.round(share * 100);
           ...d.cleaning,
           manualRate: read('manualRate', d.cleaning.manualRate),
           robotShare: Math.min(1, read('cleaningShare', d.cleaning.robotShare * 100) / 100),
-          // Zero minutes is a valid answer here, so read it without the > 0 fallback.
-          supervisionHoursPerRobotDay: Math.max(0, assumeInputs.find((i) => i.dataset.assume === 'supervision')?.valueAsNumber || 0) / 60,
+          supervisionHoursPerRobotDay: read('supervision', d.cleaning.supervisionHoursPerRobotDay * 60) / 60,
         },
         serving: {
           minutesPerTrip: read('minutesPerTrip', d.serving.minutesPerTrip),
@@ -544,12 +556,14 @@ const percent = (share: number) => Math.round(share * 100);
       el('text', { x: x - w / 2, y: y + 18, 'text-anchor': 'middle', class: 'chip-text' }, text);
     };
 
-    // The path the robot marker follows, and how far along it is.
+    // The path the robot marker follows. Each change sends the marker along it
+    // once, in four seconds, then it stops (no endless motion; WCAG 2.2.2).
+    const TRIP_MS = 4000;
     let route: SVGPathElement | null = null;
-    let distance = 0;
-    let last = 0;
+    let runStart = 0;
     let frame = 0;
     let visible = false;
+    let pending = true;
 
     const drawCleaning = (area: number, passes: number, share: number) => {
       // Plan proportions 5:3; its real size follows the slider.
@@ -617,25 +631,36 @@ const percent = (share: number) => Math.round(share * 100);
       caption.textContent = `Plano ilustrativo: ${tables} mesas. El robot lleva lo de las mesas en azul; las punteadas siguen con una persona.`;
     };
 
-    const tick = (now: number) => {
-      frame = 0;
-      if (!route || !visible) return;
-      const length = route.getTotalLength();
-      distance = (distance + ((now - (last || now)) / 1000) * 110) % length;
-      last = now;
-      const p = route.getPointAtLength(distance);
+    // t from 0 to 1 along the route. Hides the marker when there is no route
+    // (for example, when the robot takes none of the trips).
+    const moveRobot = (t: number) => {
+      const length = route?.getTotalLength() ?? 0;
+      robot.style.visibility = length > 0 ? 'visible' : 'hidden';
+      if (!route || !(length > 0)) return;
+      const p = route.getPointAtLength(Math.min(1, Math.max(0, t)) * length);
       robot.setAttribute('transform', `translate(${p.x} ${p.y})`);
-      frame = requestAnimationFrame(tick);
     };
 
-    const placeRobot = () => {
-      if (!route) return;
-      const p = route.getPointAtLength(reduce ? 0 : distance % route.getTotalLength());
-      robot.setAttribute('transform', `translate(${p.x} ${p.y})`);
-      if (!reduce && visible && !frame) {
-        last = 0;
-        frame = requestAnimationFrame(tick);
+    const tick = (now: number) => {
+      frame = 0;
+      if (!runStart) runStart = now;
+      const t = (now - runStart) / TRIP_MS;
+      moveRobot(t);
+      if (t < 1 && visible) frame = requestAnimationFrame(tick);
+    };
+
+    const animate = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      runStart = 0;
+      moveRobot(0);
+      if (reduce) return;
+      if (!visible) {
+        pending = true;
+        return;
       }
+      pending = false;
+      frame = requestAnimationFrame(tick);
     };
 
     const fill = (input: HTMLInputElement) => {
@@ -658,6 +683,7 @@ const percent = (share: number) => Math.round(share * 100);
       const a = assumptions();
       layer.replaceChildren();
       let savings: number;
+      let who: string;
       if (mode === 'limpiar') {
         const est = estimateCleaning({ area: value('area'), passes: value('passes'), wage: value('wage') }, a);
         savings = roundMoney(est.savings);
@@ -666,20 +692,24 @@ const percent = (share: number) => Math.round(share * 100);
         results.robots.textContent = String(est.robots);
         results['robot-hours'].textContent = decimal.format(est.robotHoursPerDay / est.robots);
         drawCleaning(value('area'), value('passes'), a.cleaning.robotShare);
-        summary = `Limpieza de ${number.format(value('area'))} m², ${outs.passes.textContent} al día, costo por persona de ${mxn(value('wage'))} al mes. Estimado: ${mxn(savings)} al mes de trabajo que un robot puede absorber (${number.format(est.freedHours)} horas-persona), sin restar el precio del robot.`;
+        who = est.robots === 1 ? 'un robot CC1 puede' : `${est.robots} robots CC1 pueden`;
+        results.label.textContent = est.robots === 1 ? 'Trabajo que un robot puede absorber' : `Trabajo que ${est.robots} robots pueden absorber`;
+        summary = `Limpieza de ${number.format(value('area'))} m², ${outs.passes.textContent} al día, costo por persona de ${mxn(value('wage'))} al mes. Estimado: ${mxn(savings)} al mes de trabajo que ${who} absorber (${number.format(est.freedHours)} horas-persona), sin restar el precio de los robots.`;
       } else {
         const est = estimateServing({ trips: value('trips'), shifts: value('shifts'), wage: value('wage') }, a);
         savings = roundMoney(est.savings);
         results.hours.textContent = number.format(est.freedHours);
         results.current.textContent = mxn(roundMoney(est.currentCost));
         drawServing(value('trips'), value('shifts'), a.serving.robotShare);
-        summary = `Servicio con ${number.format(value('trips'))} viajes de cocina a mesa por turno, ${outs.shifts.textContent}, costo por persona de ${mxn(value('wage'))} al mes. Estimado: ${mxn(savings)} al mes de trabajo que un robot puede absorber (${number.format(est.freedHours)} horas-persona), sin restar el precio del robot.`;
+        who = 'los robots de entrega pueden';
+        results.label.textContent = 'Trabajo que los robots de entrega pueden absorber';
+        summary = `Servicio con ${number.format(value('trips'))} viajes de cocina a mesa por turno, ${outs.shifts.textContent}, costo por persona de ${mxn(value('wage'))} al mes. Estimado: ${mxn(savings)} al mes de trabajo que ${who} absorber (${number.format(est.freedHours)} horas-persona), sin restar el precio de los robots.`;
       }
       results.savings.textContent = mxn(savings);
-      placeRobot();
+      animate();
       clearTimeout(announceTimer);
       announceTimer = window.setTimeout(() => {
-        announce.textContent = `${mxn(savings)} al mes de trabajo que un robot puede absorber.`;
+        announce.textContent = `${mxn(savings)} al mes de trabajo que ${who} absorber.`;
       }, 700);
     };
 
@@ -689,7 +719,6 @@ const percent = (share: number) => Math.round(share * 100);
       root.querySelectorAll<HTMLElement>('[data-for]').forEach((node) => {
         node.hidden = node.dataset.for !== next;
       });
-      distance = 0;
       update();
     };
 
@@ -697,15 +726,27 @@ const percent = (share: number) => Math.round(share * 100);
       radio.addEventListener('change', () => setMode(radio.value as 'limpiar' | 'servir')),
     );
     Object.values(inputs).forEach((input) => input.addEventListener('input', update));
-    assumeInputs.forEach((input) => input.addEventListener('input', update));
+    assumeInputs.forEach((input) => {
+      input.addEventListener('input', update);
+      // Once the visitor leaves the field, show the value actually used.
+      input.addEventListener('change', () => {
+        const n = Number(input.value);
+        if (input.value.trim() && Number.isFinite(n)) {
+          input.value = String(Math.min(Number(input.max), Math.max(Number(input.min), n)));
+          update();
+        }
+      });
+    });
 
-    // Animate only while the plan is on screen.
+    // Animate only while the plan is on screen; a change made off screen
+    // plays its trip when the plan comes back into view.
     new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      if (visible) placeRobot();
-      else if (frame) {
+      if (visible && pending) animate();
+      else if (!visible && frame) {
         cancelAnimationFrame(frame);
         frame = 0;
+        pending = true;
       }
     }).observe(svg);
 
