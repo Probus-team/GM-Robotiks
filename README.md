@@ -44,7 +44,7 @@ public/
 ├── brand/                   # logo lockups: full, mark, wordmark, white and mono variants
 ├── favicon.ico              # 16–256 px multi-size icon, plus PNG favicons and app icons
 ├── media/hero/              # home video montage, landscape and portrait, AV1 and H.264
-├── media/cases/             # web-encoded case videos and posters
+├── media/cases/             # case-film posters and small H.264 fallbacks (1080p films are on R2)
 ├── media/loops/             # short muted cuts of Pudu case films for the home showcase
 ├── media/docs/              # official Pudu PDFs
 └── site.webmanifest
@@ -62,9 +62,9 @@ public/
 - Contact channels (`email`, `whatsapp`, `formEndpoint`) live in `src/data/site.ts`. The form is WhatsApp-first: submitting opens WhatsApp with the lead written out for the sales number, and "Prefiero correo" opens the same text as an email. If `formEndpoint` is set, the form posts JSON there instead. "Cotizar" buttons on robot pages and catalog tiles open WhatsApp with a message for that robot.
 - Fonts (Bricolage Grotesque, Figtree) are fetched at build time through Astro's fonts API, configured in `astro.config.mjs`.
 
-## Home videos
+## Videos
 
-`scripts/build-videos.sh <source-dir>` rebuilds the home montage
+`scripts/build-videos.sh <source-dir> home` rebuilds the home montage
 (`public/media/hero/`), the showcase loops (`public/media/loops/`) and their
 posters from Pudu Robotics' original files. The script lists every source file
 with its URL (Pudu's CDN or the Pudu Robotics YouTube channel), the cut points
@@ -78,8 +78,15 @@ captions are in `src/components/Hero.astro`; keep them in sync when re-cutting.
 Its posters are `src/assets/hero/poster-*.webp` (WebP q95 masters), so astro:assets
 makes the AVIF/WebP sizes.
 
-The case films in `public/media/cases/` are still the earlier 576p–720p web
-encodes; their posters are 1600 px frames from the originals.
+The six case films ("En operación" and the robot pages) play at 1080p from
+Cloudflare R2: bucket `gm-robotiks-media` on the GM Cloudflare account, served at
+`https://media.gmrobotiks.com/cases/`. They are larger than the Worker's 25 MiB
+static-file limit. `scripts/build-videos.sh <source-dir> cases <out-dir>` encodes
+them as AV1 and HEVC (Safari without AV1 decoding), and `scripts/upload-media.sh
+<out-dir>` uploads them with a one-year immutable cache header, so give a
+re-encoded film a new file name. The older 576p–720p H.264 copies in
+`public/media/cases/` stay as the last fallback; posters are 1600 px frames from
+the originals.
 
 ## Deployment
 
@@ -135,16 +142,7 @@ must not send the preview-only `X-Robots-Tag` header.
 
 ## Showcase loops
 
-`public/media/loops/*.mp4` are 6–8 s muted cuts of the case videos, for the
-full-screen panels on the home page. To regenerate one (example: the
-Limpieza loop, seconds 4–12 of the CC1 video):
-
-```sh
-ffmpeg -ss 4 -t 8 -i public/media/cases/cc1-factory.mp4 -an \
-  -vf "scale='min(1280,iw)':-2,fps=30,format=yuv420p" \
-  -c:v libx264 -preset slow -crf 27 -movflags +faststart \
-  public/media/loops/limpieza.mp4
-```
-
-Then export the first frame as `<name>-poster.webp`. Panels are defined in
-`src/data/showcase.ts`.
+`public/media/loops/` holds 7–8 s muted cuts of Pudu case films for the
+full-screen panels on the home page, as AV1 and H.264 with a poster each. They
+are built with the home videos (see Videos above); cut points are in
+`scripts/build-videos.sh` and panels in `src/data/showcase.ts`.

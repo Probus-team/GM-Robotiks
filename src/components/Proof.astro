@@ -4,6 +4,7 @@
 // team can see where the content goes; production hides them (script below).
 // The footage below is Pudu Robotics', labelled by where it was shot.
 import { Picture } from 'astro:assets';
+import CaseFilm from './CaseFilm.astro';
 import { cases, robots } from '../data/robots';
 import { deployments, slotChecklist } from '../data/deployments';
 
@@ -67,7 +68,7 @@ const pendingSlots = deployments.length === 0 ? 3 : 0;
       {[...featured, ...rest].map((c) => (
         <figure class:list={['clip reveal', { featured: c.featured }]}>
           <div class="frame-video">
-            <video src={c.src} data-poster={c.poster} preload="none" controls playsinline aria-label={`${c.title}. ${c.where}.`}></video>
+            <CaseFilm clip={c} />
             <span class:list={['kind', c.kind]}>{c.kind === 'deployment' ? 'En sitio del cliente' : 'Video de producto'}</span>
             <span class="time">{c.minutes}</span>
           </div>

@@ -8,6 +8,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Icon from '../../components/Icon.astro';
 import { site } from '../../data/site';
+import CaseFilm from '../../components/CaseFilm.astro';
 import { cases, families, robots, type Robot } from '../../data/robots';
 import { robotPath, robotTitle } from '../../data/seo';
 import { robotCutout, robotScene } from '../../lib/media';
@@ -172,7 +173,7 @@ const structuredData = [
             <p class="lede">{clip.where} · Pudu Robotics · {clip.minutes} min</p>
           </div>
           <div class="video-frame reveal-frame">
-            <video src={clip.src} data-poster={clip.poster} preload="none" controls playsinline aria-label={`${clip.title}. ${clip.where}.`} data-clip></video>
+            <CaseFilm clip={clip} data-clip />
           </div>
         </div>
       </section>

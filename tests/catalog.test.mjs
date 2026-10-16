@@ -39,6 +39,8 @@ test('case videos linked from robot pages exist, and each says where it was shot
     assert.ok(['deployment', 'promo'].includes(clip.kind), clip.id);
     assert.ok(existsSync(file(`public${clip.src}`)), clip.src);
     assert.ok(existsSync(file(`public${clip.poster}`)), clip.poster);
+    assert.equal(clip.av1, `https://media.gmrobotiks.com/cases/${clip.id}-1080p-av1.mp4`);
+    assert.equal(clip.hevc, `https://media.gmrobotiks.com/cases/${clip.id}-1080p-hevc.mp4`);
   }
 });
 

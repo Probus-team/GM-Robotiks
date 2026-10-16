@@ -573,12 +573,21 @@ export const robots: Robot[] = [
 
 // Every clip is Pudu Robotics' own footage. `kind` says whether it was shot
 // at a customer site (deployment) or produced as a product video (promo).
+// The 1080p films are too large for the Worker's 25 MiB file limit, so they
+// live in R2 (bucket gm-robotiks-media) behind media.gmrobotiks.com, as AV1
+// and HEVC; `scripts/build-videos.sh <src> cases` builds them. `src` is the
+// older, smaller H.264 copy kept in public/ as the last fallback.
+export const mediaOrigin = 'https://media.gmrobotiks.com';
+
 export interface CaseVideo {
   id: string;
   title: string;
   where: string;
   kind: 'deployment' | 'promo';
   src: string;
+  /** 1080p AV1 and HEVC on media.gmrobotiks.com. */
+  av1: string;
+  hevc: string;
   poster: string;
   robots: string[];
   minutes: string;
@@ -592,6 +601,8 @@ export const cases: CaseVideo[] = [
     where: 'Planta de manufactura · China',
     kind: 'deployment',
     src: '/media/cases/cc1-factory.mp4',
+    av1: `${mediaOrigin}/cases/cc1-factory-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/cc1-factory-1080p-hevc.mp4`,
     poster: '/media/cases/cc1-factory-poster.webp',
     robots: ['CC1'],
     minutes: '0:43',
@@ -603,6 +614,8 @@ export const cases: CaseVideo[] = [
     where: 'Video de producto',
     kind: 'promo',
     src: '/media/cases/et1.mp4',
+    av1: `${mediaOrigin}/cases/et1-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/et1-1080p-hevc.mp4`,
     poster: '/media/cases/et1-poster.webp',
     robots: ['ET1'],
     minutes: '1:52',
@@ -614,6 +627,8 @@ export const cases: CaseVideo[] = [
     where: 'Video de producto · semi-exterior',
     kind: 'promo',
     src: '/media/cases/mt1max.mp4',
+    av1: `${mediaOrigin}/cases/mt1max-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/mt1max-1080p-hevc.mp4`,
     poster: '/media/cases/mt1max-poster.webp',
     robots: ['MT1 Max'],
     minutes: '0:36',
@@ -624,6 +639,8 @@ export const cases: CaseVideo[] = [
     where: 'Planta de manufactura · China',
     kind: 'deployment',
     src: '/media/cases/t300.mp4',
+    av1: `${mediaOrigin}/cases/t300-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/t300-1080p-hevc.mp4`,
     poster: '/media/cases/t300-poster.webp',
     robots: ['T300', 'CC1', 'PuduBot 2'],
     minutes: '1:24',
@@ -634,6 +651,8 @@ export const cases: CaseVideo[] = [
     where: 'Shaw Lab Group · Canadá',
     kind: 'deployment',
     src: '/media/cases/pudubot2.mp4',
+    av1: `${mediaOrigin}/cases/pudubot2-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/pudubot2-1080p-hevc.mp4`,
     poster: '/media/cases/pudubot2-poster.webp',
     robots: ['PuduBot 2'],
     minutes: '0:28',
@@ -644,6 +663,8 @@ export const cases: CaseVideo[] = [
     where: 'Video de producto',
     kind: 'promo',
     src: '/media/cases/gt5.mp4',
+    av1: `${mediaOrigin}/cases/gt5-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/gt5-1080p-hevc.mp4`,
     poster: '/media/cases/gt5-poster.webp',
     robots: ['GT5'],
     minutes: '1:20',
