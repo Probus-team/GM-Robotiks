@@ -1,17 +1,16 @@
 // @ts-check
-import { defineConfig, fontProviders, sharpImageService } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://gmrobotiks.com',
-  // Sharp defaults (AVIF 50, WebP 80) visibly soften the product renders and
-  // band the dark gradients. Masters in src/assets are WebP q95, so these
-  // settings decide what visitors see.
+  // Encoder quality per format lives in src/lib/image-service.ts, where it is
+  // part of each image's cache key.
   image: {
-    service: sharpImageService({
-      avif: { quality: 70 },
-      webp: { quality: 86, smartSubsample: true },
-    }),
+    service: {
+      entrypoint: './src/lib/image-service.ts',
+      config: { webp: { smartSubsample: true } },
+    },
   },
   fonts: [
     {

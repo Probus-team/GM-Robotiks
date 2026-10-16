@@ -3,7 +3,7 @@
 Every image here is Pudu Robotics material: product renders, brochure images or
 frames from Pudu's own videos. The site credits it as such. Masters are stored
 as WebP at quality 95 (alpha kept at full quality) at the largest size the
-source allows, so the AVIF/WebP that astro:assets makes (`astro.config.mjs`) is
+source allows, so the AVIF/WebP that astro:assets makes (`src/lib/image-service.ts`) is
 the only pass that costs visible detail. Replace a master with a sharper one of
 the same model and the pages pick it up; record the source here.
 
