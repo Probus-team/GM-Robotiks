@@ -1,6 +1,6 @@
 // Full-screen media panels on the home page, one per robot line.
-// Loops are short, muted cuts of the case footage in public/media/cases,
-// re-encoded in public/media/loops. Exteriores uses a still because every
+// Loops are short, muted cuts of Pudu's 1080p case films, built into
+// public/media/loops by scripts/build-videos.sh. Exteriores uses a still because every
 // GT5 shot carries burned-in captions.
 import type { FamilyId } from './robots';
 
@@ -15,7 +15,8 @@ export interface Panel {
   /** Robot the figure belongs to; the figure links to its page. */
   figureRobot: string;
   /** Images are scene ids in src/assets/scenes. */
-  media: { type: 'video'; src: string; poster: string } | { type: 'image'; scene: string };
+  /** Videos are H.264 with an AV1 twin (scripts/build-videos.sh). */
+  media: { type: 'video'; src: string; av1: string; poster: string } | { type: 'image'; scene: string };
   credit: string;
 }
 
@@ -29,7 +30,7 @@ export const panels: Panel[] = [
     figure: '2,000',
     figureLabel: 'm² por hora con la BG1, según Pudu',
     figureRobot: 'bg1',
-    media: { type: 'video', src: '/media/loops/limpieza.mp4', poster: '/media/loops/limpieza-poster.webp' },
+    media: { type: 'video', src: '/media/loops/limpieza-h264.mp4', av1: '/media/loops/limpieza-av1.mp4', poster: '/media/loops/limpieza-poster.webp' },
     credit: 'CC1 en una planta electrónica · video de Pudu Robotics',
   },
   {
@@ -41,7 +42,7 @@ export const panels: Panel[] = [
     figure: '15 h',
     figureLabel: 'de autonomía de la PuduBot 2, según Pudu',
     figureRobot: 'pudubot-2',
-    media: { type: 'video', src: '/media/loops/entrega.mp4', poster: '/media/loops/entrega-poster.webp' },
+    media: { type: 'video', src: '/media/loops/entrega-h264.mp4', av1: '/media/loops/entrega-av1.mp4', poster: '/media/loops/entrega-poster.webp' },
     credit: 'PuduBot 2 en Shaw Lab Group, Canadá · video de Pudu Robotics',
   },
   {
@@ -53,7 +54,7 @@ export const panels: Panel[] = [
     figure: '2,000 kg',
     figureLabel: 'por tarima con el MP2000, según Pudu',
     figureRobot: 'mp2000',
-    media: { type: 'video', src: '/media/loops/logistica.mp4', poster: '/media/loops/logistica-poster.webp' },
+    media: { type: 'video', src: '/media/loops/logistica-h264.mp4', av1: '/media/loops/logistica-av1.mp4', poster: '/media/loops/logistica-poster.webp' },
     credit: 'T300 en una planta de manufactura · video de Pudu Robotics',
   },
   {

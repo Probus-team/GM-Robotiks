@@ -1,9 +1,18 @@
 // @ts-check
-import { defineConfig, fontProviders } from 'astro/config';
+import { defineConfig, fontProviders, sharpImageService } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://gmrobotiks.com',
+  // Sharp defaults (AVIF 50, WebP 80) visibly soften the product renders and
+  // band the dark gradients. Masters in src/assets are WebP q95, so these
+  // settings decide what visitors see.
+  image: {
+    service: sharpImageService({
+      avif: { quality: 70 },
+      webp: { quality: 86, smartSubsample: true },
+    }),
+  },
   fonts: [
     {
       provider: fontProviders.google(),

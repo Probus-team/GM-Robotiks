@@ -7,7 +7,7 @@ import { runInNewContext } from 'node:vm';
 const source = readFileSync(new URL('../src/components/Showcase.astro', import.meta.url), 'utf8');
 const script = stripTypeScriptTypes(source.match(/<script>([\s\S]*?)<\/script>/)[1]);
 
-function setup(reduce = false) {
+function setup(reduce = false, { loaded = true } = {}) {
   const listeners = {};
   const observers = [];
   let frame;
@@ -20,7 +20,7 @@ function setup(reduce = false) {
     };
   };
   const videos = Array.from({ length: 3 }, (_, i) => ({
-    dataset: { src: `/loop-${i}.mp4` }, paused: true, loads: 0,
+    dataset: { src: `/loop-${i}.mp4`, poster: `/loop-${i}.webp` }, paused: true, loads: 0,
     load() { this.loads++; },
     play() { this.paused = false; return Promise.resolve(); },
     pause() { this.paused = true; },
@@ -49,6 +49,7 @@ function setup(reduce = false) {
       unobserve() {}
     },
   });
+  if (loaded) listeners.load();
   const scroll = (tops) => {
     panels.forEach((panel, i) => panel.top = tops[i]);
     listeners.scroll();
@@ -65,6 +66,20 @@ test('distant loops do not fetch; approaching loops preload without playing', ()
   assert.equal(state.videos[0].loads, 1);
   assert.equal(state.videos[0].paused, true);
   assert.equal(state.videos[1].src, undefined);
+});
+
+test('loops use the AV1 file only where the browser can decode it', () => {
+  const state = setup();
+  state.videos[0].dataset.srcAv1 = '/loop-0-av1.mp4';
+  state.videos[0].canPlayType = (type) => type.includes('av01') ? 'probably' : '';
+  state.videos[1].dataset.srcAv1 = '/loop-1-av1.mp4';
+  state.videos[1].canPlayType = () => '';
+  state.observers[0].callback([
+    { target: state.videos[0], isIntersecting: true },
+    { target: state.videos[1], isIntersecting: true },
+  ]);
+  assert.equal(state.videos[0].src, '/loop-0-av1.mp4');
+  assert.equal(state.videos[1].src, '/loop-1.mp4');
 });
 
 test('visible transitions keep both loops running, covered loops pause, reverse scrolling resumes', () => {
@@ -96,10 +111,20 @@ test('hidden tabs pause playback and visible tabs restore the exposed loop', () 
   assert.equal(state.videos[0].paused, false);
 });
 
-test('reduced motion reveals panel content without downloading or playing loops', () => {
+test('reduced motion reveals panel content and posters without downloading or playing loops', () => {
   const state = setup(true);
+  state.observers[0].callback([{ target: state.videos[1], isIntersecting: true }]);
   state.scroll([0, 800, 1600, 2400, 3200]);
   assert.equal(state.panels[0].classList.contains('is-active'), true);
-  assert.equal(state.observers.length, 0);
+  assert.equal(state.videos[0].poster, '/loop-0.webp');
+  assert.equal(state.videos[1].poster, '/loop-1.webp');
   assert.ok(state.videos.every((video) => !video.src && video.paused));
+});
+
+test('nothing in the showcase downloads before the page has loaded', () => {
+  const state = setup(false, { loaded: false });
+  assert.equal(state.observers.length, 0);
+  assert.ok(state.videos.every((video) => !video.src && !video.poster));
+  state.listeners.load();
+  assert.equal(state.observers.length, 1);
 });

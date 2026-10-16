@@ -23,7 +23,7 @@ const pageUrl = (id: string) => new URL(robotPath(id), Astro.site).href;
     <Picture
       src={scene('pudu-family')}
       alt=""
-      widths={[640, 960, 1280, 1800]}
+      widths={[640, 960, 1280, 1800, 2400]}
       sizes="100vw"
       formats={['avif']}
       fallbackFormat="webp"
@@ -64,7 +64,7 @@ const pageUrl = (id: string) => new URL(robotPath(id), Astro.site).href;
             <Picture
               src={robotScene(line.lead.id) ?? robotCutout(line.lead.id)}
               alt=""
-              widths={[480, 720, 960, 1280]}
+              widths={[480, 720, 960, 1280, 1600, 1920]}
               sizes="(max-width: 56rem) 100vw, 60vw"
               formats={['avif']}
               fallbackFormat="webp"

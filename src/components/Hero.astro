@@ -3,19 +3,22 @@
 // caption under it names the robot and the setting of each shot, and links to
 // that robot's page. The poster is a responsive <picture>; the video only
 // downloads after the page has loaded, and never with reduced motion or
-// data saver on.
+// data saver on. scripts/build-videos.sh builds the montage and posters.
 import Visor from './Visor.astro';
 import Icon from './Icon.astro';
 import { families, robots } from '../data/robots';
+import { heroPosters } from '../lib/media';
 
-// Seconds where each shot starts in public/media/hero/montage-*.mp4 (10.5 s).
+// Seconds where each shot starts in public/media/hero/montage-*.mp4 (10 s).
 const shots = [
-  { at: 0, robot: 'et1', label: 'ET1', where: 'fregado en tienda' },
-  { at: 1.47, robot: 't300', label: 'T300', where: 'abasto de línea en manufactura' },
-  { at: 4.47, robot: 'gt5', label: 'GT5', where: 'corte de áreas verdes' },
-  { at: 6.47, robot: 'gt7', label: 'GT7', where: 'corte helicoidal en campo' },
-  { at: 8.4, robot: 'et1', label: 'ET1', where: 'limpieza de recepción' },
+  { at: 0, robot: 'kettybot-pro', label: 'KettyBot Pro', where: 'entrega en cafetería' },
+  { at: 2.6, robot: 'et1', label: 'ET1', where: 'fregado en tienda' },
+  { at: 4.04, robot: 't600', label: 'T600', where: 'traslado de cajas en almacén' },
+  { at: 6.08, robot: 'gt5', label: 'GT5', where: 'corte de áreas verdes' },
+  { at: 8.08, robot: 'gt7', label: 'GT7', where: 'corte helicoidal en campo' },
 ];
+
+const { sizes: posterSizes, landAvif, landWebp, portAvif, portWebp } = await heroPosters();
 
 const counts = families.map((f) => ({
   ...f,
@@ -27,8 +30,20 @@ const counts = families.map((f) => ({
   <div class="frame hero-frame on-dark">
     <div class="media" aria-hidden="true">
       <picture>
-        <source media="(max-aspect-ratio: 4/5)" srcset="/media/hero/montage-poster-540.webp" width="540" height="960" />
-        <img class="poster" src="/media/hero/montage-poster-1600.webp" alt="" width="1600" height="900" fetchpriority="high" decoding="async" />
+        <source media="(max-aspect-ratio: 4/5)" type="image/avif" srcset={portAvif.srcSet.attribute} sizes={posterSizes} width="720" height="1280" />
+        <source media="(max-aspect-ratio: 4/5)" type="image/webp" srcset={portWebp.srcSet.attribute} sizes={posterSizes} width="720" height="1280" />
+        <source type="image/avif" srcset={landAvif.srcSet.attribute} sizes={posterSizes} />
+        <img
+          class="poster"
+          src={landWebp.src}
+          srcset={landWebp.srcSet.attribute}
+          sizes={posterSizes}
+          alt=""
+          width="1920"
+          height="1080"
+          fetchpriority="high"
+          decoding="async"
+        />
       </picture>
       <video
         class="video"
@@ -39,9 +54,8 @@ const counts = families.map((f) => ({
         aria-hidden="true"
         tabindex="-1"
         data-hero-video
-        data-src-portrait="/media/hero/montage-540.mp4"
-        data-src-medium="/media/hero/montage-1280.mp4"
-        data-src-large="/media/hero/montage-1600.mp4"
+        data-portrait="/media/hero/montage-portrait"
+        data-landscape="/media/hero/montage-landscape"
       ></video>
     </div>
     <div class="scrim" aria-hidden="true"></div>
@@ -457,9 +471,12 @@ const counts = families.map((f) => ({
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
 
+  // AV1 where the browser decodes it (Safari only reports it with hardware
+  // support), H.264 everywhere else.
   const pickSource = (v: HTMLVideoElement) => {
-    if (window.matchMedia('(max-aspect-ratio: 4/5)').matches) return v.dataset.srcPortrait;
-    return window.innerWidth * Math.min(window.devicePixelRatio, 2) <= 1400 ? v.dataset.srcMedium : v.dataset.srcLarge;
+    const base = window.matchMedia('(max-aspect-ratio: 4/5)').matches ? v.dataset.portrait : v.dataset.landscape;
+    if (!base) return undefined;
+    return `${base}-${v.canPlayType('video/mp4; codecs="av01.0.08M.10"') ? 'av1' : 'h264'}.mp4`;
   };
 
   let shot = 0;

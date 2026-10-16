@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { cases, families, robots } from '../src/data/robots.ts';
+import { panels } from '../src/data/showcase.ts';
 import { robotQuoteMessage, robotQuoteUrl } from '../src/lib/whatsapp.ts';
 
 const file = (path) => new URL(`../${path}`, import.meta.url);
@@ -59,12 +60,20 @@ test('"Cotizar" opens WhatsApp with a message written for that robot', () => {
   assert.equal(url.searchParams.get('text'), message);
 });
 
-test('the hero montage stays within the 3–5 MB budget and has posters', () => {
-  for (const name of ['montage-1600.mp4', 'montage-1280.mp4', 'montage-540.mp4']) {
-    const size = readFileSync(file(`public/media/hero/${name}`)).length;
-    assert.ok(size < 5 * 1024 * 1024, `${name} is ${size} bytes`);
+test('home videos come in AV1 and H.264, each within the 5 MB budget, with posters', () => {
+  const videos = ['landscape', 'portrait'].flatMap((o) => ['av1', 'h264'].map((c) => `public/media/hero/montage-${o}-${c}.mp4`));
+  for (const panel of panels) {
+    if (panel.media.type !== 'video') continue;
+    videos.push(`public${panel.media.src}`, `public${panel.media.av1}`);
+    assert.ok(existsSync(file(`public${panel.media.poster}`)), panel.media.poster);
   }
-  for (const name of ['montage-poster-1600.webp', 'montage-poster-540.webp']) {
-    assert.ok(existsSync(file(`public/media/hero/${name}`)), name);
+  assert.equal(videos.length, 10);
+  for (const path of videos) {
+    assert.ok(existsSync(file(path)), path);
+    const size = readFileSync(file(path)).length;
+    assert.ok(size < 5_000_000, `${path} is ${size} bytes`);
+  }
+  for (const name of ['poster-landscape.webp', 'poster-portrait.webp']) {
+    assert.ok(existsSync(file(`src/assets/hero/${name}`)), name);
   }
 });

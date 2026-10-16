@@ -43,9 +43,9 @@ src/
 public/
 ├── brand/                   # logo lockups: full, mark, wordmark, white and mono variants
 ├── favicon.ico              # 16–256 px multi-size icon, plus PNG favicons and app icons
-├── media/hero/              # home video montage (3 sizes) and posters
+├── media/hero/              # home video montage, landscape and portrait, AV1 and H.264
 ├── media/cases/             # web-encoded case videos and posters
-├── media/loops/             # short muted cuts of the case videos for the home showcase
+├── media/loops/             # short muted cuts of Pudu case films for the home showcase
 ├── media/docs/              # official Pudu PDFs
 └── site.webmanifest
 ```
@@ -62,23 +62,24 @@ public/
 - Contact channels (`email`, `whatsapp`, `formEndpoint`) live in `src/data/site.ts`. The form is WhatsApp-first: submitting opens WhatsApp with the lead written out for the sales number, and "Prefiero correo" opens the same text as an email. If `formEndpoint` is set, the form posts JSON there instead. "Cotizar" buttons on robot pages and catalog tiles open WhatsApp with a message for that robot.
 - Fonts (Bricolage Grotesque, Figtree) are fetched at build time through Astro's fonts API, configured in `astro.config.mjs`.
 
-## Home video montage
+## Home videos
 
-`public/media/hero/montage-{1600,1280,540}.mp4` is 10.5 s of Pudu footage
-without burned-in captions: ET1 in a store (`et1.mp4` 37.0–38.45 s), T300 on a
-production line (`public/media/cases/t300.mp4` 61–64 s, Pudu logo cropped),
-GT5 (3.1–5.1 s), GT7 (11.0–12.9 s) and ET1 in a lobby (79.8–81.85 s). The 540
-version is a portrait crop for phones. Shot start times and captions are in
-`src/components/Hero.astro`; keep them in sync when re-cutting. Encode each shot
-with `-an -vf "crop=…,scale=1600:900,fps=30"`, concatenate, then:
+`scripts/build-videos.sh <source-dir>` rebuilds the home montage
+(`public/media/hero/`), the showcase loops (`public/media/loops/`) and their
+posters from Pudu Robotics' original files. The script lists every source file
+with its URL (Pudu's CDN or the Pudu Robotics YouTube channel), the cut points
+and the encoder settings. Each clip is cut once to a lossless intermediate and
+encoded once as AV1 and once as H.264; the page picks AV1 where the browser
+decodes it. Every file stays under 5 MB (`tests/catalog.test.mjs`).
 
-```sh
-ffmpeg -f concat -safe 0 -i shots.txt -c:v libx264 -preset veryslow -crf 26 \
-  -pix_fmt yuv420p -movflags +faststart -an public/media/hero/montage-1600.mp4
-```
+The montage is 10 s: KettyBot Pro in a café (4K source), ET1 in a store, T600
+in a warehouse, GT5 and GT7, with no burned-in captions. Shot start times and
+captions are in `src/components/Hero.astro`; keep them in sync when re-cutting.
+Its posters are `src/assets/hero/poster-*.webp` (WebP q95 masters), so astro:assets
+makes the AVIF/WebP sizes.
 
-Keep each file under 3 MB (a test enforces under 5 MB) and export a frame
-about 1.2 s in as `montage-poster-<size>.webp`.
+The case films in `public/media/cases/` are still the earlier 576p–720p web
+encodes; their posters are 1600 px frames from the originals.
 
 ## Deployment
 

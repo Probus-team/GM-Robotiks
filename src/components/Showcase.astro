@@ -30,7 +30,8 @@ const withCounts = panels.map((p) => ({
           {p.media.type === 'video' ? (
             <video
               data-src={p.media.src}
-              poster={p.media.poster}
+              data-src-av1={p.media.av1}
+              data-poster={p.media.poster}
               muted
               loop
               playsinline
@@ -42,7 +43,7 @@ const withCounts = panels.map((p) => ({
             <Picture
               src={scene(p.media.scene)}
               alt=""
-              widths={[640, 960, 1280, 1600, 2000]}
+              widths={[640, 960, 1280, 1600, 2000, 2560, 2880]}
               sizes="100vw"
               formats={['avif']} fallbackFormat="webp"
               class="still"
@@ -352,26 +353,39 @@ const withCounts = panels.map((p) => ({
   const rail = root?.querySelector<HTMLElement>('[data-rail]');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // AV1 where the browser decodes it (Safari only with hardware support), H.264 otherwise.
   const loadVideo = (video: HTMLVideoElement) => {
     if (!video.dataset.src) return;
-    video.src = video.dataset.src;
+    const av1 = video.dataset.srcAv1 && video.canPlayType?.('video/mp4; codecs="av01.0.08M.10"');
+    video.src = av1 ? video.dataset.srcAv1! : video.dataset.src;
     delete video.dataset.src;
     video.preload = 'auto';
     video.load();
   };
 
-  // Warm only nearby loops; distant panels must not compete with the hero.
-  if (!reduce) {
+  const showPoster = (video: HTMLVideoElement) => {
+    if (!video.dataset.poster) return;
+    video.poster = video.dataset.poster;
+    delete video.dataset.poster;
+  };
+
+  // Posters and loops wait until the page has loaded, so they never compete with
+  // the hero poster; after that, only panels within 600px are fetched. Reduced
+  // motion gets the posters and never the loops.
+  const warm = () => {
     const preloadObserver = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
         const video = entry.target as HTMLVideoElement;
-        loadVideo(video);
+        showPoster(video);
+        if (!reduce) loadVideo(video);
         preloadObserver.unobserve(video);
       }
     }, { rootMargin: '600px 0px' });
     videos.forEach((video) => { if (video) preloadObserver.observe(video); });
-  }
+  };
+  if (document.readyState === 'complete') warm();
+  else window.addEventListener('load', warm, { once: true });
 
   let raf = 0;
   let current = -1;
@@ -409,6 +423,7 @@ const withCounts = panels.map((p) => ({
       if (!video) return;
       const exposedBottom = Math.min(bounds[i].bottom, bounds[i + 1]?.top ?? vh, vh);
       const visible = exposedBottom > Math.max(bounds[i].top, 0);
+      if (visible) showPoster(video);
       if (visible && panels[i].classList.contains('is-active') && !reduce && !document.hidden) {
         loadVideo(video);
         if (video.paused) video.play().catch(() => {});

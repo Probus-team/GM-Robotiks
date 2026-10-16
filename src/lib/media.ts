@@ -1,6 +1,9 @@
 // Robot images go through astro:assets, so every <Picture> gets AVIF/WebP and a
 // srcset. Sources and their provenance are listed in src/assets/robots/SOURCES.md.
 import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+import posterLandscape from '../assets/hero/poster-landscape.webp';
+import posterPortrait from '../assets/hero/poster-portrait.webp';
 
 const load = (modules: Record<string, ImageMetadata>) =>
   Object.fromEntries(
@@ -26,4 +29,18 @@ export function scene(id: string): ImageMetadata {
   const image = scenes[id];
   if (!image) throw new Error(`Missing scene "${id}" in src/assets/scenes`);
   return image;
+}
+
+/**
+ * AVIF and WebP srcsets for the home video poster, landscape and portrait. The
+ * hero renders them and the home page preloads the AVIF one that matches.
+ */
+export async function heroPosters() {
+  const [landAvif, landWebp, portAvif, portWebp] = await Promise.all([
+    getImage({ src: posterLandscape, widths: [960, 1440, 1920], format: 'avif' }),
+    getImage({ src: posterLandscape, widths: [960, 1440, 1920], format: 'webp' }),
+    getImage({ src: posterPortrait, widths: [480, 720], format: 'avif' }),
+    getImage({ src: posterPortrait, widths: [480, 720], format: 'webp' }),
+  ]);
+  return { sizes: '100vw', landAvif, landWebp, portAvif, portWebp };
 }
