@@ -4,6 +4,14 @@ import { defineConfig, fontProviders } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://gmrobotiks.com',
+  // Encoder quality per format lives in src/lib/image-service.ts, where it is
+  // part of each image's cache key.
+  image: {
+    service: {
+      entrypoint: './src/lib/image-service.ts',
+      config: { webp: { smartSubsample: true } },
+    },
+  },
   fonts: [
     {
       provider: fontProviders.google(),

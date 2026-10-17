@@ -1,12 +1,24 @@
 ---
+// Inset rounded video frame. The montage is Pudu Robotics' own footage; the
+// caption under it names the robot and the setting of each shot, and links to
+// that robot's page. The poster is a responsive <picture>; the video only
+// downloads after the page has loaded, and never with reduced motion or
+// data saver on. scripts/build-videos.sh builds the montage and posters.
 import Visor from './Visor.astro';
+import Icon from './Icon.astro';
 import { families, robots } from '../data/robots';
+import { heroPosters } from '../lib/media';
 
-const lineup = [
-  { id: 'bellabot-pro', name: 'BellaBot Pro', family: 'Entrega' },
-  { id: 'et1', name: 'ET1', family: 'Limpieza' },
-  { id: 'gt5', name: 'GT5', family: 'Exteriores' },
-].map((item) => ({ ...item, robot: robots.find((r) => r.id === item.id)! }));
+// Seconds where each shot starts in public/media/hero/montage-*.mp4 (10 s).
+const shots = [
+  { at: 0, robot: 'kettybot-pro', label: 'KettyBot Pro', where: 'entrega en cafetería' },
+  { at: 2.6, robot: 'et1', label: 'ET1', where: 'fregado en tienda' },
+  { at: 4.04, robot: 't600', label: 'T600', where: 'traslado de cajas en almacén' },
+  { at: 6.08, robot: 'gt5', label: 'GT5', where: 'corte de áreas verdes' },
+  { at: 8.08, robot: 'gt7', label: 'GT7', where: 'corte helicoidal en campo' },
+];
+
+const { sizes: posterSizes, landAvif, landWebp, portAvif, portWebp } = await heroPosters();
 
 const counts = families.map((f) => ({
   ...f,
@@ -14,91 +26,158 @@ const counts = families.map((f) => ({
 }));
 ---
 
-<section class="hero on-dark" id="inicio">
-  <div class="container hero-grid">
-    <div class="copy">
+<section class="hero" id="inicio" aria-labelledby="hero-title">
+  <div class="frame hero-frame on-dark">
+    <div class="media" aria-hidden="true">
+      <picture>
+        <source media="(max-aspect-ratio: 4/5)" type="image/avif" srcset={portAvif.srcSet.attribute} sizes={posterSizes} width="720" height="1280" />
+        <source media="(max-aspect-ratio: 4/5)" type="image/webp" srcset={portWebp.srcSet.attribute} sizes={posterSizes} width="720" height="1280" />
+        <source type="image/avif" srcset={landAvif.srcSet.attribute} sizes={posterSizes} />
+        <img
+          class="poster"
+          src={landWebp.src}
+          srcset={landWebp.srcSet.attribute}
+          sizes={posterSizes}
+          alt=""
+          width="1920"
+          height="1080"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </picture>
+      <video
+        class="video"
+        muted
+        loop
+        playsinline
+        preload="none"
+        aria-hidden="true"
+        tabindex="-1"
+        data-hero-video
+        data-portrait="/media/hero/montage-portrait"
+        data-landscape="/media/hero/montage-landscape"
+      ></video>
+    </div>
+    <div class="scrim" aria-hidden="true"></div>
+
+    <div class="container content">
       <p class="eyebrow intro" style="--i:0">Distribuidor Pudu Robotics · México</p>
-      <h1>
+      <h1 id="hero-title">
         <span class="mask"><span class="word" style="--i:1">Robots</span></span>
         <span class="mask"><span class="word" style="--i:2">que ya</span></span>
         <span class="mask"><span class="word line" style="--i:3">trabajan<Visor class="visor-inline" />.</span></span>
       </h1>
       <p class="lede intro" style="--i:4">
-        Limpieza, entrega, logística y áreas verdes con robots Pudu. Los medimos en tu operación antes
-        de que los compres, y los sostenemos después.
+        Limpieza, entrega, logística y áreas verdes con robots Pudu. Los probamos en tu operación antes de que
+        los compres, y les damos soporte desde México.
       </p>
       <div class="cta intro" style="--i:5">
-        <a href="/robots/" class="btn btn-white">Ver los robots</a>
-        <a href="#contacto" class="btn btn-ghost-light">Agendar una demo</a>
+        <a href="/robots/" class="btn btn-white">Ver los robots <Icon name="arrow" /></a>
+        <a href="#ahorro" class="btn btn-ghost-light">Calcula tu ahorro</a>
       </div>
     </div>
 
-    <div class="stage" aria-hidden="true">
-      <div class="floor"><span class="sweep"></span></div>
-      {lineup.map((item, i) => (
-        <figure class={`bot bot-${i + 1}`}>
-          <img src={item.robot.image} alt="" width="744" height="880" loading="eager" fetchpriority={i === 1 ? 'high' : 'auto'} />
-          <figcaption>
-            <b>{item.name}</b>
-            <span>{item.family}</span>
-          </figcaption>
-        </figure>
-      ))}
+    <div class="reel intro" style="--i:6" data-reel>
+      <ol class="ticks" aria-hidden="true">
+        {shots.map((s, i) => <li style={`--n:${i}`} class:list={{ 'is-current': i === 0 }} data-tick></li>)}
+      </ol>
+      <a class="caption" href={`/robots/${shots[0].robot}/`} data-caption>
+        <b data-caption-label>{shots[0].label}</b>{' '}
+        <span data-caption-where>{shots[0].where}</span>
+      </a>
+      <span class="credit">Video: Pudu Robotics</span>
+      <button class="pause" type="button" aria-pressed="false" data-hero-toggle hidden>
+        <span class="i-pause"><Icon name="pause" /></span>
+        <span class="i-play"><Icon name="play" /></span>
+        <span class="sr-only" data-toggle-label>Pausar video</span>
+      </button>
     </div>
   </div>
 
-  <div class="container">
-    <ol class="index intro" style="--i:6" aria-label="Líneas de robots">
+  <nav class="container index" aria-label="Elige una línea">
+    <ul>
       {counts.map((f) => (
         <li>
           <a href={`/robots/#${f.id}`}>
             <span class="idx-name">{f.name}</span>
             <span class="idx-short">{f.short}</span>
-            <span class="idx-count">{f.count} {f.count === 1 ? 'modelo' : 'modelos'}</span>
+            <span class="idx-count">{f.count} {f.count === 1 ? 'modelo' : 'modelos'} <Icon name="arrow" /></span>
           </a>
         </li>
       ))}
-    </ol>
-  </div>
+    </ul>
+  </nav>
 
-  <a href="#lineas" class="scroll-hint" aria-label="Ver los robots en acción">
-    <span class="dot"></span>
-  </a>
+  <script type="application/json" data-shots set:html={JSON.stringify(shots)} />
 </section>
 
 <style>
   .hero {
-    position: relative;
-    margin-top: -4.75rem;
-    padding-top: 4.75rem;
-    color: var(--white);
-    background:
-      radial-gradient(90rem 50rem at 85% 110%, rgba(42, 122, 188, 0.45), transparent 60%),
-      radial-gradient(60rem 40rem at -10% -20%, rgba(255, 255, 255, 0.08), transparent 60%),
-      linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 55%, var(--navy-ink) 100%);
-    overflow: hidden;
+    padding-top: var(--bezel);
   }
 
-  .hero-grid {
+  .hero-frame {
     display: grid;
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
-    gap: clamp(2rem, 5vw, 5rem);
     align-items: end;
-    padding-top: clamp(3rem, 8vw, 6rem);
-    min-height: min(84vh, 56rem);
+    min-height: 36rem;
+    height: calc(100svh - 2 * var(--bezel));
+    max-height: 62rem;
+    background: var(--ink);
   }
 
-  .copy {
+  .media,
+  .scrim {
+    position: absolute;
+    inset: 0;
+  }
+
+  .media {
+    z-index: 0;
+  }
+
+  .poster,
+  .video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .video {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .video.is-playing {
+    opacity: 1;
+  }
+
+  /* Navy wash from the lower left, where the type sits; the footage stays
+     legible on the right. */
+  .scrim {
+    z-index: 1;
+    background:
+      linear-gradient(90deg, rgba(10, 28, 43, 0.82) 0%, rgba(10, 28, 43, 0.5) 45%, rgba(10, 28, 43, 0.05) 75%),
+      linear-gradient(0deg, rgba(10, 28, 43, 0.85) 0%, rgba(10, 28, 43, 0) 55%),
+      linear-gradient(180deg, rgba(10, 28, 43, 0.55) 0%, rgba(10, 28, 43, 0) 22%);
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
     display: grid;
-    gap: 1.75rem;
-    padding-bottom: clamp(2rem, 6vw, 5rem);
+    gap: clamp(1.1rem, 2vw, 1.6rem);
+    justify-items: start;
+    padding-bottom: clamp(5.5rem, 12vh, 8.5rem);
   }
 
   h1 {
-    font-size: clamp(3rem, 8.2vw, 7rem);
+    font-size: var(--fs-display);
     font-weight: 800;
-    letter-spacing: -0.035em;
-    line-height: 0.92;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    text-shadow: 0 2px 40px rgba(10, 28, 43, 0.35);
   }
 
   /* Load sequence: each line rises out of its own mask, then the rest fades in. */
@@ -150,10 +229,8 @@ const counts = families.map((f) => ({
   }
 
   .lede {
-    font-size: clamp(1.1rem, 1.6vw, 1.35rem);
-    line-height: 1.45;
-    max-width: 30em;
-    color: var(--on-dark-muted);
+    max-width: 31em;
+    color: rgba(226, 238, 248, 0.88);
   }
 
   .cta {
@@ -162,317 +239,332 @@ const counts = families.map((f) => ({
     gap: 0.75rem;
   }
 
-  /* Lineup stage */
-  .stage {
-    position: relative;
-    width: 108%;
-    height: clamp(24rem, 46vw, 40rem);
+  /* Shot caption, credit and pause, in the lower right of the frame. */
+  .reel {
+    position: absolute;
+    z-index: 3;
+    right: clamp(1rem, 2.5vw, 2rem);
+    bottom: clamp(1rem, 2.5vw, 2rem);
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    align-items: end;
-    isolation: isolate;
+    grid-template-columns: auto auto;
+    align-items: center;
+    gap: 0.4rem 0.9rem;
+    justify-items: end;
+    max-width: calc(100% - 2rem);
   }
 
-  .floor {
-    position: absolute;
-    left: -10%;
-    right: -30%;
-    bottom: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--blue-light) 20%, var(--blue-light) 70%, transparent);
-    opacity: 0.9;
-    overflow: visible;
-  }
-
-  .floor::after {
-    content: '';
-    position: absolute;
-    left: 10%;
-    right: 20%;
-    bottom: -3rem;
-    height: 6rem;
-    background: radial-gradient(closest-side, rgba(111, 178, 234, 0.35), transparent);
-    filter: blur(10px);
-  }
-
-  /* A light pulse travels along the floor line every few seconds. */
-  .sweep {
-    position: absolute;
-    top: -2px;
-    left: 0;
-    width: 18%;
-    height: 6px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, transparent, #fff, transparent);
-    opacity: 0.9;
-    animation: sweep 5.5s var(--ease-out) 1.4s infinite;
-  }
-
-  @keyframes sweep {
-    0% {
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-    10% {
-      opacity: 0.9;
-    }
-    55%,
-    100% {
-      transform: translateX(560%);
-      opacity: 0;
-    }
-  }
-
-  .bot {
-    margin: 0;
-    position: relative;
-    display: grid;
-    justify-items: center;
-    align-self: end;
-    animation: rise 1.1s var(--ease-out) both;
-  }
-
-  .bot img {
-    width: 100%;
-    height: auto;
-    filter: drop-shadow(0 24px 30px rgba(0, 0, 0, 0.45));
-    transition: transform 0.6s var(--ease-out);
-  }
-
-  .bot:hover img {
-    transform: translateY(-6px);
-  }
-
-  .bot-1 {
-    animation-delay: 0.35s;
-    width: 92%;
-  }
-
-  .bot-2 {
-    animation-delay: 0.5s;
-    width: 116%;
-    z-index: 2;
-  }
-
-  .bot-3 {
-    animation-delay: 0.65s;
-    width: 122%;
-    justify-self: end;
-  }
-
-  .bot figcaption {
-    position: absolute;
-    left: 50%;
-    bottom: -2.6rem;
-    translate: -50% 0;
-    display: grid;
-    justify-items: center;
-    gap: 0.1rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--on-dark-muted);
-    white-space: nowrap;
-  }
-
-  .bot figcaption b {
-    color: var(--white);
-    font-weight: 700;
-  }
-
-  @keyframes rise {
-    from {
-      opacity: 0;
-      transform: translateY(40px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  /* Scroll parallax: the stage drifts up slower than the page (browsers with scroll timelines). */
-  @supports (animation-timeline: scroll()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .stage {
-        animation: drift linear both;
-        animation-timeline: scroll(root);
-        animation-range: 0px 100vh;
-      }
-
-      @keyframes drift {
-        to {
-          transform: translateY(18vh);
-        }
-      }
-    }
-  }
-
-  /* Family index */
-  .index {
+  .ticks {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 0.3rem;
     list-style: none;
     margin: 0;
     padding: 0;
-    margin-top: 4.5rem;
+  }
+
+  .ticks li {
+    width: 1.6rem;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.28);
+    transition: background-color 0.3s;
+  }
+
+  .ticks li.is-current {
+    background: var(--white);
+  }
+
+  .caption {
+    display: inline-flex;
+    gap: 0.45rem;
+    align-items: baseline;
+    text-decoration: none;
+    font-size: var(--fs-small);
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .caption b {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    color: var(--white);
+  }
+
+  .caption:hover span {
+    text-decoration: underline;
+  }
+
+  .credit {
+    grid-column: 1 / -1;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.66);
+  }
+
+  .pause {
+    grid-row: 2;
+    grid-column: 2;
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(10, 28, 43, 0.4);
+    color: var(--white);
+    cursor: pointer;
+  }
+
+  .pause:hover {
+    background: rgba(10, 28, 43, 0.7);
+  }
+
+  .pause[hidden] {
+    display: none;
+  }
+
+  .pause .i-play,
+  .pause[aria-pressed='true'] .i-pause {
+    display: none;
+  }
+
+  .pause[aria-pressed='true'] .i-play {
+    display: inline-flex;
+  }
+
+  /* Line index under the frame */
+  .index ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
   }
 
   .index a {
     display: grid;
-    gap: 0.35rem;
-    padding: 1.5rem 1.25rem 1.75rem 0;
+    gap: 0.3rem;
+    padding: 1.6rem 1.25rem 1.8rem;
     text-decoration: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 1px solid var(--line);
+    height: 100%;
     transition: background-color 0.2s;
   }
 
-  .index li:not(:first-child) a {
-    padding-left: 1.25rem;
-  }
-
-  .index li:last-child a {
-    border-right: 0;
-  }
-
-  .index a:hover .idx-name {
-    color: var(--blue-light);
-    translate: 0.25rem 0;
+  .index li:first-child a {
+    border-left: 0;
+    padding-left: 0;
   }
 
   .idx-name {
     font-family: var(--font-display);
     font-weight: 700;
     font-size: 1.35rem;
-    letter-spacing: -0.01em;
-    transition:
-      color 0.2s,
-      translate 0.35s var(--ease-out);
+    letter-spacing: -0.015em;
+    color: var(--navy);
   }
 
   .idx-short {
-    font-size: 0.9rem;
-    color: var(--on-dark-muted);
+    font-size: var(--fs-small);
+    color: var(--muted);
   }
 
   .idx-count {
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--blue-light);
-    margin-top: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.3rem;
+    font-size: var(--fs-label);
+    font-weight: 700;
+    color: var(--blue);
   }
 
-  .scroll-hint {
-    position: absolute;
-    right: var(--gutter);
-    bottom: 1.5rem;
-    width: 1.5rem;
-    height: 2.5rem;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 999px;
-    display: none;
+  .index a:hover .idx-count :global(.arrow) {
+    translate: 0.25rem 0;
   }
 
-  .scroll-hint .dot {
-    position: absolute;
-    left: 50%;
-    top: 0.45rem;
-    width: 4px;
-    height: 4px;
-    margin-left: -2px;
-    border-radius: 50%;
-    background: var(--white);
-    animation: nudge 1.8s ease-in-out infinite;
-  }
-
-  @keyframes nudge {
-    0%,
-    100% {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    70% {
-      transform: translateY(0.9rem);
-      opacity: 0;
-    }
-  }
-
-  @media (min-width: 64rem) {
-    .scroll-hint {
-      display: block;
-    }
+  .index :global(.arrow) {
+    transition: translate 0.35s var(--ease-out);
   }
 
   @media (max-width: 64rem) {
-    .hero-grid {
-      grid-template-columns: 1fr;
-      align-items: start;
-      min-height: 0;
-    }
-
-    .copy {
-      padding-bottom: 0;
-    }
-
-    .stage {
-      height: auto;
-      margin-top: 2.5rem;
-      width: min(100%, 36rem);
-      padding-bottom: 0.25rem;
-    }
-
-    .bot-1 {
-      width: 86%;
-    }
-
-    .bot-2 {
-      width: 104%;
-    }
-
-    .bot-3 {
-      width: 108%;
-      justify-self: center;
-    }
-
-    .floor {
-      left: -5%;
-      right: -5%;
-    }
-
-    .index {
+    .index ul {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    .index li:nth-child(2) a {
-      border-right: 0;
+    .index li:nth-child(odd) a {
+      border-left: 0;
+      padding-left: 0;
     }
 
     .index li:nth-child(n + 3) a {
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .index li:nth-child(3) a {
-      padding-left: 0;
+      border-top: 1px solid var(--line);
     }
   }
 
   @media (max-width: 40rem) {
-    .bot figcaption {
+    .hero-frame {
+      min-height: 40rem;
+      height: calc(100svh - 2 * var(--bezel));
+    }
+
+    .scrim {
+      background:
+        linear-gradient(0deg, rgba(10, 28, 43, 0.95) 0%, rgba(10, 28, 43, 0.75) 45%, rgba(10, 28, 43, 0.1) 75%),
+        linear-gradient(180deg, rgba(10, 28, 43, 0.5) 0%, rgba(10, 28, 43, 0) 20%);
+    }
+
+    .content {
+      padding-bottom: 6.5rem;
+    }
+
+    .content .eyebrow {
+      letter-spacing: 0.08em;
+    }
+
+    .content .eyebrow::before {
+      display: none;
+    }
+
+    .cta .btn {
+      flex: 1 1 auto;
+    }
+
+    .reel {
+      left: var(--gutter);
+      right: var(--gutter);
+      justify-items: start;
+      grid-template-columns: 1fr auto;
+    }
+
+    .index a {
+      padding: 1.2rem 0.9rem 1.3rem;
+    }
+
+    .idx-name {
+      font-size: 1.15rem;
+    }
+
+    .idx-short {
       display: none;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .word,
-    .intro,
-    .bot,
-    .sweep,
-    .scroll-hint .dot {
+    .intro {
       animation: none;
-      opacity: 1;
-      transform: none;
     }
   }
 </style>
+
+<script>
+  const video = document.querySelector<HTMLVideoElement>('[data-hero-video]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-hero-toggle]');
+  const toggleLabel = document.querySelector<HTMLElement>('[data-toggle-label]');
+  const caption = document.querySelector<HTMLAnchorElement>('[data-caption]');
+  const captionLabel = document.querySelector<HTMLElement>('[data-caption-label]');
+  const captionWhere = document.querySelector<HTMLElement>('[data-caption-where]');
+  const ticks = Array.from(document.querySelectorAll<HTMLElement>('[data-tick]'));
+  const shots: { at: number; robot: string; label: string; where: string }[] = JSON.parse(
+    document.querySelector('[data-shots]')?.textContent ?? '[]',
+  );
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+
+  // AV1 where the browser decodes it (Safari only reports it with hardware
+  // support), H.264 everywhere else.
+  const pickSource = (v: HTMLVideoElement) => {
+    const base = window.matchMedia('(max-aspect-ratio: 4/5)').matches ? v.dataset.portrait : v.dataset.landscape;
+    if (!base) return undefined;
+    return `${base}-${v.canPlayType('video/mp4; codecs="av01.0.08M.10"') ? 'av1' : 'h264'}.mp4`;
+  };
+
+  let shot = 0;
+  const showShot = (i: number) => {
+    if (i === shot || !shots[i]) return;
+    shot = i;
+    ticks.forEach((tick, n) => tick.classList.toggle('is-current', n === i));
+    if (caption) caption.href = `/robots/${shots[i].robot}/`;
+    if (captionLabel) captionLabel.textContent = shots[i].label;
+    if (captionWhere) captionWhere.textContent = shots[i].where;
+  };
+
+  // One place decides whether the video plays: it needs the page loaded, the
+  // hero on screen, the tab visible and no pause from the visitor. The source
+  // is attached the first time all of that is true, so a visit that lands
+  // further down the page (/#contacto) never downloads it.
+  let loaded = false;
+  // Set by the observer, which reports the initial state right after observe().
+  let inView = false;
+  let userPaused = false;
+
+  const setPaused = (paused: boolean) => {
+    toggle?.setAttribute('aria-pressed', String(paused));
+    if (toggleLabel) toggleLabel.textContent = paused ? 'Reproducir video' : 'Pausar video';
+  };
+
+  const attach = (v: HTMLVideoElement) => {
+    const src = pickSource(v);
+    if (!src) return false;
+    v.src = src;
+    v.addEventListener('playing', () => v.classList.add('is-playing'), { once: true });
+    v.addEventListener('timeupdate', () => {
+      let i = 0;
+      shots.forEach((s, n) => {
+        if (v.currentTime >= s.at) i = n;
+      });
+      showShot(i);
+    });
+    return true;
+  };
+
+  const play = (v: HTMLVideoElement) =>
+    v.play().then(() => {
+      if (toggle) toggle.hidden = false;
+    }).catch(() => {});
+
+  // The first download waits until the hero has stayed on screen for a moment:
+  // landing on /#contacto smooth-scrolls past it, and that should not count.
+  let attachTimer = 0;
+  const sync = () => {
+    if (!video || reduce || saveData || !loaded) return;
+    const shouldPlay = inView && !document.hidden && !userPaused;
+    if (!shouldPlay) {
+      clearTimeout(attachTimer);
+      attachTimer = 0;
+      if (!video.paused) video.pause();
+      return;
+    }
+    if (video.src) {
+      play(video);
+      return;
+    }
+    if (attachTimer) return;
+    attachTimer = window.setTimeout(() => {
+      attachTimer = 0;
+      if (inView && !document.hidden && !userPaused && attach(video)) play(video);
+    }, 600);
+  };
+
+  toggle?.addEventListener('click', () => {
+    userPaused = !userPaused;
+    setPaused(userPaused);
+    sync();
+  });
+
+  document.addEventListener('visibilitychange', sync);
+
+  if (video && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      sync();
+    }).observe(video);
+  }
+
+  const start = () => {
+    loaded = true;
+    sync();
+  };
+  if (document.readyState === 'complete') setTimeout(start, 200);
+  else window.addEventListener('load', () => setTimeout(start, 200), { once: true });
+</script>

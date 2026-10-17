@@ -12,6 +12,18 @@ export interface Family {
   where: string;
 }
 
+/** A headline number for the robot page. Values are the manufacturer's. */
+export interface KeyFigure {
+  value: string;
+  unit?: string;
+  label: string;
+}
+
+export interface UseCase {
+  title: string;
+  detail: string;
+}
+
 export interface Robot {
   id: string;
   family: FamilyId;
@@ -19,12 +31,16 @@ export interface Robot {
   role: string;
   summary: string;
   specs: [string, string][];
-  image: string;
-  /** cutout = transparent product render; photo = full-bleed picture */
-  imageStyle: 'cutout' | 'photo';
+  /** Exactly three, shown large on the robot page. */
+  keyFigures: [KeyFigure, KeyFigure, KeyFigure];
+  useCases: UseCase[];
+  /** Case video in `cases` that shows this robot working. */
+  caseId?: string;
   isNew?: boolean;
   doc?: string;
 }
+// Product cut-outs live in src/assets/robots/<id>.webp and scenes in
+// src/assets/scenes/<id>.webp; src/lib/media.ts resolves them by id.
 
 export const families: Family[] = [
   {
@@ -68,8 +84,17 @@ export const robots: Robot[] = [
       ['Agua caliente', '85 °C'],
       ['Paso mínimo', '50 cm'],
     ],
-    image: '/media/robots/et1.webp',
-    imageStyle: 'cutout',
+    keyFigures: [
+      { value: '100–800', unit: 'm²', label: 'de área ideal por equipo' },
+      { value: '85', unit: '°C', label: 'de agua caliente para fregar' },
+      { value: '50', unit: 'cm', label: 'de paso mínimo entre anaqueles' },
+    ],
+    useCases: [
+      { title: 'Tiendas y farmacias', detail: 'Friega pasillos angostos entre góndolas antes de abrir o después de cerrar.' },
+      { title: 'Oficinas y recepciones', detail: 'Barre, friega y aspira pisos duros y alfombra en áreas comunes.' },
+      { title: 'Restaurantes y cafeterías', detail: 'Quita grasa del salón con fregado de agua caliente y vuelve sola a su estación.' },
+    ],
+    caseId: 'et1',
     isNew: true,
   },
   {
@@ -85,8 +110,17 @@ export const robots: Robot[] = [
       ['Tanques', '15 L + 15 L'],
       ['Paso mínimo', '70 cm'],
     ],
-    image: '/media/robots/cc1.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '700–1,000', unit: 'm²/h', label: 'de cobertura' },
+      { value: '5–9', unit: 'h', label: 'de autonomía por carga' },
+      { value: '15 + 15', unit: 'L', label: 'de tanque limpio y sucio' },
+    ],
+    useCases: [
+      { title: 'Plantas de manufactura', detail: 'Friega pasillos de producción entre maquinaria y personal, como en el video de la planta electrónica.' },
+      { title: 'Centros comerciales', detail: 'Pisos duros en áreas comunes y alfombra en zonas de descanso, con la misma máquina.' },
+      { title: 'Hospitales y clínicas', detail: 'Pasillos y salas de espera en turnos nocturnos, con estación de agua opcional.' },
+    ],
+    caseId: 'cc1-factory',
   },
   {
     id: 'cc1-pro',
@@ -101,8 +135,16 @@ export const robots: Robot[] = [
       ['Batería', '50 Ah'],
       ['Protección', 'IPX4'],
     ],
-    image: '/media/robots/cc1-pro.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '700–1,000', unit: 'm²/h', label: 'de cobertura' },
+      { value: '1,500–3,000', unit: 'm²/h', label: 'en modo puntual' },
+      { value: '50', unit: 'Ah', label: 'de batería' },
+    ],
+    useCases: [
+      { title: 'Retail con auditoría de limpieza', detail: 'La cámara trasera verifica cada pasada y el mapa de calor muestra dónde se ensucia más.' },
+      { title: 'Edificios corporativos', detail: 'Limpieza puntual guiada por IA en vestíbulos y elevadores de mucho tránsito.' },
+      { title: 'Hospitales', detail: 'Fregado verificable en pasillos donde la evidencia de limpieza importa.' },
+    ],
   },
   {
     id: 'mt1',
@@ -117,8 +159,16 @@ export const robots: Robot[] = [
       ['Autonomía', '4–8 h'],
       ['Depósito', '35 L'],
     ],
-    image: '/media/robots/mt1.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '1,800', unit: 'm²/h', label: 'de cobertura' },
+      { value: '4–8', unit: 'h', label: 'de autonomía' },
+      { value: '35', unit: 'L', label: 'de depósito' },
+    ],
+    useCases: [
+      { title: 'Almacenes y centros de distribución', detail: 'Barre polvo, plástico y cartón en pasillos largos sin recorrer una ruta fija.' },
+      { title: 'Naves industriales', detail: 'Concentra el barrido donde detecta residuos y deja limpias las zonas de paso.' },
+      { title: 'Centros comerciales', detail: 'Barrido de explanadas interiores antes de la apertura.' },
+    ],
   },
   {
     id: 'mt1-max',
@@ -133,8 +183,17 @@ export const robots: Robot[] = [
       ['Autonomía', '6.5–10 h'],
       ['Protección', 'IP54'],
     ],
-    image: '/media/robots/mt1-max.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '2,200', unit: 'm²/h', label: 'de cobertura' },
+      { value: '6.5–10', unit: 'h', label: 'de autonomía' },
+      { value: 'IP54', label: 'de protección para semi-exterior' },
+    ],
+    useCases: [
+      { title: 'Estacionamientos', detail: 'Cede el paso a vehículos y peatones mientras barre cajones y rampas.' },
+      { title: 'Plazas y explanadas', detail: 'Zonas parcialmente exteriores con hojas, polvo y basura ligera.' },
+      { title: 'Naves de techo alto', detail: 'Percepción 3D pensada para espacios amplios de techo alto.' },
+    ],
+    caseId: 'mt1max',
   },
   {
     id: 'mt1-vac',
@@ -149,8 +208,16 @@ export const robots: Robot[] = [
       ['Autonomía', '3–6.5 h'],
       ['Bolsa', '14 L'],
     ],
-    image: '/media/robots/mt1-vac.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '1,400', unit: 'm²/h', label: 'de cobertura' },
+      { value: '3–6.5', unit: 'h', label: 'de autonomía' },
+      { value: '14', unit: 'L', label: 'de bolsa' },
+    ],
+    useCases: [
+      { title: 'Oficinas con alfombra', detail: 'Barre, aspira y pasa mopa seca en una sola ruta.' },
+      { title: 'Bodegas con estantería', detail: 'Llega al polvo fino bajo anaqueles con su aspirado de 55 cm.' },
+      { title: 'Áreas sensibles al polvo', detail: 'Filtración H11, con H13 opcional, para espacios que no toleran polvo suspendido.' },
+    ],
   },
   {
     id: 'bg1',
@@ -165,8 +232,16 @@ export const robots: Robot[] = [
       ['Agua', '75 L + 60 L'],
       ['Paso mínimo', '85 cm'],
     ],
-    image: '/media/robots/bg1.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '2,000', unit: 'm²/h', label: 'de cobertura' },
+      { value: '7.5', unit: 'h', label: 'de autonomía, como máximo' },
+      { value: '75 + 60', unit: 'L', label: 'de agua limpia y sucia' },
+    ],
+    useCases: [
+      { title: 'Naves y andenes', detail: 'Barre y friega en una pasada los pasillos anchos de carga y descarga.' },
+      { title: 'Centros de distribución', detail: 'Dosifica el detergente sola en recorridos largos.' },
+      { title: 'Supermercados de gran formato', detail: 'Fregado de pasillos amplios fuera del horario de venta.' },
+    ],
   },
   {
     id: 'bg1-pro',
@@ -181,8 +256,16 @@ export const robots: Robot[] = [
       ['Navegación', '3D LiDAR + VSLAM'],
       ['Carga', '≈3 h'],
     ],
-    image: '/media/robots/bg1.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '550', unit: 'mm', label: 'de ancho de fregado' },
+      { value: '7.5', unit: 'h', label: 'de autonomía' },
+      { value: '≈3', unit: 'h', label: 'de carga' },
+    ],
+    useCases: [
+      { title: 'Plantas con rutas cambiantes', detail: 'LiDAR 3D y VSLAM para pisos donde cambian tarimas, carros y estaciones.' },
+      { title: 'Retail de gran formato', detail: 'Ajusta la intensidad de limpieza según la suciedad que detecta.' },
+      { title: 'Terminales y vestíbulos', detail: 'Fregado industrial en espacios abiertos con tránsito constante.' },
+    ],
     doc: '/media/docs/pudu-bg1-pro-ficha-tecnica.pdf',
   },
   {
@@ -198,8 +281,16 @@ export const robots: Robot[] = [
       ['Succión', '20 kPa'],
       ['Autonomía', '70–100 min'],
     ],
-    image: '/media/robots/sh1.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '1,100–1,600', unit: 'm²/h', label: 'de productividad' },
+      { value: '27', unit: 'kg', label: 'de presión de fregado' },
+      { value: '70–100', unit: 'min', label: 'de autonomía' },
+    ],
+    useCases: [
+      { title: 'Orillas y esquinas', detail: 'El trabajo que un robot autónomo no alcanza, sin cambiar de máquina.' },
+      { title: 'Escaleras y desniveles', detail: 'Fregado asistido donde no puede entrar una fregadora grande.' },
+      { title: 'Manchas difíciles', detail: 'Cocinas, accesos y zonas de derrame que piden presión.' },
+    ],
   },
 
   // Entrega y servicio
@@ -216,8 +307,16 @@ export const robots: Robot[] = [
       ['Pantalla', '18.5"'],
       ['Paso mínimo', '65 cm'],
     ],
-    image: '/media/robots/bellabot-pro.webp',
-    imageStyle: 'cutout',
+    keyFigures: [
+      { value: '4', label: 'bandejas' },
+      { value: '40', unit: 'kg', label: 'de carga' },
+      { value: '11', unit: 'h', label: 'de autonomía' },
+    ],
+    useCases: [
+      { title: 'Restaurantes', detail: 'Lleva platos a la mesa y regresa la loza, para que el mesero se quede con el cliente.' },
+      { title: 'Hoteles', detail: 'Recibe huéspedes en recepción y los acompaña con voz y pantalla.' },
+      { title: 'Salas de venta', detail: 'Muestra promociones en su pantalla de 18.5" mientras circula.' },
+    ],
   },
   {
     id: 'bellabot',
@@ -232,8 +331,16 @@ export const robots: Robot[] = [
       ['Bandejas', '4'],
       ['Paso mínimo', '70 cm'],
     ],
-    image: '/media/robots/bellabot.webp',
-    imageStyle: 'cutout',
+    keyFigures: [
+      { value: '4', label: 'bandejas' },
+      { value: '40', unit: 'kg', label: 'de carga' },
+      { value: '13', unit: 'h', label: 'de autonomía' },
+    ],
+    useCases: [
+      { title: 'Restaurantes', detail: 'Reparte comida y recoge loza en salones con mesas cercanas.' },
+      { title: 'Banquetes y eventos', detail: 'Sirve en ciclos repetidos durante todo el servicio.' },
+      { title: 'Comedores corporativos', detail: 'Mueve charolas entre cocina y salón en horas pico.' },
+    ],
   },
   {
     id: 'pudubot-2',
@@ -248,8 +355,17 @@ export const robots: Robot[] = [
       ['Bandejas', '3'],
       ['Peso', '39 kg'],
     ],
-    image: '/media/robots/pudubot-2.webp',
-    imageStyle: 'cutout',
+    keyFigures: [
+      { value: '3', label: 'bandejas' },
+      { value: '40', unit: 'kg', label: 'de carga' },
+      { value: '15', unit: 'h', label: 'de autonomía' },
+    ],
+    useCases: [
+      { title: 'Comedores industriales', detail: 'Lleva y trae charolas entre cocina y salón en cada turno.' },
+      { title: 'Laboratorios', detail: 'Mueve muestras y modelos entre estaciones, como en Shaw Lab Group.' },
+      { title: 'Hospitales', detail: 'Reparte insumos entre áreas sin que el personal deje su puesto.' },
+    ],
+    caseId: 'pudubot2',
     doc: '/media/docs/pudu-pudubot-2-ficha-tecnica.pdf',
   },
   {
@@ -265,8 +381,16 @@ export const robots: Robot[] = [
       ['Paso mínimo', '52 cm'],
       ['Velocidad', '0.2–1.2 m/s'],
     ],
-    image: '/media/robots/kettybot-pro.webp',
-    imageStyle: 'cutout',
+    keyFigures: [
+      { value: '30', unit: 'kg', label: 'de carga' },
+      { value: '11', unit: 'h', label: 'de autonomía' },
+      { value: '52', unit: 'cm', label: 'de paso mínimo' },
+    ],
+    useCases: [
+      { title: 'Cafeterías y restaurantes compactos', detail: 'Pasa entre mesas a 52 cm y entrega en cada una.' },
+      { title: 'Recepción', detail: 'Recibe a los clientes y los guía a su mesa.' },
+      { title: 'Retail', detail: 'Muestra publicidad en su pantalla vertical mientras recorre el piso.' },
+    ],
   },
   {
     id: 'flashbot-max',
@@ -281,8 +405,16 @@ export const robots: Robot[] = [
       ['Autonomía', '9 h'],
       ['Paso mínimo', '70 cm'],
     ],
-    image: '/media/robots/flashbot-max.webp',
-    imageStyle: 'cutout',
+    keyFigures: [
+      { value: '20', unit: 'kg', label: 'de carga' },
+      { value: '1–2', label: 'compartimentos con llave digital' },
+      { value: '9', unit: 'h', label: 'de autonomía' },
+    ],
+    useCases: [
+      { title: 'Hoteles', detail: 'Servicio a cuartos entre pisos, con elevador y llave digital.' },
+      { title: 'Hospitales', detail: 'Medicamentos y muestras en compartimento cerrado.' },
+      { title: 'Oficinas', detail: 'Paquetería interna entre pisos y áreas de acceso controlado.' },
+    ],
   },
 
   // Logística
@@ -299,8 +431,17 @@ export const robots: Robot[] = [
       ['Autonomía', '8 h a plena carga'],
       ['Paso mínimo', '60 cm'],
     ],
-    image: '/media/robots/t300.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '300', unit: 'kg', label: 'de carga' },
+      { value: '1.2', unit: 'm/s', label: 'de velocidad' },
+      { value: '8', unit: 'h', label: 'de autonomía a plena carga' },
+    ],
+    useCases: [
+      { title: 'Abasto de línea', detail: 'Lleva material a cada estación sin que el operador deje la línea.' },
+      { title: 'Producto terminado', detail: 'Retira cajas de la línea al almacén en ciclos programados.' },
+      { title: 'Almacenes', detail: 'Módulos de bandejas, elevación, remolque o transportador según la carga.' },
+    ],
+    caseId: 't300',
   },
   {
     id: 't600',
@@ -315,8 +456,16 @@ export const robots: Robot[] = [
       ['Carga de batería', '2 h (0–90 %)'],
       ['Protocolo', 'VDA5050'],
     ],
-    image: '/media/robots/t600.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '600', unit: 'kg', label: 'de carga' },
+      { value: '12', unit: 'h', label: 'de autonomía' },
+      { value: '2', unit: 'h', label: 'de carga de 0 a 90 %' },
+    ],
+    useCases: [
+      { title: 'Carga pesada entre estaciones', detail: 'Versión alta para carros y racks de hasta 600 kg.' },
+      { title: 'Bajo carros (Underride)', detail: 'La plataforma baja entra bajo el carro y lo levanta.' },
+      { title: 'Integración con tu flota', detail: 'Habla VDA5050 con tu sistema de gestión de flota.' },
+    ],
   },
   {
     id: 'mp2000',
@@ -331,8 +480,16 @@ export const robots: Robot[] = [
       ['Velocidad', '1.2–1.6 m/s'],
       ['Pasillo', '2.0 m'],
     ],
-    image: '/media/robots/mp2000.webp',
-    imageStyle: 'photo',
+    keyFigures: [
+      { value: '2,000', unit: 'kg', label: 'por tarima' },
+      { value: '6', unit: 'h', label: 'de autonomía cargado' },
+      { value: '2.0', unit: 'm', label: 'de pasillo mínimo' },
+    ],
+    useCases: [
+      { title: 'Almacenes', detail: 'Mueve tarimas entre racks y piso sin operador de montacargas.' },
+      { title: 'Recepción y embarque', detail: 'Lleva tarimas del andén a su ubicación.' },
+      { title: 'Pasillos angostos', detail: 'Toma tarimas en ángulo recto en pasillos de 2 m.' },
+    ],
   },
 
   // Exteriores
@@ -349,8 +506,16 @@ export const robots: Robot[] = [
       ['Mapeo', 'Automático'],
       ['Carga rápida', '2 h con cargador de 6 kW'],
     ],
-    image: '/media/robots/gt3.webp',
-    imageStyle: 'cutout',
+    keyFigures: [
+      { value: '1', unit: 'pasada', label: 'para cortar y recoger' },
+      { value: '2', unit: 'h', label: 'de carga con cargador de 6 kW' },
+      { value: 'Auto', label: 'vaciado de tolva y mapeo' },
+    ],
+    useCases: [
+      { title: 'Jardines corporativos', detail: 'Corta y recoge el pasto en una sola pasada.' },
+      { title: 'Fraccionamientos', detail: 'Corte programado de áreas verdes comunes.' },
+      { title: 'Escuelas', detail: 'Corte fuera del horario de clases, con vaciado automático.' },
+    ],
     isNew: true,
   },
   {
@@ -366,8 +531,17 @@ export const robots: Robot[] = [
       ['Velocidad', 'hasta 11 km/h'],
       ['Bordes', 'a 5 cm'],
     ],
-    image: '/media/robots/gt5.webp',
-    imageStyle: 'cutout',
+    keyFigures: [
+      { value: '10', unit: 'h', label: 'de autonomía' },
+      { value: '16', unit: 'acres', label: 'por carga' },
+      { value: '11', unit: 'km/h', label: 'de velocidad máxima' },
+    ],
+    useCases: [
+      { title: 'Parques industriales', detail: 'Grandes superficies con tránsito autónomo entre zonas.' },
+      { title: 'Campus', detail: 'Corte antes de que llegue la gente, con percepción 360°.' },
+      { title: 'Áreas verdes comerciales', detail: 'Corta hasta 5 cm del borde.' },
+    ],
+    caseId: 'gt5',
     isNew: true,
   },
   {
@@ -383,17 +557,37 @@ export const robots: Robot[] = [
       ['Tracción', '4WD'],
       ['Velocidad', 'hasta 11 km/h'],
     ],
-    image: '/media/robots/gt7.webp',
-    imageStyle: 'cutout',
+    keyFigures: [
+      { value: '10–12', unit: 'h', label: 'de autonomía' },
+      { value: '30', unit: '°', label: 'de pendiente máxima' },
+      { value: '4WD', label: 'de tracción' },
+    ],
+    useCases: [
+      { title: 'Campos deportivos', detail: 'Cabezales helicoidales y control de patrones de corte.' },
+      { title: 'Campus', detail: 'Terreno irregular con cabezales flotantes que siguen el suelo.' },
+      { title: 'Taludes', detail: 'Tracción 4x4 en pendientes de hasta 30°.' },
+    ],
     isNew: true,
   },
 ];
+
+// Every clip is Pudu Robotics' own footage. `kind` says whether it was shot
+// at a customer site (deployment) or produced as a product video (promo).
+// The 1080p films are too large for the Worker's 25 MiB file limit, so they
+// live in R2 (bucket gm-robotiks-media) behind media.gmrobotiks.com, as AV1
+// and HEVC; `scripts/build-videos.sh <src> cases` builds them. `src` is the
+// older, smaller H.264 copy kept in public/ as the last fallback.
+export const mediaOrigin = 'https://media.gmrobotiks.com';
 
 export interface CaseVideo {
   id: string;
   title: string;
   where: string;
+  kind: 'deployment' | 'promo';
   src: string;
+  /** 1080p AV1 and HEVC on media.gmrobotiks.com. */
+  av1: string;
+  hevc: string;
   poster: string;
   robots: string[];
   minutes: string;
@@ -404,8 +598,11 @@ export const cases: CaseVideo[] = [
   {
     id: 'cc1-factory',
     title: 'Planta electrónica con CC1',
-    where: 'Manufactura · China',
+    where: 'Planta de manufactura · China',
+    kind: 'deployment',
     src: '/media/cases/cc1-factory.mp4',
+    av1: `${mediaOrigin}/cases/cc1-factory-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/cc1-factory-1080p-hevc.mp4`,
     poster: '/media/cases/cc1-factory-poster.webp',
     robots: ['CC1'],
     minutes: '0:43',
@@ -414,8 +611,11 @@ export const cases: CaseVideo[] = [
   {
     id: 'et1',
     title: 'ET1: presentación oficial',
-    where: 'Retail y oficinas',
+    where: 'Video de producto',
+    kind: 'promo',
     src: '/media/cases/et1.mp4',
+    av1: `${mediaOrigin}/cases/et1-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/et1-1080p-hevc.mp4`,
     poster: '/media/cases/et1-poster.webp',
     robots: ['ET1'],
     minutes: '1:52',
@@ -424,8 +624,11 @@ export const cases: CaseVideo[] = [
   {
     id: 'mt1max',
     title: 'MT1 Max en estacionamiento',
-    where: 'Semi-exterior con vehículos',
+    where: 'Video de producto · semi-exterior',
+    kind: 'promo',
     src: '/media/cases/mt1max.mp4',
+    av1: `${mediaOrigin}/cases/mt1max-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/mt1max-1080p-hevc.mp4`,
     poster: '/media/cases/mt1max-poster.webp',
     robots: ['MT1 Max'],
     minutes: '0:36',
@@ -433,8 +636,11 @@ export const cases: CaseVideo[] = [
   {
     id: 't300',
     title: 'PuduBot 2, CC1 y T300 en una misma planta',
-    where: 'Manufactura',
+    where: 'Planta de manufactura · China',
+    kind: 'deployment',
     src: '/media/cases/t300.mp4',
+    av1: `${mediaOrigin}/cases/t300-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/t300-1080p-hevc.mp4`,
     poster: '/media/cases/t300-poster.webp',
     robots: ['T300', 'CC1', 'PuduBot 2'],
     minutes: '1:24',
@@ -443,7 +649,10 @@ export const cases: CaseVideo[] = [
     id: 'pudubot2',
     title: 'PuduBot 2 en laboratorio',
     where: 'Shaw Lab Group · Canadá',
+    kind: 'deployment',
     src: '/media/cases/pudubot2.mp4',
+    av1: `${mediaOrigin}/cases/pudubot2-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/pudubot2-1080p-hevc.mp4`,
     poster: '/media/cases/pudubot2-poster.webp',
     robots: ['PuduBot 2'],
     minutes: '0:28',
@@ -451,8 +660,11 @@ export const cases: CaseVideo[] = [
   {
     id: 'gt5',
     title: 'GT5: corte y recolección',
-    where: 'Áreas verdes comerciales',
+    where: 'Video de producto',
+    kind: 'promo',
     src: '/media/cases/gt5.mp4',
+    av1: `${mediaOrigin}/cases/gt5-1080p-av1.mp4`,
+    hevc: `${mediaOrigin}/cases/gt5-1080p-hevc.mp4`,
     poster: '/media/cases/gt5-poster.webp',
     robots: ['GT5'],
     minutes: '1:20',

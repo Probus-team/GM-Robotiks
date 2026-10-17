@@ -3,19 +3,28 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import Showcase from '../components/Showcase.astro';
-import Cases from '../components/Cases.astro';
+import Lineup from '../components/Lineup.astro';
+import Savings from '../components/Savings.astro';
+import Proof from '../components/Proof.astro';
 import Process from '../components/Process.astro';
 import Fleet from '../components/Fleet.astro';
 import Contact from '../components/Contact.astro';
 import Footer from '../components/Footer.astro';
+import { heroPosters } from '../lib/media';
+
+const poster = await heroPosters();
 ---
 
 <Layout>
+  <link slot="head" rel="preload" as="image" type="image/avif" imagesrcset={poster.landAvif.srcSet.attribute} imagesizes={poster.sizes} media="(min-aspect-ratio: 4/5)" fetchpriority="high" />
+  <link slot="head" rel="preload" as="image" type="image/avif" imagesrcset={poster.portAvif.srcSet.attribute} imagesizes={poster.sizes} media="(max-aspect-ratio: 4/5)" fetchpriority="high" />
   <Header />
-  <main>
+  <main id="contenido">
     <Hero />
     <Showcase />
-    <Cases />
+    <Lineup />
+    <Savings />
+    <Proof />
     <Process />
     <Fleet />
     <Contact />

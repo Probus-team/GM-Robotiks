@@ -1,83 +1,116 @@
 ---
 import { site } from '../data/site';
+import { families } from '../data/robots';
 import BrandImage from './BrandImage.astro';
 const year = new Date().getFullYear();
+const { email, whatsapp } = site.contact;
 ---
 
 <footer class="footer on-dark">
   <div class="container inner">
     <div class="brand">
-      <BrandImage variant="mark" loading="lazy" />
+      <BrandImage variant="white" loading="lazy" />
       <p>{site.tagline}. Distribuidor e integrador de Pudu Robotics.</p>
     </div>
     <nav aria-label="Pie de página">
+      <p class="col-title">Sitio</p>
       <ul>
         {site.nav.map((item) => (
           <li><a href={item.href}>{item.label}</a></li>
         ))}
-        <li><a href="#contacto">Contacto</a></li>
+        <li><a href={site.cta.href}>{site.cta.label}</a></li>
       </ul>
     </nav>
+    <nav aria-label="Líneas de robots">
+      <p class="col-title">Robots</p>
+      <ul>
+        {families.map((f) => (
+          <li><a href={`/robots/#${f.id}`}>{f.name}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <div class="reach">
+      <p class="col-title">Contacto</p>
+      <ul>
+        {whatsapp && <li><a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener">WhatsApp</a></li>}
+        {email && <li><a href={`mailto:${email}`}>{email}</a></li>}
+        <li>México</li>
+      </ul>
+    </div>
     <p class="legal">
-      © {year} {site.name}. Pudu, BellaBot, KettyBot, PuduBot y FlashBot son marcas de Pudu Robotics.
-      Las especificaciones son del fabricante y pueden cambiar sin previo aviso.
+      © {year} {site.name}. Pudu, BellaBot, KettyBot, PuduBot y FlashBot son marcas de Pudu Robotics. Las
+      especificaciones, fotos y videos de los robots son del fabricante y pueden cambiar sin previo aviso.
     </p>
   </div>
 </footer>
 
 <style>
   .footer {
-    background: var(--navy-ink);
+    background: var(--ink);
     color: var(--on-dark-muted);
-    padding-block: 3.5rem 2.5rem;
+    padding-block: 4rem 2.5rem;
+    margin-top: var(--bezel);
   }
 
   .inner {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 2rem 4rem;
+    grid-template-columns: 1.6fr repeat(3, 1fr);
+    gap: 2.5rem 3rem;
     align-items: start;
   }
 
   .brand {
     display: grid;
     gap: 1rem;
-    max-width: 24rem;
+    max-width: 22rem;
   }
 
   .brand :global(img) {
-    width: 5.5rem;
+    width: 10rem;
     height: auto;
   }
 
-  nav ul {
+  .col-title {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 0.9rem;
+  }
+
+  ul {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.5rem;
+    gap: 0.55rem;
   }
 
-  nav a {
+  a {
     color: var(--white);
     text-decoration: none;
     font-weight: 600;
   }
 
-  nav a:hover {
-    color: var(--blue-light);
+  a:hover {
+    color: var(--sky);
   }
 
   .legal {
     grid-column: 1 / -1;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid var(--line-dark);
   }
 
-  @media (max-width: 40rem) {
+  @media (max-width: 56rem) {
     .inner {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .brand {
+      grid-column: 1 / -1;
     }
   }
 </style>

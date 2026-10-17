@@ -1,0 +1,249 @@
+---
+// Every robot, standing on one floor line per robot line. Each one links to
+// its page. Cut-outs are trimmed renders, so the image box sets their height.
+import { Picture } from 'astro:assets';
+import Icon from './Icon.astro';
+import { families, robots } from '../data/robots';
+import { robotCutout } from '../lib/media';
+
+const groups = families.map((family) => ({
+  ...family,
+  robots: robots.filter((r) => r.family === family.id),
+}));
+---
+
+<section class="section lineup" id="modelos" aria-labelledby="lineup-title">
+  <div class="container">
+    <div class="head" data-stagger>
+      <p class="eyebrow reveal">Catálogo Pudu · {robots.length} modelos</p>
+      <h2 id="lineup-title" class="reveal">Cuatro trabajos, {robots.length} robots.</h2>
+      <p class="lede reveal">
+        Elige por tarea. Cada robot tiene su ficha con los datos del fabricante, dónde rinde y un botón para
+        cotizarlo por WhatsApp.
+      </p>
+    </div>
+
+    {groups.map((group) => (
+      <div class="group">
+        <div class="group-head">
+          <h3>{group.name}</h3>
+          <p>{group.short}</p>
+          <a class="link-arrow" href={`/robots/#${group.id}`}>Ver la línea <Icon name="arrow" /></a>
+        </div>
+        <ul class="shelf" data-stagger>
+          {group.robots.map((robot) => (
+            <li class="reveal">
+              <a class="bot" href={`/robots/${robot.id}/`}>
+                <span class="stage">
+                  <Picture
+                    src={robotCutout(robot.id)}
+                    alt=""
+                    widths={[160, 240, 320, 480]}
+                    sizes="(max-width: 40rem) 40vw, 12rem"
+                    formats={['avif']} fallbackFormat="webp"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="name">{robot.name.replace('PUDU ', '')}</span>
+                <span class="role">{robot.role}</span>
+                {robot.isNew && <span class="tag">Nuevo</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .lineup {
+    background: var(--white);
+  }
+
+  .head {
+    display: grid;
+    gap: 1.1rem;
+    max-width: 46rem;
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  h2 {
+    color: var(--navy);
+  }
+
+  .group {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: 2rem;
+    padding-block: 2.25rem 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .group + .group {
+    margin-top: 1rem;
+  }
+
+  .group-head {
+    display: grid;
+    align-content: start;
+    gap: 0.4rem;
+    justify-items: start;
+  }
+
+  .group-head h3 {
+    font-size: var(--fs-h3);
+    color: var(--navy);
+  }
+
+  .group-head p {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .shelf {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    row-gap: 1.75rem;
+  }
+
+  .bot {
+    position: relative;
+    display: grid;
+    gap: 0.15rem;
+    padding: 0 0.6rem 0.25rem;
+    text-decoration: none;
+    border-radius: 0.75rem;
+  }
+
+  /* The robot stands on the floor line; on hover it rises and its shadow tightens. */
+  .stage {
+    position: relative;
+    display: grid;
+    /* A definite row so the image's max-height: 100% resolves. */
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+    place-items: end center;
+    height: 11rem;
+    margin-bottom: 0.85rem;
+    border-bottom: 2px solid var(--navy);
+  }
+
+  .stage::after {
+    content: '';
+    position: absolute;
+    left: 18%;
+    right: 18%;
+    bottom: -6px;
+    height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(10, 28, 43, 0.28), transparent);
+    transition:
+      transform 0.5s var(--ease-out),
+      opacity 0.5s var(--ease-out);
+  }
+
+  .stage :global(img) {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: bottom;
+    transition: translate 0.5s var(--ease-out);
+  }
+
+  .bot:hover .stage :global(img),
+  .bot:focus-visible .stage :global(img) {
+    translate: 0 -8px;
+  }
+
+  .bot:hover .stage::after,
+  .bot:focus-visible .stage::after {
+    transform: scaleX(0.7);
+    opacity: 0.6;
+  }
+
+  .name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+    color: var(--navy);
+  }
+
+  .role {
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+
+  .bot:hover .name {
+    color: var(--blue);
+  }
+
+  .tag {
+    position: absolute;
+    top: 0;
+    left: 0.6rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.4rem;
+    background: var(--ice);
+    color: var(--navy);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 56rem) {
+    .group {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .group-head {
+      grid-template-columns: 1fr auto;
+      align-items: baseline;
+    }
+
+    .group-head p {
+      grid-row: 2;
+      grid-column: 1 / -1;
+      margin: 0;
+    }
+
+    .group-head .link-arrow {
+      grid-row: 1;
+      grid-column: 2;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    /* Phones: one row per line that scrolls sideways. */
+    .shelf {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+
+    .shelf::-webkit-scrollbar {
+      display: none;
+    }
+
+    .shelf li {
+      flex: 0 0 9.5rem;
+      scroll-snap-align: start;
+    }
+
+    .stage {
+      height: 9rem;
+    }
+  }
+</style>

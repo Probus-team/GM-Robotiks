@@ -1,250 +1,218 @@
 ---
+// Floating navigation bar: dark glass over every page, with one main action.
 import { site } from '../data/site';
 import BrandImage from './BrandImage.astro';
+import Icon from './Icon.astro';
 
-interface Props {
-  /** Solid header from the start, for pages without a dark hero behind it. */
-  solid?: boolean;
-}
-const { solid = false } = Astro.props;
+const current = Astro.url.pathname;
 ---
 
-<header class:list={['header', { 'is-solid': solid }]} data-header>
-  <div class="container header-inner">
+<header class="header" data-header>
+  <div class="bar">
     <a href="/" class="brand" aria-label={`${site.name}, inicio`}>
-      <BrandImage variant="white" class="brand-dark" />
-      <BrandImage variant="full" class="brand-light" />
+      <BrandImage variant="white" />
     </a>
 
-    <nav class="nav" aria-label="Principal" id="nav">
+    <nav class="nav" aria-label="Principal" id="nav" data-nav>
       <ul>
         {site.nav.map((item) => (
-          <li><a href={item.href} aria-current={Astro.url.pathname === item.href ? 'page' : undefined}>{item.label}</a></li>
+          <li>
+            <a href={item.href} aria-current={current === item.href || (item.href === '/robots/' && current.startsWith('/robots/')) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
         ))}
       </ul>
     </nav>
 
-    <div class="actions">
-      <a href="#contacto" class="btn btn-white header-cta">Agendar demo</a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav" data-menu-toggle>
-        <span class="sr-only">Abrir menú</span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-      </button>
-    </div>
+    <a href={site.cta.href} class="btn btn-white btn-small cta">
+      {site.cta.label}
+      <Icon name="arrow" />
+    </a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav" data-menu-toggle>
+      <span class="sr-only">Menú</span>
+      <span class="bar-line"></span>
+      <span class="bar-line"></span>
+    </button>
   </div>
 </header>
 
 <style>
   .header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
+    position: fixed;
+    z-index: 60;
+    top: calc(var(--bezel) + 0.65rem);
+    left: 50%;
+    translate: -50% 0;
+    width: min(100% - 2 * (var(--bezel) + 0.65rem), 70rem);
     color: var(--white);
-    background: transparent;
-    /* Starts over the navy hero, so it wants the lifted accent. */
-    --accent: var(--blue-light);
+    --accent: var(--sky);
     view-transition-name: site-header;
-    transition:
-      background-color 0.3s,
-      color 0.3s,
-      box-shadow 0.3s,
-      transform 0.45s var(--ease-out);
   }
 
-  .header.is-scrolled,
-  .header.is-solid {
-    background: rgba(255, 255, 255, 0.92);
-    color: var(--text);
-    --accent: var(--blue);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 1px 0 var(--line);
-  }
-
-  /* Slides away while reading down, comes back on the first scroll up. */
-  .header.is-hidden {
-    transform: translateY(-100%);
-  }
-
-  .header-inner {
+  .bar {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-    height: 4.75rem;
+    gap: 1rem;
+    height: var(--header-h);
+    padding: 0 0.65rem 0 1.1rem;
+    border-radius: 1.1rem;
+    background: rgba(10, 28, 43, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: 0 18px 40px -24px rgba(10, 28, 43, 0.55);
+    transition: background-color 0.3s;
+  }
+
+  .header.is-scrolled .bar {
+    background: rgba(10, 28, 43, 0.82);
   }
 
   .brand {
     display: inline-flex;
     align-items: center;
-    height: 100%;
+    margin-right: auto;
   }
 
   .brand :global(img) {
-    height: 3rem;
+    height: 2.6rem;
     width: auto;
-  }
-
-  :global(.brand-light) {
-    display: none;
-  }
-
-  .header.is-scrolled :global(.brand-dark),
-  .header.is-solid :global(.brand-dark) {
-    display: none;
-  }
-
-  .header.is-scrolled :global(.brand-light),
-  .header.is-solid :global(.brand-light) {
-    display: block;
-  }
-
-  .header.is-scrolled .header-cta,
-  .header.is-solid .header-cta {
-    background: var(--navy);
-    color: var(--white);
-  }
-
-  .header.is-scrolled .header-cta:hover,
-  .header.is-solid .header-cta:hover {
-    background: var(--navy-deep);
   }
 
   .nav ul {
     display: flex;
-    gap: 2rem;
+    gap: 0.25rem;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
   .nav a {
-    position: relative;
+    display: block;
+    padding: 0.55rem 0.8rem;
+    border-radius: 0.6rem;
     text-decoration: none;
     font-weight: 600;
     font-size: 0.95rem;
-    opacity: 0.85;
-    padding-block: 0.4rem;
-    transition: opacity 0.2s;
+    color: rgba(255, 255, 255, 0.86);
+    transition:
+      background-color 0.2s,
+      color 0.2s;
   }
 
-  .nav a::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 2px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.35s var(--ease-out);
+  .nav a:hover {
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.08);
   }
 
-  .nav a:hover,
   .nav a[aria-current='page'] {
-    opacity: 1;
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.12);
   }
 
-  .nav a:hover::after,
-  .nav a[aria-current='page']::after {
-    transform: scaleX(1);
-    transform-origin: left;
-  }
-
-  .actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .header-cta {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.95rem;
+  .cta {
+    margin-left: 0.5rem;
+    white-space: nowrap;
   }
 
   .menu-toggle {
     display: none;
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: 999px;
-    border: 2px solid currentColor;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.24);
     background: transparent;
     cursor: pointer;
     position: relative;
   }
 
-  .menu-toggle .bar {
+  .bar-line {
     position: absolute;
     left: 50%;
     width: 1.1rem;
     height: 2px;
+    border-radius: 2px;
     background: currentColor;
-    transform: translateX(-50%);
+    translate: -50% 0;
     transition: transform 0.25s var(--ease-out);
   }
 
-  .menu-toggle .bar:first-of-type {
+  .bar-line:first-of-type {
     top: calc(50% - 4px);
   }
 
-  .menu-toggle .bar:last-of-type {
+  .bar-line:last-of-type {
     top: calc(50% + 2px);
   }
 
-  .menu-toggle[aria-expanded='true'] .bar:first-of-type {
-    transform: translateX(-50%) translateY(3px) rotate(45deg);
+  .menu-toggle[aria-expanded='true'] .bar-line:first-of-type {
+    transform: translateY(3px) rotate(45deg);
   }
 
-  .menu-toggle[aria-expanded='true'] .bar:last-of-type {
-    transform: translateX(-50%) translateY(-3px) rotate(-45deg);
+  .menu-toggle[aria-expanded='true'] .bar-line:last-of-type {
+    transform: translateY(-3px) rotate(-45deg);
   }
 
-  @media (max-width: 56rem) {
+  @media (max-width: 60rem) {
     .menu-toggle {
       display: inline-flex;
     }
 
-    .header-cta {
-      display: none;
+    .bar {
+      gap: 0.5rem;
+      padding-left: 0.85rem;
+    }
+
+    .brand :global(img) {
+      height: 2.2rem;
     }
 
     .nav {
       position: absolute;
-      inset: 4.75rem 0 auto 0;
-      background: var(--navy-ink);
-      color: var(--white);
-      --accent: var(--blue-light);
-      padding: 1rem var(--gutter) 1.5rem;
-      transform: translateY(-8px);
+      top: calc(100% + 0.5rem);
+      left: 0;
+      right: 0;
+      padding: 0.5rem;
+      border-radius: 1.1rem;
+      background: rgba(10, 28, 43, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       opacity: 0;
-      pointer-events: none;
+      translate: 0 -6px;
+      visibility: hidden;
       transition:
-        opacity 0.25s,
-        transform 0.25s var(--ease-out);
+        opacity 0.2s,
+        translate 0.25s var(--ease-out),
+        visibility 0s 0.25s;
     }
 
     .nav.is-open {
       opacity: 1;
-      transform: none;
-      pointer-events: auto;
+      translate: 0 0;
+      visibility: visible;
+      transition:
+        opacity 0.2s,
+        translate 0.25s var(--ease-out);
     }
 
     .nav ul {
       flex-direction: column;
-      gap: 0.25rem;
     }
 
     .nav a {
-      display: block;
-      padding: 0.9rem 0;
-      font-size: 1.15rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      opacity: 1;
+      padding: 0.95rem 1rem;
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .cta {
+      padding-inline: 0.85rem;
+      margin-left: 0;
     }
 
-    .nav a::after {
+    .cta :global(.arrow) {
       display: none;
     }
   }
@@ -253,41 +221,28 @@ const { solid = false } = Astro.props;
 <script>
   const header = document.querySelector<HTMLElement>('[data-header]');
   const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
-  const nav = document.getElementById('nav');
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
 
-  let last = window.scrollY;
   let raf = 0;
   const onScroll = () => {
     raf = 0;
-    const y = window.scrollY;
-    header?.classList.toggle('is-scrolled', y > 24);
-    const menuOpen = toggle?.getAttribute('aria-expanded') === 'true' || header?.classList.contains('is-solid');
-    const goingDown = y > last + 4;
-    const goingUp = y < last - 4;
-    if (!menuOpen && goingDown && y > 280) header?.classList.add('is-hidden');
-    else if (goingUp || y <= 280) header?.classList.remove('is-hidden');
-    last = y;
+    header?.classList.toggle('is-scrolled', window.scrollY > 24);
   };
   onScroll();
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (!raf) raf = requestAnimationFrame(onScroll);
-    },
-    { passive: true },
-  );
+  window.addEventListener('scroll', () => {
+    if (!raf) raf = requestAnimationFrame(onScroll);
+  }, { passive: true });
 
-  toggle?.addEventListener('click', () => {
-    const open = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', String(!open));
-    nav?.classList.toggle('is-open', !open);
-    header?.classList.remove('is-hidden');
+  const setOpen = (open: boolean) => {
+    toggle?.setAttribute('aria-expanded', String(open));
+    nav?.classList.toggle('is-open', open);
+  };
+  toggle?.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  nav?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      toggle.focus();
+    }
   });
-
-  nav?.querySelectorAll('a').forEach((a) =>
-    a.addEventListener('click', () => {
-      toggle?.setAttribute('aria-expanded', 'false');
-      nav.classList.remove('is-open');
-    }),
-  );
 </script>
