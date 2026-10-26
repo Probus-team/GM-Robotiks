@@ -99,6 +99,22 @@ test('visible transitions keep both loops running, covered loops pause, reverse 
   assert.ok(state.videos.every((video) => video.paused));
 });
 
+test('covered and scrolled-away panels pause the still drift but keep their revealed text', () => {
+  const state = setup();
+  const offscreen = () => state.panels.map((panel) => panel.classList.contains('is-offscreen'));
+  state.scroll([0, 800, 1600, 2400, 3200]);
+  assert.deepEqual(offscreen(), [false, true, true, true, true]);
+  state.scroll([0, 360, 1160, 1960, 2760]);
+  assert.deepEqual(offscreen(), [false, false, true, true, true]);
+  state.scroll([0, 0, 800, 1600, 2400]);
+  assert.deepEqual(offscreen(), [true, false, true, true, true]);
+  assert.equal(state.panels[0].classList.contains('is-active'), true);
+  state.scroll([0, 440, 1240, 2040, 2840]);
+  assert.deepEqual(offscreen(), [false, false, true, true, true]);
+  state.scroll([-800, -800, -800, -800, -800]);
+  assert.ok(offscreen().every(Boolean));
+});
+
 test('hidden tabs pause playback and visible tabs restore the exposed loop', () => {
   const state = setup();
   state.scroll([0, 800, 1600, 2400, 3200]);
