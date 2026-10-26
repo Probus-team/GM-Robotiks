@@ -147,7 +147,8 @@ for (let i = 0; i < icoImages.length; i++) {
 }
 await writeFile(path.join(publicDir, 'favicon.ico'), Buffer.concat([icoHeader, ...icoImages]));
 // A compact 256 px raster inside SVG preserves gradients without loading the full master.
-const favicon = await square(256, 0.86, 0.2);
+// A 256-color palette cuts it to under a third and renders the same at icon sizes.
+const favicon = await sharp(await square(256, 0.86, 0.2)).png({ palette: true, quality: 100, effort: 10, dither: 1 }).toBuffer();
 await writeFile(path.join(publicDir, 'favicon.svg'), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><title>GM Robotiks IA</title><image width="256" height="256" href="data:image/png;base64,${favicon.toString('base64')}"/></svg>`);
 for (const [name, size, fraction, radius] of [['icon-192', 192, 0.8, 0.22], ['icon-512', 512, 0.8, 0.22], ['icon-512-maskable', 512, 0.56, 0], ['apple-touch-icon', 180, 0.8, 0]]) {
   await writeFile(path.join(publicDir, `${name}.png`), await square(size, fraction, radius));

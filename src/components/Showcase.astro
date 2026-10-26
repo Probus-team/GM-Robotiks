@@ -95,10 +95,21 @@ const withCounts = panels.map((p) => ({
     margin: 0;
     transform: scale(calc(1 - var(--cover) * 0.06));
     transform-origin: 50% 0%;
-    filter: brightness(calc(1 - var(--cover) * 0.55));
-    transition:
-      transform 0.1s linear,
-      filter 0.1s linear;
+    transition: transform 0.1s linear;
+  }
+
+  /* Darkens the covered frame. Black at opacity a gives the same result as
+     brightness(1 - a), but only opacity changes per scroll frame, so the
+     compositor blends it instead of re-filtering the playing video. */
+  .panel-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: #000;
+    opacity: calc(var(--cover) * 0.55);
+    pointer-events: none;
+    transition: opacity 0.1s linear;
   }
 
   .media {
@@ -114,9 +125,14 @@ const withCounts = panels.map((p) => ({
     object-fit: cover;
   }
 
-  /* Stills get a slow drift so the panel is never fully static. */
+  /* Stills get a slow drift so the panel is never fully static. Like the
+     loops, it holds its frame while the panel is covered or scrolled away. */
   .panel.is-active :global(.still) {
     animation: kenburns 18s ease-in-out infinite alternate;
+  }
+
+  .panel.is-active.is-offscreen :global(.still) {
+    animation-play-state: paused;
   }
 
   @keyframes kenburns {
@@ -331,7 +347,10 @@ const withCounts = panels.map((p) => ({
   @media (prefers-reduced-motion: reduce) {
     .panel-frame {
       transform: none;
-      filter: none;
+    }
+
+    .panel-frame::after {
+      display: none;
     }
 
     .panel.is-active :global(.still) {
@@ -419,16 +438,20 @@ const withCounts = panels.map((p) => ({
         rail?.classList.toggle('is-off', id === 'all');
       }
     }
-    videos.forEach((video, i) => {
-      if (!video) return;
+    panels.forEach((panel, i) => {
+      // Sticky panels stay geometrically visible even when the next panel covers them.
       const exposedBottom = Math.min(bounds[i].bottom, bounds[i + 1]?.top ?? vh, vh);
       const visible = exposedBottom > Math.max(bounds[i].top, 0);
+      // is-active stays on so the text never replays its entrance; this only
+      // pauses the still's drift.
+      panel.classList.toggle('is-offscreen', !visible);
+      const video = videos[i];
+      if (!video) return;
       if (visible) showPoster(video);
-      if (visible && panels[i].classList.contains('is-active') && !reduce && !document.hidden) {
+      if (visible && panel.classList.contains('is-active') && !reduce && !document.hidden) {
         loadVideo(video);
         if (video.paused) video.play().catch(() => {});
       } else if (!video.paused) {
-        // Sticky panels stay geometrically visible even when the next panel covers them.
         video.pause();
       }
     });
