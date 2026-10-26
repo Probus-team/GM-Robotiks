@@ -95,10 +95,21 @@ const withCounts = panels.map((p) => ({
     margin: 0;
     transform: scale(calc(1 - var(--cover) * 0.06));
     transform-origin: 50% 0%;
-    filter: brightness(calc(1 - var(--cover) * 0.55));
-    transition:
-      transform 0.1s linear,
-      filter 0.1s linear;
+    transition: transform 0.1s linear;
+  }
+
+  /* Darkens the covered frame. Black at opacity a gives the same result as
+     brightness(1 - a), but only opacity changes per scroll frame, so the
+     compositor blends it instead of re-filtering the playing video. */
+  .panel-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: #000;
+    opacity: calc(var(--cover) * 0.55);
+    pointer-events: none;
+    transition: opacity 0.1s linear;
   }
 
   .media {
@@ -331,7 +342,10 @@ const withCounts = panels.map((p) => ({
   @media (prefers-reduced-motion: reduce) {
     .panel-frame {
       transform: none;
-      filter: none;
+    }
+
+    .panel-frame::after {
+      display: none;
     }
 
     .panel.is-active :global(.still) {
