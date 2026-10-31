@@ -1,0 +1,75 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import { legal } from '../data/legal';
+
+const mail = `mailto:${legal.email}?subject=${encodeURIComponent('Eliminación de datos')}`;
+---
+
+<LegalPage
+  title="Eliminación de datos"
+  description="Cómo pedir que GM Robotiks IA borre tus datos personales, incluidos los de WhatsApp y Galu Asistente."
+>
+  <p>
+    Puedes pedir en cualquier momento que borremos los datos que {legal.company} guarda sobre ti, incluidos los mensajes de WhatsApp y los de
+    Galu Asistente. Esta página explica cómo hacerlo, qué se borra y en cuánto tiempo.
+  </p>
+
+  <section>
+    <h2>Cómo pedirlo</h2>
+    <ol>
+      <li>Escribe a <a href={mail}>{legal.email}</a> con el asunto «Eliminación de datos».</li>
+      <li>Incluye tu nombre y el número de WhatsApp o correo con el que te comunicaste con nosotros.</li>
+      <li>
+        Para confirmar que el número es tuyo, te enviaremos un mensaje de WhatsApp a ese número; contéstalo para que procedamos. Si escribes desde
+        el correo que tenemos registrado, basta con ese correo.
+      </li>
+    </ol>
+    <p>Si eres parte de nuestro personal, también puedes pedírselo a una persona administradora, que primero retirará tu acceso al asistente.</p>
+  </section>
+
+  <section>
+    <h2>Qué borramos</h2>
+    <ul>
+      <li>Tus mensajes y conversaciones con nosotros y con Galu Asistente, y los adjuntos que enviaste.</li>
+      <li>El historial de actividad, el resumen de tus solicitudes y los registros técnicos asociados a tu número.</li>
+      <li>Los avisos de mensajes de WhatsApp que recibió nuestro servidor.</li>
+      <li>Tus datos de contacto como prospecto, y tu registro como persona autorizada o tu cuenta del sitio de administración, si los tienes.</li>
+    </ul>
+    <p>
+      Aunque no lo pidas, parte de estos datos se borra sola: las conversaciones con el asistente, el detalle de su actividad y los adjuntos a los
+      90 días, y los avisos de WhatsApp a los 30 días.
+    </p>
+  </section>
+
+  <section>
+    <h2>Qué no podemos borrar</h2>
+    <ul>
+      <li>
+        <strong>Registros comerciales y fiscales.</strong> Las cotizaciones, ventas y facturas, y los datos de cliente que contienen, se conservan
+        el tiempo que exige la ley. Mientras tanto los bloqueamos para que solo se usen para cumplir esas obligaciones, y los borramos cuando
+        termina el plazo.
+      </li>
+      <li>
+        <strong>Datos que guarda WhatsApp.</strong> Meta conserva los datos de tu cuenta de WhatsApp y los chats en tu teléfono según su propia
+        política. Puedes borrar el chat con nosotros desde tu aplicación de WhatsApp y gestionar tu cuenta en su configuración.
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Plazos</h2>
+    <p>
+      Te responderemos en un máximo de 20 días hábiles desde que recibamos la solicitud completa. Si procede, el borrado se hará dentro de los 15
+      días hábiles siguientes y te lo confirmaremos por el mismo medio. Las copias de seguridad de nuestros proveedores se sobrescriben en sus
+      ciclos normales.
+    </p>
+  </section>
+
+  <section>
+    <h2>Más información</h2>
+    <p>
+      Consulta el <a href="/privacidad/">aviso de privacidad</a> para conocer todos tus derechos, y los
+      <a href="/terminos/">términos del servicio</a>.
+    </p>
+  </section>
+</LegalPage>
