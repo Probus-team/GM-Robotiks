@@ -42,8 +42,10 @@ const mail = (subject: string) => `mailto:${legal.email}?subject=${encodeURIComp
           <tr>
             <td>Clientes y prospectos que nos escriben</td>
             <td>
-              Nombre, número de WhatsApp, correo, empresa y lo que nos cuentes en la conversación (por ejemplo, el robot que te interesa y tu
-              operación). Si te cotizamos o te damos de alta como cliente: razón social, RFC, régimen fiscal, domicilio y datos de contacto.
+              Nombre, número de WhatsApp, correo, empresa y lo que nos cuentes en la conversación, incluidos los archivos que nos envíes (por
+              ejemplo, el robot que te interesa y tu operación). Las notas internas de nuestro equipo sobre la conversación, y si aceptaste o no
+              recibir mensajes nuestros. Si te cotizamos o te damos de alta como cliente: razón social, RFC, régimen fiscal, domicilio y datos de
+              contacto.
             </td>
           </tr>
           <tr>
@@ -71,6 +73,10 @@ const mail = (subject: string) => `mailto:${legal.email}?subject=${encodeURIComp
     <p>Usamos los datos únicamente para estas finalidades, todas necesarias para la relación que tienes con nosotros:</p>
     <ol>
       <li>Contestar tus mensajes, darte información de los robots, cotizarte, venderte, instalar y dar soporte.</li>
+      <li>
+        Atender tus conversaciones de WhatsApp en nuestra bandeja de atención: asignarlas a una persona del equipo, dejar notas internas y, solo
+        si lo aceptaste, enviarte mensajes con plantillas aprobadas por WhatsApp.
+      </li>
       <li>Dar de alta y administrar clientes, cotizaciones y productos en nuestro sistema de gestión, y facturar.</li>
       <li>
         Operar Galu Asistente: recibir los mensajes del personal, comprobar que la persona está autorizada, hacer el trabajo pedido en el sistema
@@ -87,10 +93,13 @@ const mail = (subject: string) => `mailto:${legal.email}?subject=${encodeURIComp
   <section>
     <h2>WhatsApp y Galu Asistente</h2>
     <p>
-      Usamos la plataforma WhatsApp Business de Meta. Los mensajes que nos envías llegan a nuestros servidores y los atiende una persona de
-      nuestro equipo. Galu Asistente solo atiende al personal autorizado: si no eres parte del personal, el asistente no lee ni contesta tus
-      mensajes, y el aviso técnico de cada mensaje (número, nombre de perfil, contenido y hora) se borra automáticamente de nuestro servidor a los
-      30 días.
+      Usamos la plataforma WhatsApp Business de Meta. Los mensajes que nos envías llegan a nuestros servidores y los lee y contesta una persona de
+      nuestro equipo desde nuestra bandeja de atención, a la que solo entra personal invitado. Galu Asistente solo atiende al personal
+      autorizado: si no eres parte del personal, el asistente no lee ni contesta tus mensajes.
+    </p>
+    <p>
+      Solo te escribimos primero si aceptaste recibir mensajes nuestros. Si ya no quieres recibirlos, escribe <strong>BAJA</strong> o
+      <strong>STOP</strong> en el chat: dejaremos de enviarte mensajes y solo te contestaremos cuando tú nos escribas.
     </p>
     <p>
       Para las solicitudes del personal, el asistente usa modelos de inteligencia artificial que entienden el mensaje y preparan las acciones. Las
@@ -116,7 +125,13 @@ const mail = (subject: string) => `mailto:${legal.email}?subject=${encodeURIComp
           <tr><td>Oracle NetSuite</td><td>Sistema de gestión donde guardamos clientes, cotizaciones, productos y facturas.</td></tr>
           <tr><td>OpenAI</td><td>Modelo de IA de Galu Asistente; procesa el texto y los adjuntos de cada solicitud del personal.</td></tr>
           <tr><td>TypeSafe</td><td>Clasificar cada mensaje del personal; recibe el texto, nunca números de teléfono ni adjuntos.</td></tr>
-          <tr><td>Convex, Vercel y Clerk</td><td>Base de datos, alojamiento e inicio de sesión del sitio de administración del asistente.</td></tr>
+          <tr>
+            <td>Convex, Vercel y Clerk</td>
+            <td>
+              Base de datos, alojamiento e inicio de sesión del sitio de administración del asistente y de la bandeja de atención de WhatsApp,
+              donde se guardan las conversaciones y sus archivos.
+            </td>
+          </tr>
           <tr><td>Sentry y Axiom</td><td>Registro técnico de errores; no reciben el contenido de los mensajes ni números de teléfono.</td></tr>
         </tbody>
       </table>
@@ -134,7 +149,11 @@ const mail = (subject: string) => `mailto:${legal.email}?subject=${encodeURIComp
         Conversaciones con Galu Asistente, detalle de su actividad, adjuntos, PDFs generados y registros técnicos: 90 días; después se borran
         automáticamente.
       </li>
-      <li>Avisos de mensajes de WhatsApp en nuestro servidor: 30 días.</li>
+      <li>
+        Conversaciones de WhatsApp con nuestro equipo, sus notas internas y archivos: 2 años después del último mensaje; después se borran
+        automáticamente.
+      </li>
+      <li>Copia técnica de los avisos que WhatsApp manda a nuestro servidor: 30 días.</li>
       <li>
         Resumen de cada solicitud al asistente y registro de cambios del sitio de administración: se conservan como registro interno mientras sean
         necesarios.
@@ -148,7 +167,7 @@ const mail = (subject: string) => `mailto:${legal.email}?subject=${encodeURIComp
     <h2>Cómo los protegemos</h2>
     <p>
       Las conexiones van cifradas. Verificamos la firma de cada aviso que manda WhatsApp. Solo el personal autorizado puede usar el asistente y
-      solo personas invitadas pueden entrar a su sitio de administración. Las credenciales se guardan fuera del código y el acceso al sistema de
+      solo personas invitadas pueden entrar a su sitio de administración y a la bandeja de atención. Las credenciales se guardan fuera del código y el acceso al sistema de
       gestión usa un rol con los permisos mínimos.
     </p>
   </section>
