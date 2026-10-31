@@ -1,0 +1,182 @@
+---
+// Shell for the legal documents: dark title frame, then numbered prose
+// sections (<section><h2>…</h2>…</section>) passed as children.
+import Layout from '../layouts/Layout.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import { legal, legalPages } from '../data/legal';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const page = legalPages.find((p) => p.path === Astro.url.pathname.replace(/\/?$/, '/'));
+---
+
+<Layout title={page?.title ?? title} description={description}>
+  <Header />
+  <main id="contenido">
+    <section class="top">
+      <div class="frame on-dark inner">
+        <div class="container head">
+          <p class="eyebrow">Legal</p>
+          <h1>{title}</h1>
+          <p class="updated">Última actualización: {legal.updated}</p>
+          <nav aria-label="Documentos legales">
+            {legalPages.map((p) => (
+              <a href={p.path} aria-current={p.path === page?.path ? 'page' : undefined}>{p.label}</a>
+            ))}
+          </nav>
+        </div>
+      </div>
+    </section>
+    <article class="container doc">
+      <slot />
+    </article>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .top {
+    padding-top: var(--bezel);
+  }
+
+  .inner {
+    background:
+      radial-gradient(40rem 30rem at 85% 110%, rgba(42, 140, 255, 0.22), transparent 60%),
+      linear-gradient(160deg, var(--navy), var(--ink));
+  }
+
+  .head {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+    padding-block: calc(var(--header-h) + 4rem) 3rem;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 5vw, 4.25rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .updated {
+    color: var(--on-dark-muted);
+    font-size: var(--fs-small);
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  nav a {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: var(--fs-small);
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--line-dark);
+    border-radius: 999px;
+  }
+
+  nav a:hover,
+  nav a[aria-current='page'] {
+    background: var(--white);
+    color: var(--ink);
+  }
+
+  .doc {
+    max-width: 46rem;
+    padding-block: clamp(3rem, 7vw, 5rem) var(--section);
+    color: var(--text);
+    line-height: 1.65;
+    counter-reset: legal;
+  }
+
+  .doc :global(> p) {
+    font-size: var(--fs-lede);
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .doc :global(section) {
+    margin-top: 3rem;
+    counter-increment: legal;
+  }
+
+  .doc :global(h2) {
+    font-size: 1.45rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 0.9rem;
+  }
+
+  .doc :global(h2::before) {
+    content: counter(legal, decimal-leading-zero);
+    color: var(--blue);
+    font-size: 0.95rem;
+    margin-right: 0.75rem;
+  }
+
+  .doc :global(section > * + *) {
+    margin-top: 0.85rem;
+  }
+
+  .doc :global(ul),
+  .doc :global(ol) {
+    padding-left: 1.3rem;
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .doc :global(a) {
+    color: var(--blue);
+    text-underline-offset: 0.15em;
+  }
+
+  .doc :global(strong) {
+    font-weight: 700;
+  }
+
+  .doc :global(.table) {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+  }
+
+  .doc :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-small);
+  }
+
+  .doc :global(th),
+  .doc :global(td) {
+    text-align: left;
+    vertical-align: top;
+    padding: 0.7rem 0.9rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .doc :global(th) {
+    background: var(--ice);
+    border-top: 0;
+    font-size: var(--fs-label);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .doc :global(td:first-child) {
+    font-weight: 650;
+    width: 34%;
+  }
+</style>

@@ -2,6 +2,7 @@
 import { site } from '../data/site';
 import { families } from '../data/robots';
 import BrandImage from './BrandImage.astro';
+import { legalPages } from '../data/legal';
 const year = new Date().getFullYear();
 const { email, whatsapp } = site.contact;
 ---
@@ -37,6 +38,9 @@ const { email, whatsapp } = site.contact;
         <li>México</li>
       </ul>
     </div>
+    <nav class="legal-links" aria-label="Legal">
+      {legalPages.map((p) => <a href={p.path}>{p.label}</a>)}
+    </nav>
     <p class="legal">
       © {year} {site.name}. Pudu, BellaBot, KettyBot, PuduBot y FlashBot son marcas de Pudu Robotics. Las
       especificaciones, fotos y videos de los robots son del fabricante y pueden cambiar sin previo aviso.
@@ -95,6 +99,21 @@ const { email, whatsapp } = site.contact;
 
   a:hover {
     color: var(--sky);
+  }
+
+  .legal-links {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line-dark);
+    font-size: 0.85rem;
+  }
+
+  .legal-links + .legal {
+    border-top: 0;
+    padding-top: 0;
   }
 
   .legal {

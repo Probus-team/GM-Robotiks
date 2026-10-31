@@ -1,0 +1,183 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import { legal } from '../data/legal';
+
+const mail = (subject: string) => `mailto:${legal.email}?subject=${encodeURIComponent(subject)}`;
+---
+
+<LegalPage
+  title="Aviso de privacidad"
+  description="Cómo GM Robotiks IA trata los datos personales de quienes visitan su sitio, le escriben por WhatsApp o usan su asistente de WhatsApp."
+>
+  <p>
+    Este aviso explica qué datos personales trata {legal.company}, para qué los usa, con quién los comparte, cuánto tiempo los guarda y cómo
+    puedes ejercer tus derechos. Aplica a este sitio, a las conversaciones por WhatsApp con nuestro equipo y a Galu Asistente, el asistente de
+    WhatsApp que usa nuestro personal. Se emite conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares y a
+    las políticas de WhatsApp Business de Meta.
+  </p>
+
+  <section>
+    <h2>Responsable</h2>
+    <p>
+      <strong>{legal.company}</strong>, con domicilio en {legal.address}, es responsable del tratamiento de tus datos personales. Para cualquier
+      asunto de privacidad escríbenos a <a href={mail('Privacidad')}>{legal.email}</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Datos que tratamos</h2>
+    <div class="table">
+      <table>
+        <thead>
+          <tr><th>De quién</th><th>Qué datos</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Visitantes de este sitio</td>
+            <td>
+              El sitio no tiene formularios, no usa cookies de publicidad ni herramientas de analítica. Nuestro proveedor de alojamiento registra
+              datos técnicos de cada visita (dirección IP, navegador, página y hora) para entregar el sitio y protegerlo.
+            </td>
+          </tr>
+          <tr>
+            <td>Clientes y prospectos que nos escriben</td>
+            <td>
+              Nombre, número de WhatsApp, correo, empresa y lo que nos cuentes en la conversación (por ejemplo, el robot que te interesa y tu
+              operación). Si te cotizamos o te damos de alta como cliente: razón social, RFC, régimen fiscal, domicilio y datos de contacto.
+            </td>
+          </tr>
+          <tr>
+            <td>Personal autorizado que usa Galu Asistente</td>
+            <td>
+              Nombre, número de WhatsApp, correo, identificador de empleado en nuestro sistema de gestión y los permisos en el asistente. Los
+              mensajes que envía al asistente (texto, notas de voz, fotos y documentos), lo que pide y el resultado de cada solicitud.
+            </td>
+          </tr>
+          <tr>
+            <td>Personas administradoras del asistente</td>
+            <td>Correo, nombre, datos de inicio de sesión y un registro de los cambios que hacen.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      No pedimos datos personales sensibles. Si alguien los incluye en un mensaje o documento, solo se usan para atender esa conversación o
+      solicitud.
+    </p>
+  </section>
+
+  <section>
+    <h2>Para qué los usamos</h2>
+    <p>Usamos los datos únicamente para estas finalidades, todas necesarias para la relación que tienes con nosotros:</p>
+    <ol>
+      <li>Contestar tus mensajes, darte información de los robots, cotizarte, venderte, instalar y dar soporte.</li>
+      <li>Dar de alta y administrar clientes, cotizaciones y productos en nuestro sistema de gestión, y facturar.</li>
+      <li>
+        Operar Galu Asistente: recibir los mensajes del personal, comprobar que la persona está autorizada, hacer el trabajo pedido en el sistema
+        de gestión y contestar por WhatsApp, incluido el PDF de la cotización.
+      </li>
+      <li>Mantener el sitio y los servicios seguros y funcionando: detectar fallas, evitar duplicados y atender incidentes.</li>
+      <li>Cumplir obligaciones legales, fiscales y requerimientos de autoridades.</li>
+    </ol>
+    <p>
+      No vendemos tus datos ni los usamos para publicidad de terceros. No usamos tus mensajes para entrenar modelos de inteligencia artificial.
+    </p>
+  </section>
+
+  <section>
+    <h2>WhatsApp y Galu Asistente</h2>
+    <p>
+      Usamos la plataforma WhatsApp Business de Meta. Los mensajes que nos envías llegan a nuestros servidores y los atiende una persona de
+      nuestro equipo. Galu Asistente solo atiende al personal autorizado: si no eres parte del personal, el asistente no lee ni contesta tus
+      mensajes, y el aviso técnico de cada mensaje (número, nombre de perfil, contenido y hora) se borra automáticamente de nuestro servidor a los
+      30 días.
+    </p>
+    <p>
+      Para las solicitudes del personal, el asistente usa modelos de inteligencia artificial que entienden el mensaje y preparan las acciones. Las
+      notas de voz se transcriben en nuestro propio equipo. Los precios que no son de lista solo se guardan cuando una persona con permiso los
+      confirma.
+    </p>
+  </section>
+
+  <section>
+    <h2>Con quién compartimos los datos</h2>
+    <p>
+      Usamos proveedores que tratan los datos por cuenta nuestra y según nuestras instrucciones. Varios están fuera de México, principalmente en
+      Estados Unidos, por lo que los datos pueden almacenarse o procesarse allá.
+    </p>
+    <div class="table">
+      <table>
+        <thead>
+          <tr><th>Proveedor</th><th>Para qué</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Meta Platforms (WhatsApp Business Platform)</td><td>Entregar los mensajes de WhatsApp.</td></tr>
+          <tr><td>Cloudflare</td><td>Alojamiento y protección de este sitio.</td></tr>
+          <tr><td>Oracle NetSuite</td><td>Sistema de gestión donde guardamos clientes, cotizaciones, productos y facturas.</td></tr>
+          <tr><td>OpenAI</td><td>Modelo de IA de Galu Asistente; procesa el texto y los adjuntos de cada solicitud del personal.</td></tr>
+          <tr><td>TypeSafe</td><td>Clasificar cada mensaje del personal; recibe el texto, nunca números de teléfono ni adjuntos.</td></tr>
+          <tr><td>Convex, Vercel y Clerk</td><td>Base de datos, alojamiento e inicio de sesión del sitio de administración del asistente.</td></tr>
+          <tr><td>Sentry y Axiom</td><td>Registro técnico de errores; no reciben el contenido de los mensajes ni números de teléfono.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      No transferimos datos a terceros para sus propios fines. Solo los entregaríamos a una autoridad cuando la ley lo exija. WhatsApp trata además
+      los datos de tu cuenta conforme a su propia política de privacidad.
+    </p>
+  </section>
+
+  <section>
+    <h2>Cuánto tiempo los guardamos</h2>
+    <ul>
+      <li>
+        Conversaciones con Galu Asistente, detalle de su actividad, adjuntos, PDFs generados y registros técnicos: 90 días; después se borran
+        automáticamente.
+      </li>
+      <li>Avisos de mensajes de WhatsApp en nuestro servidor: 30 días.</li>
+      <li>
+        Resumen de cada solicitud al asistente y registro de cambios del sitio de administración: se conservan como registro interno mientras sean
+        necesarios.
+      </li>
+      <li>Clientes, cotizaciones y facturas: el tiempo que exijan las obligaciones comerciales y fiscales.</li>
+      <li>Registro del personal autorizado: mientras la persona tenga acceso.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Cómo los protegemos</h2>
+    <p>
+      Las conexiones van cifradas. Verificamos la firma de cada aviso que manda WhatsApp. Solo el personal autorizado puede usar el asistente y
+      solo personas invitadas pueden entrar a su sitio de administración. Las credenciales se guardan fuera del código y el acceso al sistema de
+      gestión usa un rol con los permisos mínimos.
+    </p>
+  </section>
+
+  <section>
+    <h2>Tus derechos (ARCO) y cómo ejercerlos</h2>
+    <p>
+      Puedes pedir acceso a tus datos, su rectificación, su cancelación u oponerte a su tratamiento, así como revocar tu consentimiento o limitar
+      su uso. Escribe a <a href={mail('Derechos ARCO')}>{legal.email}</a> con:
+    </p>
+    <ul>
+      <li>tu nombre y un medio para responderte;</li>
+      <li>el número de WhatsApp o correo con el que te comunicaste con nosotros;</li>
+      <li>qué derecho quieres ejercer y sobre qué datos;</li>
+      <li>si actúas por otra persona, el documento que lo acredite.</li>
+    </ul>
+    <p>
+      Podemos pedirte que confirmes la solicitud desde el mismo número de WhatsApp. Te responderemos en un máximo de 20 días hábiles y, si
+      procede, la haremos efectiva dentro de los 15 días hábiles siguientes. Para borrar tus datos, sigue también las
+      <a href="/eliminacion-de-datos/">instrucciones de eliminación de datos</a>.
+    </p>
+    <p>Si crees que tu derecho a la protección de datos personales fue vulnerado, puedes acudir a la autoridad competente en la materia.</p>
+  </section>
+
+  <section>
+    <h2>Cambios a este aviso</h2>
+    <p>
+      Publicaremos cualquier cambio en esta página con su fecha de actualización. Consulta también los
+      <a href="/terminos/">términos del servicio</a>.
+    </p>
+  </section>
+</LegalPage>

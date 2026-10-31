@@ -1,0 +1,86 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import { legal } from '../data/legal';
+---
+
+<LegalPage
+  title="Términos del servicio"
+  description="Condiciones de uso del sitio de GM Robotiks IA, de su canal de WhatsApp y de Galu Asistente, su asistente de WhatsApp."
+>
+  <p>
+    Estos términos regulan el uso de este sitio, de nuestro canal de WhatsApp y de Galu Asistente, el asistente de WhatsApp de {legal.company}.
+    Al usarlos aceptas estos términos y el <a href="/privacidad/">aviso de privacidad</a>.
+  </p>
+
+  <section>
+    <h2>Este sitio</h2>
+    <p>
+      El sitio presenta los robots de servicio de Pudu Robotics que {legal.company} distribuye e integra en México. Las especificaciones, fotos y
+      videos son del fabricante y pueden cambiar sin previo aviso. Las cifras de ahorro de la calculadora son estimaciones con los supuestos que
+      ahí se indican, no una oferta. Precios, disponibilidad y condiciones se confirman en una cotización por escrito.
+    </p>
+  </section>
+
+  <section>
+    <h2>Nuestro canal de WhatsApp</h2>
+    <p>
+      Puedes escribirnos por WhatsApp para pedir información, una demostración o una cotización; te contesta una persona de nuestro equipo. No
+      envíes datos sensibles por este medio. También aplican los términos y políticas de WhatsApp.
+    </p>
+  </section>
+
+  <section>
+    <h2>Galu Asistente</h2>
+    <p>
+      Galu Asistente es una herramienta interna: recibe por WhatsApp las solicitudes de nuestro personal y las ejecuta en el sistema de gestión
+      (alta y edición de clientes, cotizaciones y productos). No atiende al público.
+    </p>
+    <ul>
+      <li>Solo lo usan las personas que una persona administradora dio de alta, desde su número registrado y con los permisos asignados.</li>
+      <li>El acceso es personal. Si pierdes tu teléfono o cambias de número, avisa de inmediato a una persona administradora.</li>
+      <li>
+        Úsalo solo para tu trabajo y dentro de tus funciones; envía datos de clientes únicamente cuando la solicitud lo necesite. No intentes
+        que haga algo fuera de tus permisos ni acceder a datos que no te corresponden.
+      </li>
+      <li>
+        El asistente usa inteligencia artificial y puede equivocarse. Antes de enviar una cotización o usar un dato, revisa clientes, productos,
+        cantidades, precios y condiciones.
+      </li>
+      <li>Podemos suspender o retirar el acceso en cualquier momento, por ejemplo al terminar la relación laboral o ante un uso indebido.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Disponibilidad</h2>
+    <p>
+      Procuramos que el sitio y el asistente funcionen todo el tiempo, pero pueden tener interrupciones por mantenimiento o por fallas de
+      WhatsApp, de los proveedores de IA o de otros servicios. Si el asistente no pudo completar algo, lo avisa en el chat.
+    </p>
+  </section>
+
+  <section>
+    <h2>Propiedad intelectual</h2>
+    <p>
+      El sitio, su diseño, el asistente y la marca GM Robotiks pertenecen a {legal.company}. Pudu, BellaBot, KettyBot, PuduBot y FlashBot son
+      marcas de Pudu Robotics, y las fotos y videos de los robots son material del fabricante.
+    </p>
+  </section>
+
+  <section>
+    <h2>Responsabilidad</h2>
+    <p>
+      El sitio y el asistente se ofrecen tal como están. En la medida que permita la ley, {legal.company} no responde por daños derivados de
+      interrupciones, de fallas de terceros (como WhatsApp o los proveedores de IA) o de usar un resultado del asistente sin revisarlo. La venta
+      de robots y servicios se rige por la cotización y el contrato correspondientes.
+    </p>
+  </section>
+
+  <section>
+    <h2>Cambios y ley aplicable</h2>
+    <p>
+      Podemos actualizar estos términos; la versión vigente es la publicada en esta página con su fecha. Estos términos se rigen por las leyes de
+      México y cualquier controversia se resolverá ante los tribunales de Guadalajara, Jalisco. Dudas:
+      <a href={`mailto:${legal.email}?subject=${encodeURIComponent('Términos del servicio')}`}>{legal.email}</a>.
+    </p>
+  </section>
+</LegalPage>
