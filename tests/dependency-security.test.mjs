@@ -7,8 +7,7 @@ const requireFromAstro = createRequire(import.meta.resolve('astro/package.json')
 const semver = requireFromAstro('semver');
 const lock = readFileSync(new URL('../bun.lock', import.meta.url), 'utf8');
 
-// Check nested copies as well as hoisted ones. Miniflare still pins Undici 7.29.1;
-// its September floor remains here, with the October floor for font downloads below.
+// Check nested copies as well as hoisted ones, including Miniflare tooling.
 const patchedRanges = {
   // GHSA-mpr7-6m5w-76rw and GHSA-98hj-9722-w3j8.
   astro: '>=7.3.3',
@@ -17,7 +16,7 @@ const patchedRanges = {
   sharp: '>=0.35.5',
   'smol-toml': '>=1.9.0',
   'source-map-js': '>=1.2.2',
-  undici: '^6.28.1 || ^7.29.1 || >=8.10.2',
+  undici: '^6.28.1 || ^7.30.1 || >=8.12.2',
   // October 2026 Vite dev-server and Zod resource-exhaustion advisories.
   vite: '~8.2.4 || >=8.3.3',
   zod: '>=4.6.6',
@@ -46,6 +45,20 @@ test('font downloads use Undici with the October integrity and denial-of-service
 test('font fetches verify uppercase and mixed-case integrity tokens', async () => {
   const requireFromUnifont = createRequire(requireFromAstro.resolve('unifont'));
   const { fetch } = await import(requireFromUnifont.resolve('undici'));
+  const { createHash } = await import('node:crypto');
+  const digest = createHash('sha256').update('trusted').digest('base64');
+  for (const algorithm of ['sha256', 'SHA256', 'Sha256']) {
+    const integrity = `${algorithm}-${digest}`;
+    assert.equal(await (await fetch('data:,trusted', { integrity })).text(), 'trusted');
+    await assert.rejects(fetch('data:,tampered', { integrity }), /fetch failed/);
+  }
+  assert.equal(await (await fetch('data:,unpinned')).text(), 'unpinned');
+});
+
+test('Miniflare fetches verify integrity tokens without accepting tampered content', async () => {
+  const requireFromWrangler = createRequire(import.meta.resolve('wrangler/package.json'));
+  const requireFromMiniflare = createRequire(requireFromWrangler.resolve('miniflare'));
+  const { fetch } = await import(requireFromMiniflare.resolve('undici'));
   const { createHash } = await import('node:crypto');
   const digest = createHash('sha256').update('trusted').digest('base64');
   for (const algorithm of ['sha256', 'SHA256', 'Sha256']) {
