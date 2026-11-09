@@ -150,3 +150,28 @@ for (const tag of ['script', 'style']) {
     );
   });
 }
+
+// Bundled packages are invisible to lockfile audits. Check the published bundle
+// markers as well, using the fixed versions recorded in Wrangler 4.158.0.
+const requireFromWranglerBundle = createRequire(import.meta.resolve('wrangler/package.json'));
+const bundledSources = [
+  readFileSync(new URL('wrangler-dist/cli.js', import.meta.resolve('wrangler/package.json')), 'utf8'),
+  readFileSync(requireFromWranglerBundle.resolve('miniflare'), 'utf8'),
+];
+for (const [name, range] of Object.entries({
+  'brace-expansion': '^2.1.7 || >=5.0.12',
+  minimatch: '^5.1.9 || >=10.2.5',
+  'fast-xml-parser': '>=4.5.5',
+  'shell-quote': '>=1.11.0',
+  yaml: '>=2.8.3',
+})) {
+  test(`Wrangler and Miniflare bundle patched ${name} copies`, () => {
+    const versions = bundledSources.flatMap((source) =>
+      [...source.matchAll(new RegExp(`${name}@([0-9]+\\.[0-9]+\\.[0-9]+)`, 'g'))]
+        .map((match) => match[1]));
+    assert.ok(versions.length > 0, `${name} must be identifiable in the published bundles`);
+    for (const version of versions) {
+      assert.ok(semver.satisfies(version, range), `${name}@${version} must satisfy ${range}`);
+    }
+  });
+}
