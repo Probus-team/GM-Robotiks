@@ -19,6 +19,14 @@ export function robotTitle(robot: { name: string; role: string }): string {
   return `${robot.name}: ${midSentence(robot.role)} · ${site.shortName}`;
 }
 
+/** schema.org BreadcrumbList for a trail of [name, path] pairs. */
+export function breadcrumbs(site: URL, trail: [string, string][]) {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: trail.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: new URL(path, site).href })),
+  };
+}
+
 export function canonicalPath(path: string): string {
   return `${path.replace(/\/+$/, '')}/`;
 }

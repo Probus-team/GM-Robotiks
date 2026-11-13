@@ -10,7 +10,7 @@ import Icon from '../../components/Icon.astro';
 import { site } from '../../data/site';
 import CaseFilm from '../../components/CaseFilm.astro';
 import { cases, families, robots, type Robot } from '../../data/robots';
-import { robotPath, robotTitle } from '../../data/seo';
+import { breadcrumbs, robotPath, robotTitle } from '../../data/seo';
 import { robotCutout, robotScene } from '../../lib/media';
 import { robotQuoteUrl } from '../../lib/whatsapp';
 import { midSentence } from '../../lib/text';
@@ -39,14 +39,7 @@ const productImages = await Promise.all(
 );
 const description = `${robot.name}: ${midSentence(robot.role)}. ${robot.summary}`;
 const structuredData = [
-  {
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: new URL('/', Astro.site).href },
-      { '@type': 'ListItem', position: 2, name: 'Catálogo de robots Pudu', item: new URL('/robots/', Astro.site).href },
-      { '@type': 'ListItem', position: 3, name: robot.name, item: pageUrl },
-    ],
-  },
+  breadcrumbs(Astro.site!, [['Inicio', '/'], ['Catálogo de robots Pudu', '/robots/'], [robot.name, robotPath(robot.id)]]),
   {
     '@type': 'Product',
     '@id': `${pageUrl}#product`,
