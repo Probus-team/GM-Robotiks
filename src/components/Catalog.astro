@@ -13,7 +13,7 @@ import { robotPath } from '../data/seo';
 const lines = families.map((family) => {
   const list = robots.filter((r) => r.family === family.id);
   const lead = list.find((r) => r.isNew && robotScene(r.id)) ?? list.find((r) => robotScene(r.id)) ?? list[0];
-  return { ...family, lead, rest: list.filter((r) => r !== lead), count: list.length };
+  return { ...family, tiles: [lead, ...list.filter((r) => r !== lead)] };
 });
 const pageUrl = (id: string) => new URL(robotPath(id), Astro.site).href;
 ---
@@ -41,7 +41,7 @@ const pageUrl = (id: string) => new URL(robotPath(id), Astro.site).href;
       </p>
       <nav class="jump" aria-label="Ir a una línea">
         {lines.map((line) => (
-          <a href={`#${line.id}`}>{line.name} <span>{line.count}</span></a>
+          <a href={`#${line.id}`}>{line.name} <span>{line.tiles.length}</span></a>
         ))}
       </nav>
     </div>
@@ -52,67 +52,45 @@ const pageUrl = (id: string) => new URL(robotPath(id), Astro.site).href;
   <section class="section line" id={line.id} aria-labelledby={`${line.id}-title`}>
     <div class="container layout">
       <header class="line-head">
-        <p class="eyebrow">{line.count} modelos</p>
+        <p class="eyebrow">{line.tiles.length} modelos</p>
         <h2 id={`${line.id}-title`}>{line.name}</h2>
         <p class="short">{line.short}.</p>
         <p class="where">{line.where}</p>
       </header>
 
       <ul class="tiles" data-stagger>
-        <li class="tile lead reveal">
-          <div class="media">
-            <Picture
-              src={robotScene(line.lead.id) ?? robotCutout(line.lead.id)}
-              alt=""
-              widths={[480, 720, 960, 1280, 1600, 1920]}
-              sizes="(max-width: 56rem) 100vw, 60vw"
-              formats={['avif']}
-              fallbackFormat="webp"
-              loading="lazy"
-              class:list={[robotScene(line.lead.id) ? 'scene' : 'cutout']}
-            />
-            {line.lead.isNew && <span class="tag">Nuevo 2026</span>}
-          </div>
-          <div class="body">
-            <h3><a href={robotPath(line.lead.id)} class="stretch">{line.lead.name}</a></h3>
-            <p class="role">{line.lead.role}</p>
-            <p class="figure"><b>{line.lead.keyFigures[0].value}{line.lead.keyFigures[0].unit && ` ${line.lead.keyFigures[0].unit}`}</b> {line.lead.keyFigures[0].label}</p>
-            <div class="actions">
-              <span class="more">Ver ficha <Icon name="arrow" /></span>
-              <a class="quote" href={robotQuoteUrl(site.contact.whatsapp, line.lead, pageUrl(line.lead.id))} target="_blank" rel="noopener">
-                <Icon name="whatsapp" /> Cotizar
-              </a>
-            </div>
-          </div>
-        </li>
-        {line.rest.map((robot) => (
-          <li class="tile reveal">
-            <div class="media stage">
-              <Picture
-                src={robotCutout(robot.id)}
-                alt=""
-                widths={[240, 360, 480, 640]}
-                sizes="(max-width: 40rem) 80vw, 18rem"
-                formats={['avif']}
-                fallbackFormat="webp"
-                loading="lazy"
-                class="cutout"
-              />
-              {robot.isNew && <span class="tag">Nuevo 2026</span>}
-            </div>
-            <div class="body">
-              <h3><a href={robotPath(robot.id)} class="stretch">{robot.name}</a></h3>
-              <p class="role">{robot.role}</p>
-              <p class="figure"><b>{robot.keyFigures[0].value}{robot.keyFigures[0].unit && ` ${robot.keyFigures[0].unit}`}</b> {robot.keyFigures[0].label}</p>
-              <div class="actions">
-                <span class="more">Ver ficha <Icon name="arrow" /></span>
-                <a class="quote" href={robotQuoteUrl(site.contact.whatsapp, robot, pageUrl(robot.id))} target="_blank" rel="noopener" aria-label={`Cotizar ${robot.name} por WhatsApp`}>
-                  <Icon name="whatsapp" /> Cotizar
-                </a>
+        {line.tiles.map((robot, i) => {
+          const lead = i === 0;
+          const scene = lead && robotScene(robot.id);
+          return (
+            <li class:list={['tile', { lead }, 'reveal']}>
+              <div class:list={['media', { stage: !lead }]}>
+                <Picture
+                  src={scene || robotCutout(robot.id)}
+                  alt=""
+                  widths={lead ? [480, 720, 960, 1280, 1600, 1920] : [240, 360, 480, 640]}
+                  sizes={lead ? '(max-width: 56rem) 100vw, 60vw' : '(max-width: 40rem) 80vw, 18rem'}
+                  formats={['avif']}
+                  fallbackFormat="webp"
+                  loading="lazy"
+                  class={scene ? 'scene' : 'cutout'}
+                />
+                {robot.isNew && <span class="tag">Nuevo 2026</span>}
               </div>
-            </div>
-          </li>
-        ))}
+              <div class="body">
+                <h3><a href={robotPath(robot.id)} class="stretch">{robot.name}</a></h3>
+                <p class="role">{robot.role}</p>
+                <p class="figure"><b>{robot.keyFigures[0].value}{robot.keyFigures[0].unit && ` ${robot.keyFigures[0].unit}`}</b> {robot.keyFigures[0].label}</p>
+                <div class="actions">
+                  <span class="more">Ver ficha <Icon name="arrow" /></span>
+                  <a class="quote" href={robotQuoteUrl(site.contact.whatsapp, robot, pageUrl(robot.id))} target="_blank" rel="noopener" aria-label={lead ? undefined : `Cotizar ${robot.name} por WhatsApp`}>
+                    <Icon name="whatsapp" /> Cotizar
+                  </a>
+                </div>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   </section>
