@@ -16,8 +16,6 @@
   --blue: #2875b4;
   /* Accent text on navy grounds. */
   --sky: #6fb2ea;
-  --blue-light: var(--sky);
-  --blue-tint: var(--ice-2);
   /* The electric blue of the logo. Graphics, routes and large type only:
      it does not pass contrast for small text on white. */
   --volt: #2a8cff;
@@ -282,15 +280,6 @@ p {
 
 .btn-navy:hover {
   background: var(--ink);
-}
-
-.btn-ghost-dark {
-  border-color: var(--line-strong);
-  color: var(--navy);
-}
-
-.btn-ghost-dark:hover {
-  border-color: var(--navy);
 }
 
 .btn-small {

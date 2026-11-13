@@ -17,7 +17,7 @@ const withCounts = panels.map((p) => ({
 ---
 
 <section class="showcase on-dark" id="lineas" aria-label="Robots en acción, por línea" data-showcase>
-  <ol class="rail" aria-hidden="true" data-rail>
+  <ol class="rail" aria-hidden="true">
     {withCounts.map((p) => (
       <li data-rail-item={p.family}><span class="rail-bar"></span><span class="rail-label">{p.familyName}</span></li>
     ))}
@@ -272,11 +272,6 @@ const withCounts = panels.map((p) => ({
     width: max-content;
     margin-left: auto;
     margin-right: calc(var(--bezel) + var(--gutter));
-    transition: opacity 0.4s;
-  }
-
-  .rail.is-off {
-    opacity: 0;
   }
 
   .rail li {
@@ -369,7 +364,6 @@ const withCounts = panels.map((p) => ({
   const panels = Array.from(root?.querySelectorAll<HTMLElement>('[data-panel]') ?? []);
   const videos = panels.map((panel) => panel.querySelector<HTMLVideoElement>('[data-loop]'));
   const railItems = Array.from(root?.querySelectorAll<HTMLElement>('[data-rail-item]') ?? []);
-  const rail = root?.querySelector<HTMLElement>('[data-rail]');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // AV1 where the browser decodes it (Safari only with hardware support), H.264 otherwise.
@@ -435,7 +429,6 @@ const withCounts = panels.map((p) => ({
         panels[active].classList.add('is-active');
         const id = panels[active].dataset.panel;
         railItems.forEach((item) => item.classList.toggle('is-current', item.dataset.railItem === id));
-        rail?.classList.toggle('is-off', id === 'all');
       }
     }
     panels.forEach((panel, i) => {

@@ -52,7 +52,7 @@ public/
 
 ## Content notes
 
-- Brand exports and usage notes are in [output/brand-kit/README.md](output/brand-kit/README.md). Open [the asset preview](output/brand-kit/preview.html) locally to review color, white, icon, and favicon versions. The active master is `src/assets/brand/source/gm-robotiks-approved.png`; the older `gm-robotics-ia-original.jpg` is a legacy reference.
+- Brand exports and usage notes are in [output/brand-kit/README.md](output/brand-kit/README.md). Open [the asset preview](output/brand-kit/preview.html) locally to review color, white, icon, and favicon versions. The active master is `src/assets/brand/source/gm-robotiks-approved.png`.
 
 - Product figures come from Pudu's official spec sheets and product pages (2025 brochure, 2026 cleaning catalog, September 2026 ET1 / GT-series pages). Update them in `src/data/robots.ts`. Each robot has three `keyFigures` (shown large on its page) and its `useCases`; pages, the sitemap and `llms.txt` are generated from this file.
 - Images go through `astro:assets` (`<Picture>`, AVIF with WebP fallback, `srcset`); encoder quality is set in `src/lib/image-service.ts`. To add or improve a robot image, drop `<id>.webp` into `src/assets/robots/` (transparent, trimmed) or `src/assets/scenes/`, saved as WebP q95 at the largest size the source allows. Record where it came from in `src/assets/robots/SOURCES.md`.
