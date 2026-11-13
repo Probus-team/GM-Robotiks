@@ -9,8 +9,8 @@ const { class: className = '', label = 'Robot GM mirando' } = Astro.props;
 ---
 
 <span class:list={['visor', className]} role="img" aria-label={label} data-visor>
-  <span class="eye eye-l"><span class="pupil"></span></span>
-  <span class="eye eye-r"><span class="pupil"></span></span>
+  <span class="eye"></span>
+  <span class="eye eye-r"></span>
 </span>
 
 <style>
@@ -43,13 +43,6 @@ const { class: className = '', label = 'Robot GM mirando' } = Astro.props;
 
   .eye-r {
     animation-delay: 0.02s;
-  }
-
-  .pupil {
-    position: absolute;
-    inset: 0;
-    background: var(--navy);
-    opacity: 0;
   }
 
   @keyframes blink {

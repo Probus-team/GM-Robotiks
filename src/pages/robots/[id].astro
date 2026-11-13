@@ -698,37 +698,11 @@ const structuredData = [
     display: none;
   }
 
-  @media (max-width: 40rem) {
-    .sticky-cta {
-      position: fixed;
-      z-index: 50;
-      left: 0.75rem;
-      right: 0.75rem;
-      bottom: 0.75rem;
-      display: block;
-      translate: 0 calc(100% + 1rem);
-      transition: translate 0.35s var(--ease-out);
-    }
-
-    .sticky-cta.is-shown {
-      translate: 0 0;
-    }
-
-    .sticky-cta .btn {
-      width: 100%;
-      box-shadow: 0 16px 30px -12px rgba(10, 28, 43, 0.6);
-    }
-  }
-
   @media (max-width: 56rem) {
     .hero-grid {
       grid-template-columns: 1fr;
       min-height: 0;
       padding-top: 7rem;
-    }
-
-    .copy {
-      padding-bottom: 0;
     }
 
     .stage {
@@ -758,6 +732,26 @@ const structuredData = [
   }
 
   @media (max-width: 40rem) {
+    .sticky-cta {
+      position: fixed;
+      z-index: 50;
+      left: 0.75rem;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      display: block;
+      translate: 0 calc(100% + 1rem);
+      transition: translate 0.35s var(--ease-out);
+    }
+
+    .sticky-cta.is-shown {
+      translate: 0 0;
+    }
+
+    .sticky-cta .btn {
+      width: 100%;
+      box-shadow: 0 16px 30px -12px rgba(10, 28, 43, 0.6);
+    }
+
     .figures ul {
       grid-template-columns: 1fr;
       gap: 1.5rem;
