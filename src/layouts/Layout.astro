@@ -92,8 +92,8 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
     <meta name="twitter:image:alt" content={socialImageAlt} />
     <script type="application/ld+json" set:html={jsonLd} />
 
-    <Font cssVariable="--font-display" preload={[{ subset: 'latin', style: 'normal' }]} />
-    <Font cssVariable="--font-body" preload={[{ subset: 'latin', style: 'normal' }]} />
+    <Font cssVariable="--font-display" />
+    <Font cssVariable="--font-body" />
     <slot name="head" />
     <script is:inline>
       document.documentElement.classList.add('js');
