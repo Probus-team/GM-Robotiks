@@ -20,5 +20,24 @@
 /icon-*
   Cache-Control: public, max-age=86400
 
+# Pages. A browser may show the copy it fetched in the last five minutes
+# without asking again, so going back to a page during a visit (the header
+# links, the logo, a robot and back to the catalogue) takes no round trip.
+# The cost: for up to five minutes after a deploy, a visitor who already has a
+# page sees that copy when they follow a link to it. Reloading always asks the
+# server. Chrome ignores stale-while-revalidate for pages, so there is no
+# setting that both answers at once and checks in the background. A new page
+# needs a line here, or it keeps the default (ask every time).
+/
+  Cache-Control: public, max-age=300, must-revalidate
+/robots/*
+  Cache-Control: public, max-age=300, must-revalidate
+/privacidad/
+  Cache-Control: public, max-age=300, must-revalidate
+/terminos/
+  Cache-Control: public, max-age=300, must-revalidate
+/eliminacion-de-datos/
+  Cache-Control: public, max-age=300, must-revalidate
+
 https://:worker.22jacganon.workers.dev/*
   X-Robots-Tag: noindex, nofollow
