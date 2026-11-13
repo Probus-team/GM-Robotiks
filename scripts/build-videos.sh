@@ -2,8 +2,8 @@
 # Rebuilds the site's videos from Pudu Robotics' original files.
 #
 #   scripts/build-videos.sh <source-dir> home
-#     Home montage (public/media/hero), showcase loops (public/media/loops) and
-#     their posters. Every shot is cut once to a lossless intermediate and
+#     Home montage in its five sizes (public/media/hero), showcase loops
+#     (public/media/loops) and their posters. Every shot is cut once to a lossless intermediate and
 #     encoded once per codec: AV1 (Chrome, Firefox, Edge, Safari on recent Apple
 #     chips) and H.264 for everything else. Each file stays under 5 MB
 #     (tests/catalog.test.mjs).
@@ -42,10 +42,12 @@ cut() { # source start duration filter out.mkv
   ffmpeg -v error -y -ss "$2" -i "$SRC/$1" -t "$3" -an -vf "fps=25,$4,format=yuv420p" -c:v ffv1 "$5"
 }
 
-encode() { # in.mkv out-base [av1-crf] [h264-crf] (writes out-base-av1.mp4 and out-base-h264.mp4)
-  ffmpeg -v error -y -i "$1" -an -c:v libsvtav1 -preset 3 -crf "${3:-30}" -g 50 -pix_fmt yuv420p10le \
+encode() { # in.mkv out-base [av1-crf] [h264-crf] [width:height] (writes out-base-av1.mp4 and out-base-h264.mp4)
+  local scale=()
+  [ -n "${5:-}" ] && scale=(-vf "scale=$5:flags=lanczos")
+  ffmpeg -v error -y -i "$1" -an "${scale[@]}" -c:v libsvtav1 -preset 3 -crf "${3:-30}" -g 50 -pix_fmt yuv420p10le \
     -svtav1-params tune=0 -movflags +faststart "$2-av1.mp4"
-  ffmpeg -v error -y -i "$1" -an -c:v libx264 -preset veryslow -tune film -crf "${4:-25}" -g 50 \
+  ffmpeg -v error -y -i "$1" -an "${scale[@]}" -c:v libx264 -preset veryslow -tune film -crf "${4:-25}" -g 50 \
     -pix_fmt yuv420p -profile:v high -movflags +faststart "$2-h264.mp4"
 }
 
@@ -107,6 +109,14 @@ for o in landscape portrait; do
   encode "$WORK/$o.mkv" "$HERO/montage-$o"
   still "$WORK/$o.mkv" 1.6 "$WORK/poster-$o.png"
 done
+# Smaller renditions, which src/components/Hero.astro picks by screen and
+# connection. 720p at the same CRFs for frames up to 1400 device pixels wide
+# (1.6 Mbps AV1 against 2.6). "lite" is 540p at about 0.8 Mbps for connections
+# that cannot keep up with the others: softer on fast motion, and it plays
+# without stalling on a 1.6 Mbps link, where the 1080p file stalled throughout.
+encode "$WORK/landscape.mkv" "$HERO/montage-landscape-720" 30 25 1280:720
+encode "$WORK/landscape.mkv" "$HERO/montage-landscape-lite" 36 27 960:540
+encode "$WORK/portrait.mkv" "$HERO/montage-portrait-lite" 36 27 540:960
 # Posters are near-lossless masters; astro:assets makes the AVIF/WebP sizes.
 (cd "$ROOT" && node -e "
   const sharp = require('sharp');
