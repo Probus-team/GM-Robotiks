@@ -10,7 +10,7 @@ import Icon from '../../components/Icon.astro';
 import { site } from '../../data/site';
 import CaseFilm from '../../components/CaseFilm.astro';
 import { cases, families, robots, type Robot } from '../../data/robots';
-import { robotPath, robotTitle } from '../../data/seo';
+import { breadcrumbs, robotPath, robotTitle } from '../../data/seo';
 import { robotCutout, robotScene } from '../../lib/media';
 import { robotQuoteUrl } from '../../lib/whatsapp';
 import { midSentence } from '../../lib/text';
@@ -39,14 +39,7 @@ const productImages = await Promise.all(
 );
 const description = `${robot.name}: ${midSentence(robot.role)}. ${robot.summary}`;
 const structuredData = [
-  {
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: new URL('/', Astro.site).href },
-      { '@type': 'ListItem', position: 2, name: 'Catálogo de robots Pudu', item: new URL('/robots/', Astro.site).href },
-      { '@type': 'ListItem', position: 3, name: robot.name, item: pageUrl },
-    ],
-  },
+  breadcrumbs(Astro.site!, [['Inicio', '/'], ['Catálogo de robots Pudu', '/robots/'], [robot.name, robotPath(robot.id)]]),
   {
     '@type': 'Product',
     '@id': `${pageUrl}#product`,
@@ -173,7 +166,7 @@ const structuredData = [
             <p class="lede">{clip.where} · Pudu Robotics · {clip.minutes} min</p>
           </div>
           <div class="video-frame reveal-frame">
-            <CaseFilm clip={clip} data-clip />
+            <CaseFilm clip={clip} />
           </div>
         </div>
       </section>
@@ -705,37 +698,11 @@ const structuredData = [
     display: none;
   }
 
-  @media (max-width: 40rem) {
-    .sticky-cta {
-      position: fixed;
-      z-index: 50;
-      left: 0.75rem;
-      right: 0.75rem;
-      bottom: 0.75rem;
-      display: block;
-      translate: 0 calc(100% + 1rem);
-      transition: translate 0.35s var(--ease-out);
-    }
-
-    .sticky-cta.is-shown {
-      translate: 0 0;
-    }
-
-    .sticky-cta .btn {
-      width: 100%;
-      box-shadow: 0 16px 30px -12px rgba(10, 28, 43, 0.6);
-    }
-  }
-
   @media (max-width: 56rem) {
     .hero-grid {
       grid-template-columns: 1fr;
       min-height: 0;
       padding-top: 7rem;
-    }
-
-    .copy {
-      padding-bottom: 0;
     }
 
     .stage {
@@ -765,6 +732,26 @@ const structuredData = [
   }
 
   @media (max-width: 40rem) {
+    .sticky-cta {
+      position: fixed;
+      z-index: 50;
+      left: 0.75rem;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      display: block;
+      translate: 0 calc(100% + 1rem);
+      transition: translate 0.35s var(--ease-out);
+    }
+
+    .sticky-cta.is-shown {
+      translate: 0 0;
+    }
+
+    .sticky-cta .btn {
+      width: 100%;
+      box-shadow: 0 16px 30px -12px rgba(10, 28, 43, 0.6);
+    }
+
     .figures ul {
       grid-template-columns: 1fr;
       gap: 1.5rem;
@@ -789,24 +776,6 @@ const structuredData = [
 </style>
 
 <script>
-  // The clip's poster loads as its section approaches, not with the page.
-  const clipVideo = document.querySelector<HTMLVideoElement>('[data-clip]');
-  if (clipVideo) {
-    const showPoster = () => {
-      if (clipVideo.dataset.poster) clipVideo.poster = clipVideo.dataset.poster;
-    };
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(([entry]) => {
-        if (!entry.isIntersecting) return;
-        showPoster();
-        io.disconnect();
-      }, { rootMargin: '600px 0px' });
-      io.observe(clipVideo);
-    } else {
-      showPoster();
-    }
-  }
-
   // Show the phone quote bar once the hero is out of view.
   const bar = document.querySelector<HTMLElement>('[data-sticky-cta]');
   const hero = document.querySelector('[data-robot-hero]');

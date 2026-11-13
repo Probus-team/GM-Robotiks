@@ -52,7 +52,7 @@ public/
 
 ## Content notes
 
-- Brand exports and usage notes are in [output/brand-kit/README.md](output/brand-kit/README.md). Open [the asset preview](output/brand-kit/preview.html) locally to review color, white, icon, and favicon versions. The active master is `src/assets/brand/source/gm-robotiks-approved.png`; the older `gm-robotics-ia-original.jpg` is a legacy reference.
+- Brand exports and usage notes are in [output/brand-kit/README.md](output/brand-kit/README.md). Open [the asset preview](output/brand-kit/preview.html) locally to review color, white, icon, and favicon versions. The active master is `src/assets/brand/source/gm-robotiks-approved.png`.
 
 - Product figures come from Pudu's official spec sheets and product pages (2025 brochure, 2026 cleaning catalog, September 2026 ET1 / GT-series pages). Update them in `src/data/robots.ts`. Each robot has three `keyFigures` (shown large on its page) and its `useCases`; pages, the sitemap and `llms.txt` are generated from this file.
 - Images go through `astro:assets` (`<Picture>`, AVIF with WebP fallback, `srcset`); encoder quality is set in `src/lib/image-service.ts`. To add or improve a robot image, drop `<id>.webp` into `src/assets/robots/` (transparent, trimmed) or `src/assets/scenes/`, saved as WebP q95 at the largest size the source allows. Record where it came from in `src/assets/robots/SOURCES.md`.
@@ -65,8 +65,9 @@ public/
 ## Videos
 
 `scripts/build-videos.sh <source-dir> home` rebuilds the home montage
-(`public/media/hero/`), the showcase loops (`public/media/loops/`) and their
-posters from Pudu Robotics' original files. The script lists every source file
+(`public/media/hero/`), the 7–8 s showcase loops (`public/media/loops/`, one
+per panel in `src/data/showcase.ts`) and their posters from Pudu Robotics'
+original files. The script lists every source file
 with its URL (Pudu's CDN or the Pudu Robotics YouTube channel), the cut points
 and the encoder settings. Each clip is cut once to a lossless intermediate and
 encoded once as AV1 and once as H.264; the page picks AV1 where the browser
@@ -139,10 +140,3 @@ After merging, verify the Cloudflare production deployment identifies the
 merged commit, and that both production hosts respond over HTTPS. Check the
 canonical URL and an image, video, and PDF from the deployed site. Production
 must not send the preview-only `X-Robots-Tag` header.
-
-## Showcase loops
-
-`public/media/loops/` holds 7–8 s muted cuts of Pudu case films for the
-full-screen panels on the home page, as AV1 and H.264 with a poster each. They
-are built with the home videos (see Videos above); cut points are in
-`scripts/build-videos.sh` and panels in `src/data/showcase.ts`.

@@ -1,34 +1,25 @@
 ---
-import full from '../assets/brand/optimized/logo-full.webp';
-import full320 from '../assets/brand/optimized/logo-full-320.webp';
-import full480 from '../assets/brand/optimized/logo-full-480.webp';
+// The white full logo for dark grounds (header and footer).
 import white from '../assets/brand/optimized/logo-full-white.webp';
 import white320 from '../assets/brand/optimized/logo-full-white-320.webp';
 import white480 from '../assets/brand/optimized/logo-full-white-480.webp';
-import mark from '../assets/brand/optimized/logo-mark.webp';
-import mark176 from '../assets/brand/optimized/logo-mark-176.webp';
-import mark288 from '../assets/brand/optimized/logo-mark-288.webp';
 
 interface Props {
-  variant: 'full' | 'white' | 'mark';
-  class?: string;
   loading?: 'eager' | 'lazy';
 }
 
-const { variant, class: className, loading = 'eager' } = Astro.props;
-const sources = { full: [full320, full480, full], white: [white320, white480, white], mark: [mark176, mark288, mark] }[variant];
-const original = sources[2];
+const { loading = 'eager' } = Astro.props;
+const sources = [white320, white480, white];
 ---
 
 <img
-  src={sources[1].src}
+  src={white480.src}
   srcset={sources.map((image) => `${image.src} ${image.width}w`).join(', ')}
-  sizes={variant === 'mark' ? '5.5rem' : '9.2rem'}
-  width={original.width}
-  height={original.height}
-  style={`aspect-ratio: ${original.width} / ${original.height}`}
-  alt={variant === 'mark' ? 'GM Robotiks IA' : ''}
-  class={className}
+  sizes="9.2rem"
+  width={white.width}
+  height={white.height}
+  style={`aspect-ratio: ${white.width} / ${white.height}`}
+  alt=""
   loading={loading}
   decoding="async"
 />

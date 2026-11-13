@@ -1,8 +1,9 @@
 ---
 // A case film with controls. Browsers take the first source they can play:
 // AV1 (Chrome, Firefox, Edge, newer Safari), HEVC (other Safari), then the
-// small local H.264 copy. The poster is set by the page's script when the
-// film comes near, so data-poster is passed through with the other attributes.
+// small local H.264 copy. The poster loads as the film comes near, not with
+// the page, and only one film plays at a time. Other attributes pass through,
+// which carries the parent's scoped-style attribute so its CSS reaches the video.
 import type { CaseVideo } from '../data/robots';
 
 interface Props {
@@ -13,8 +14,35 @@ interface Props {
 const { clip, ...attributes } = Astro.props;
 ---
 
-<video data-poster={clip.poster} preload="none" controls playsinline aria-label={`${clip.title}. ${clip.where}.`} {...attributes}>
+<video data-case-film data-poster={clip.poster} preload="none" controls playsinline aria-label={`${clip.title}. ${clip.where}.`} {...attributes}>
   <source src={clip.av1} type='video/mp4; codecs="av01.0.08M.10"' />
   <source src={clip.hevc} type='video/mp4; codecs="hvc1.1.6.L120.90"' />
   <source src={clip.src} type="video/mp4" />
 </video>
+
+<script>
+  const videos = document.querySelectorAll<HTMLVideoElement>('[data-case-film]');
+  const showPoster = (video: HTMLVideoElement) => {
+    if (video.dataset.poster) video.poster = video.dataset.poster;
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        showPoster(entry.target as HTMLVideoElement);
+        io.unobserve(entry.target);
+      });
+    }, { rootMargin: '600px 0px' });
+    videos.forEach((video) => io.observe(video));
+  } else {
+    videos.forEach(showPoster);
+  }
+
+  videos.forEach((v) =>
+    v.addEventListener('play', () => {
+      videos.forEach((other) => {
+        if (other !== v) other.pause();
+      });
+    }),
+  );
+</script>

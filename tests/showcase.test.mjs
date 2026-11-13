@@ -27,7 +27,7 @@ function setup(reduce = false, { loaded = true } = {}) {
   }));
   const panels = Array.from({ length: 5 }, (_, i) => ({
     top: 1000 + i * 800,
-    dataset: { panel: i === 4 ? 'all' : String(i) },
+    dataset: { panel: String(i) },
     classList: classList(),
     style: { setProperty() {} },
     querySelector: () => videos[i] ?? null,
@@ -36,7 +36,6 @@ function setup(reduce = false, { loaded = true } = {}) {
   const railItems = panels.map((panel) => ({ dataset: { railItem: panel.dataset.panel }, classList: classList() }));
   const root = {
     querySelectorAll: (selector) => selector === '[data-panel]' ? panels : railItems,
-    querySelector: () => ({ classList: classList() }),
   };
   const document = { hidden: false, querySelector: () => root, addEventListener: (name, callback) => listeners[name] = callback };
   runInNewContext(script, {

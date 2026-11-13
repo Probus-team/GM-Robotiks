@@ -76,7 +76,7 @@ function trace(mask, width, height) {
 const assets = {};
 for (const [name, region] of Object.entries(regions)) {
   const asset = extractArtwork(pixels, info, region);
-  asset.paths = asset.masks.map(mask => trace(mask, asset.width, asset.height));
+  asset.path = trace(asset.mask, asset.width, asset.height);
   assets[name] = asset;
 }
 
@@ -93,7 +93,7 @@ async function png(asset, variant = 'color') {
 
 async function svg(asset, variant = 'color') {
   const content = variant.startsWith('mono')
-    ? asset.paths.map(d => `<path fill="${variant === 'mono-white' ? palette.white : palette.navy}" fill-rule="evenodd" d="${d}"/>`).join('')
+    ? `<path fill="${variant === 'mono-white' ? palette.white : palette.navy}" fill-rule="evenodd" d="${asset.path}"/>`
     : `<image width="${asset.width}" height="${asset.height}" href="data:image/png;base64,${(await png(asset, variant)).toString('base64')}"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${asset.width} ${asset.height}"><title>GM Robotiks IA</title>${content}</svg>`;
 }
@@ -111,12 +111,11 @@ for (const [name, key, variant] of exports) {
   await writeFile(path.join(brand, `${name}.svg`), await svg(assets[key], variant));
 }
 
-for (const name of ['logo-full', 'logo-full-white', 'logo-mark']) {
-  const input = path.join(brand, `${name}.png`);
-  await sharp(input).webp({ lossless: true }).toFile(path.join(optimized, `${name}.webp`));
-  for (const width of name === 'logo-mark' ? [176, 288] : [320, 480]) {
-    await sharp(input).resize({ width }).webp({ lossless: true }).toFile(path.join(optimized, `${name}-${width}.webp`));
-  }
+// The header and footer logo (src/components/BrandImage.astro).
+const whiteLogo = path.join(brand, 'logo-full-white.png');
+await sharp(whiteLogo).webp({ lossless: true }).toFile(path.join(optimized, 'logo-full-white.webp'));
+for (const width of [320, 480]) {
+  await sharp(whiteLogo).resize({ width }).webp({ lossless: true }).toFile(path.join(optimized, `logo-full-white-${width}.webp`));
 }
 
 // White tiles keep the original blue robot legible in both light and dark browser chrome.
@@ -194,4 +193,4 @@ for (let i = 0; i < reviewTiles.length; i++) {
   reviewLayers.push({ input: tile, left: (i % 2) * 600, top: Math.floor(i / 2) * 280 });
 }
 await sharp({ create: { width: 1200, height: 840, channels: 4, background: '#ffffff' } }).composite(reviewLayers).png().toFile(path.join(kit, 'asset-review.png'));
-console.log(`Built ${inventory.length} public assets, 9 optimized WebP files, and the review kit in output/brand-kit.`);
+console.log(`Built ${inventory.length} public assets, 3 optimized WebP files, and the review kit in output/brand-kit.`);

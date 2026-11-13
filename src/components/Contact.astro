@@ -256,6 +256,8 @@ const directWhatsapp = whatsapp ? whatsappUrl(whatsapp, 'Hola, GM Robotiks. Quie
 </style>
 
 <script>
+  import { whatsappUrl } from '../lib/whatsapp';
+
   const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
   const status = form?.querySelector<HTMLElement>('[data-status]');
 
@@ -327,7 +329,7 @@ const directWhatsapp = whatsapp ? whatsappUrl(whatsapp, 'Hola, GM Robotiks. Quie
       return;
     }
 
-    const url = `https://wa.me/${form.dataset.whatsapp}?text=${encodeURIComponent(text)}`;
+    const url = whatsappUrl(form.dataset.whatsapp!, text);
     const opened = window.open(url, '_blank');
     if (opened) opened.opener = null;
     else window.location.href = url;

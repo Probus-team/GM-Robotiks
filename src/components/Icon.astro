@@ -1,15 +1,13 @@
 ---
 // Small inline icons. Decorative: the text next to them carries the meaning.
 interface Props {
-  name: 'arrow' | 'whatsapp' | 'pause' | 'play' | 'download' | 'arrow-down';
-  class?: string;
+  name: 'arrow' | 'whatsapp' | 'pause' | 'play' | 'download';
 }
-const { name, class: className } = Astro.props;
+const { name } = Astro.props;
 ---
 
-<svg class:list={['icon', name === 'arrow' && 'arrow', className]} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+<svg class:list={['icon', name === 'arrow' && 'arrow']} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
   {name === 'arrow' && <path d="M4 12h15m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />}
-  {name === 'arrow-down' && <path d="M12 4v15m-6-6 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />}
   {name === 'download' && <path d="M12 3v12m-5-5 5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />}
   {name === 'pause' && <path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />}
   {name === 'play' && <path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor" />}

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { test } from 'node:test';
 
@@ -42,32 +43,22 @@ test('font downloads use Undici with the October integrity and denial-of-service
   }
 });
 
-test('font fetches verify uppercase and mixed-case integrity tokens', async () => {
-  const requireFromUnifont = createRequire(requireFromAstro.resolve('unifont'));
-  const { fetch } = await import(requireFromUnifont.resolve('undici'));
-  const { createHash } = await import('node:crypto');
-  const digest = createHash('sha256').update('trusted').digest('base64');
-  for (const algorithm of ['sha256', 'SHA256', 'Sha256']) {
-    const integrity = `${algorithm}-${digest}`;
-    assert.equal(await (await fetch('data:,trusted', { integrity })).text(), 'trusted');
-    await assert.rejects(fetch('data:,tampered', { integrity }), /fetch failed/);
-  }
-  assert.equal(await (await fetch('data:,unpinned')).text(), 'unpinned');
-});
-
-test('Miniflare fetches verify integrity tokens without accepting tampered content', async () => {
-  const requireFromWrangler = createRequire(import.meta.resolve('wrangler/package.json'));
-  const requireFromMiniflare = createRequire(requireFromWrangler.resolve('miniflare'));
-  const { fetch } = await import(requireFromMiniflare.resolve('undici'));
-  const { createHash } = await import('node:crypto');
-  const digest = createHash('sha256').update('trusted').digest('base64');
-  for (const algorithm of ['sha256', 'SHA256', 'Sha256']) {
-    const integrity = `${algorithm}-${digest}`;
-    assert.equal(await (await fetch('data:,trusted', { integrity })).text(), 'trusted');
-    await assert.rejects(fetch('data:,tampered', { integrity }), /fetch failed/);
-  }
-  assert.equal(await (await fetch('data:,unpinned')).text(), 'unpinned');
-});
+const requireFromWrangler = createRequire(import.meta.resolve('wrangler/package.json'));
+for (const [name, requireFromOwner] of [
+  ['font fetches', createRequire(requireFromAstro.resolve('unifont'))],
+  ['Miniflare fetches', createRequire(requireFromWrangler.resolve('miniflare'))],
+]) {
+  test(`${name} verify uppercase and mixed-case integrity tokens without accepting tampered content`, async () => {
+    const { fetch } = await import(requireFromOwner.resolve('undici'));
+    const digest = createHash('sha256').update('trusted').digest('base64');
+    for (const algorithm of ['sha256', 'SHA256', 'Sha256']) {
+      const integrity = `${algorithm}-${digest}`;
+      assert.equal(await (await fetch('data:,trusted', { integrity })).text(), 'trusted');
+      await assert.rejects(fetch('data:,tampered', { integrity }), /fetch failed/);
+    }
+    assert.equal(await (await fetch('data:,unpinned')).text(), 'unpinned');
+  });
+}
 
 test('Vite rejects protocol-relative script injection during HTML transformation', async (t) => {
   const { createServer } = await import(requireFromAstro.resolve('vite'));
@@ -153,10 +144,9 @@ for (const tag of ['script', 'style']) {
 
 // Bundled packages are invisible to lockfile audits. Check the published bundle
 // markers as well, using the fixed versions recorded in Wrangler 4.158.0.
-const requireFromWranglerBundle = createRequire(import.meta.resolve('wrangler/package.json'));
 const bundledSources = [
   readFileSync(new URL('wrangler-dist/cli.js', import.meta.resolve('wrangler/package.json')), 'utf8'),
-  readFileSync(requireFromWranglerBundle.resolve('miniflare'), 'utf8'),
+  readFileSync(requireFromWrangler.resolve('miniflare'), 'utf8'),
 ];
 for (const [name, range] of Object.entries({
   'brace-expansion': '^2.1.7 || >=5.0.12',

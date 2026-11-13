@@ -17,7 +17,7 @@ const current = Astro.url.pathname;
       <ul>
         {site.nav.map((item) => (
           <li>
-            <a href={item.href} aria-current={current === item.href || (item.href === '/robots/' && current.startsWith('/robots/')) ? 'page' : undefined}>
+            <a href={item.href} aria-current={current.startsWith(item.href) ? 'page' : undefined}>
               {item.label}
             </a>
           </li>
