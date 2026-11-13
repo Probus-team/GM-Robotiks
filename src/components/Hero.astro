@@ -36,6 +36,7 @@ const counts = families.map((f) => ({
         <source type="image/avif" srcset={landAvif.srcSet.attribute} sizes={posterSizes} />
         <img
           class="poster"
+          data-hero-poster
           src={landWebp.src}
           srcset={landWebp.srcSet.attribute}
           sizes={posterSizes}
@@ -462,6 +463,7 @@ const counts = families.map((f) => ({
 
 <script>
   const video = document.querySelector<HTMLVideoElement>('[data-hero-video]');
+  const poster = document.querySelector<HTMLImageElement>('[data-hero-poster]');
   const toggle = document.querySelector<HTMLButtonElement>('[data-hero-toggle]');
   const toggleLabel = document.querySelector<HTMLElement>('[data-toggle-label]');
   const caption = document.querySelector<HTMLAnchorElement>('[data-caption]');
@@ -473,14 +475,60 @@ const counts = families.map((f) => ({
   );
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
 
+  // How much video the connection can take, in megabits per second. The poster
+  // was just downloaded over it, so its body is the sample: the browser's own
+  // estimate (navigator.connection.downlink) reads about 1.5 on a new profile
+  // whatever the link is. The poster shares the link with the fonts, so this
+  // reads up to half the real figure; the thresholds below allow for that. A
+  // poster that came from the cache says nothing, and neither does a browser
+  // without Resource Timing sizes: then the last visit's answer is used.
+  const TIERS = ['none', 'lite', 'mid', 'full'] as const;
+  type Tier = (typeof TIERS)[number];
+  const measuredTier = (): Tier | undefined => {
+    const entry = poster && (performance.getEntriesByName(poster.currentSrc)[0] as PerformanceResourceTiming | undefined);
+    if (!entry || !entry.transferSize || entry.encodedBodySize < 20_000) return undefined;
+    const ms = entry.responseEnd - entry.responseStart;
+    const mbps = ms > 0 ? (entry.encodedBodySize * 8) / ms / 1000 : Infinity;
+    return mbps >= 5 ? 'full' : mbps >= 2.5 ? 'mid' : mbps >= 0.5 ? 'lite' : 'none';
+  };
+  const remembered = (): Tier | undefined => {
+    try {
+      const tier = localStorage.getItem('hero-video-tier') as Tier | null;
+      return tier && TIERS.includes(tier) ? tier : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+  const connectionTier = (): Tier => {
+    if (connection?.saveData || connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g') return 'none';
+    const measured = measuredTier();
+    if (measured) {
+      try {
+        localStorage.setItem('hero-video-tier', measured);
+      } catch {
+        // Private browsing: measure again next time.
+      }
+    }
+    const tier = measured ?? remembered() ?? 'full';
+    return connection?.effectiveType === '3g' && tier !== 'none' ? 'lite' : tier;
+  };
+
+  // The montage comes in three landscape sizes and two portrait ones (see
+  // scripts/build-videos.sh): 1080p at 2.6 Mbps, 720p at 1.6 and a 540p "lite"
+  // at 0.8 (AV1; H.264 runs a fifth to a third higher). The connection caps the
+  // bitrate; under that cap the screen picks the size: 720p covers a frame up to
+  // 1400 device pixels wide.
   // AV1 where the browser decodes it (Safari only reports it with hardware
   // support), H.264 everywhere else.
-  const pickSource = (v: HTMLVideoElement) => {
-    const base = window.matchMedia('(max-aspect-ratio: 4/5)').matches ? v.dataset.portrait : v.dataset.landscape;
-    if (!base) return undefined;
-    return `${base}-${v.canPlayType('video/mp4; codecs="av01.0.08M.10"') ? 'av1' : 'h264'}.mp4`;
+  const pickSource = (v: HTMLVideoElement, tier: Tier) => {
+    const portrait = window.matchMedia('(max-aspect-ratio: 4/5)').matches;
+    const base = portrait ? v.dataset.portrait : v.dataset.landscape;
+    if (!base || tier === 'none') return undefined;
+    const small = v.clientWidth * window.devicePixelRatio <= 1400;
+    const size = tier === 'lite' ? '-lite' : !portrait && (tier === 'mid' || small) ? '-720' : '';
+    return `${base}${size}-${v.canPlayType('video/mp4; codecs="av01.0.08M.10"') ? 'av1' : 'h264'}.mp4`;
   };
 
   let shot = 0;
@@ -500,18 +548,32 @@ const counts = families.map((f) => ({
   let loaded = false;
   // Set by the observer, which reports the initial state right after observe().
   let inView = false;
+  // On a connection too slow for any rendition (or with data saver on) the
+  // montage starts paused and the button offers it; pressing play is consent.
   let userPaused = false;
+  let tier: Tier = 'full';
 
   const setPaused = (paused: boolean) => {
     toggle?.setAttribute('aria-pressed', String(paused));
     if (toggleLabel) toggleLabel.textContent = paused ? 'Reproducir video' : 'Pausar video';
   };
 
+  // The showcase under the hero preloads its first loop once this says the
+  // montage has what it needs (or will not play), so the two never share a
+  // slow connection. See Showcase.astro. (Not data-hero-video: that attribute
+  // is how both scripts find the video element.)
+  const settle = (state: 'ready' | 'slow') => {
+    if (document.documentElement.dataset.heroMontage) return;
+    document.documentElement.dataset.heroMontage = state;
+    window.dispatchEvent(new Event('hero-montage'));
+  };
+
   const attach = (v: HTMLVideoElement) => {
-    const src = pickSource(v);
+    const src = pickSource(v, tier);
     if (!src) return false;
     v.src = src;
     v.addEventListener('playing', () => v.classList.add('is-playing'), { once: true });
+    v.addEventListener('canplaythrough', () => settle(tier === 'full' || tier === 'mid' ? 'ready' : 'slow'), { once: true });
     v.addEventListener('timeupdate', () => {
       let i = 0;
       shots.forEach((s, n) => {
@@ -527,11 +589,15 @@ const counts = families.map((f) => ({
       if (toggle) toggle.hidden = false;
     }).catch(() => {});
 
-  // The first download waits until the hero has stayed on screen for a moment:
-  // landing on /#contacto smooth-scrolls past it, and that should not count.
+  // A page opened at the top starts the montage as soon as it has loaded. One
+  // opened at an anchor (/#contacto) smooth-scrolls past the hero, and that
+  // should not count: there the first download waits until the hero has stayed
+  // on screen, with the page still, for a moment. (On a slow device the scroll
+  // can take longer than the moment; the hero is on screen the whole time.)
+  const openedAtTop = !location.hash && window.scrollY < 1;
   let attachTimer = 0;
   const sync = () => {
-    if (!video || reduce || saveData || !loaded) return;
+    if (!video || reduce || !loaded) return;
     const shouldPlay = inView && !document.hidden && !userPaused;
     if (!shouldPlay) {
       clearTimeout(attachTimer);
@@ -544,14 +610,23 @@ const counts = families.map((f) => ({
       return;
     }
     if (attachTimer) return;
-    attachTimer = window.setTimeout(() => {
+    const start = () => {
       attachTimer = 0;
       if (inView && !document.hidden && !userPaused && attach(video)) play(video);
+    };
+    if (openedAtTop && window.scrollY < 1) return start();
+    const y = window.scrollY;
+    attachTimer = window.setTimeout(() => {
+      if (Math.abs(window.scrollY - y) < 4) return start();
+      attachTimer = 0;
+      sync();
     }, 600);
   };
 
   toggle?.addEventListener('click', () => {
     userPaused = !userPaused;
+    // Asked for by hand on a slow connection: the smallest rendition.
+    if (!userPaused && tier === 'none') tier = 'lite';
     setPaused(userPaused);
     sync();
   });
@@ -567,8 +642,16 @@ const counts = families.map((f) => ({
 
   const start = () => {
     loaded = true;
+    if (!video || reduce) return settle('slow');
+    tier = connectionTier();
+    if (tier === 'none') {
+      userPaused = true;
+      setPaused(true);
+      if (toggle) toggle.hidden = false;
+      return settle('slow');
+    }
     sync();
   };
-  if (document.readyState === 'complete') setTimeout(start, 200);
-  else window.addEventListener('load', () => setTimeout(start, 200), { once: true });
+  if (document.readyState === 'complete') start();
+  else window.addEventListener('load', start, { once: true });
 </script>

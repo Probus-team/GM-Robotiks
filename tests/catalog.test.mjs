@@ -63,17 +63,25 @@ test('"Cotizar" opens WhatsApp with a message written for that robot', () => {
 });
 
 test('home videos come in AV1 and H.264, each within the 5 MB budget, with posters', () => {
-  const videos = ['landscape', 'portrait'].flatMap((o) => ['av1', 'h264'].map((c) => `public/media/hero/montage-${o}-${c}.mp4`));
+  // The montage sizes src/components/Hero.astro can ask for.
+  const videos = ['landscape', 'landscape-720', 'landscape-lite', 'portrait', 'portrait-lite']
+    .flatMap((o) => ['av1', 'h264'].map((c) => `public/media/hero/montage-${o}-${c}.mp4`));
   for (const panel of panels) {
     if (panel.media.type !== 'video') continue;
     videos.push(`public${panel.media.src}`, `public${panel.media.av1}`);
     assert.ok(existsSync(file(`public${panel.media.poster}`)), panel.media.poster);
   }
-  assert.equal(videos.length, 10);
+  assert.equal(videos.length, 16);
   for (const path of videos) {
     assert.ok(existsSync(file(path)), path);
     const size = readFileSync(file(path)).length;
     assert.ok(size < 5_000_000, `${path} is ${size} bytes`);
+  }
+  // A smaller rendition is only worth having if it is smaller.
+  const bytes = (name) => readFileSync(file(`public/media/hero/montage-${name}.mp4`)).length;
+  for (const codec of ['av1', 'h264']) {
+    assert.ok(bytes(`landscape-lite-${codec}`) < bytes(`landscape-720-${codec}`) && bytes(`landscape-720-${codec}`) < bytes(`landscape-${codec}`));
+    assert.ok(bytes(`portrait-lite-${codec}`) < bytes(`portrait-${codec}`));
   }
   for (const name of ['poster-landscape.webp', 'poster-portrait.webp']) {
     assert.ok(existsSync(file(`src/assets/hero/${name}`)), name);

@@ -389,15 +389,35 @@ const withCounts = panels.map((p) => ({
   };
 
   // Posters and loops wait until the page has loaded, so they never compete with
-  // the hero poster; after that, only panels within 600px are fetched. Reduced
-  // motion gets the posters and never the loops.
+  // the hero poster; after that, only panels within 600px are fetched. A loop
+  // also waits for the hero montage above it: the first panel is within reach
+  // of a page that has not been scrolled, and on a slow connection its 3 MB
+  // would take half the link from the montage. Hero.astro says when the montage
+  // has what it needs (data-hero-montage="ready"); the first scroll lifts the
+  // wait whatever the montage is doing. Reduced motion gets the posters and
+  // never the loops.
+  let loopsAllowed = document.documentElement.dataset.heroMontage === 'ready' || !document.querySelector('[data-hero-video]');
+  const waiting = new Set<HTMLVideoElement>();
+  const allowLoops = () => {
+    loopsAllowed = true;
+    waiting.forEach(loadVideo);
+    waiting.clear();
+  };
+  window.addEventListener('hero-montage', () => {
+    if (document.documentElement.dataset.heroMontage === 'ready') allowLoops();
+  });
+  window.addEventListener('scroll', allowLoops, { once: true, passive: true });
+
   const warm = () => {
     const preloadObserver = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
         const video = entry.target as HTMLVideoElement;
         showPoster(video);
-        if (!reduce) loadVideo(video);
+        if (!reduce) {
+          if (loopsAllowed) loadVideo(video);
+          else waiting.add(video);
+        }
         preloadObserver.unobserve(video);
       }
     }, { rootMargin: '600px 0px' });

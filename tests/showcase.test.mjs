@@ -7,8 +7,12 @@ import { runInNewContext } from 'node:vm';
 const source = readFileSync(new URL('../src/components/Showcase.astro', import.meta.url), 'utf8');
 const script = stripTypeScriptTypes(source.match(/<script>([\s\S]*?)<\/script>/)[1]);
 
-function setup(reduce = false, { loaded = true } = {}) {
-  const listeners = {};
+// hero: 'none' (no montage on the page), 'pending' (montage still loading), or the state Hero.astro
+// announced before this script ran ('ready', 'slow').
+function setup(reduce = false, { loaded = true, hero = 'none' } = {}) {
+  const handlers = {};
+  const on = (name, callback) => (handlers[name] ??= []).push(callback);
+  const listeners = new Proxy({}, { get: (_, name) => (...args) => (handlers[name] ?? []).forEach((callback) => callback(...args)) });
   const observers = [];
   let frame;
   const classList = () => {
@@ -38,10 +42,14 @@ function setup(reduce = false, { loaded = true } = {}) {
     querySelectorAll: (selector) => selector === '[data-panel]' ? panels : railItems,
     querySelector: () => ({ classList: classList() }),
   };
-  const document = { hidden: false, querySelector: () => root, addEventListener: (name, callback) => listeners[name] = callback };
+  const documentElement = { dataset: hero === 'ready' || hero === 'slow' ? { heroMontage: hero } : {} };
+  const document = {
+    hidden: false, documentElement, addEventListener: on,
+    querySelector: (selector) => selector === '[data-hero-video]' ? (hero === 'none' ? null : {}) : root,
+  };
   runInNewContext(script, {
     document,
-    window: { innerHeight: 800, matchMedia: () => ({ matches: reduce }), addEventListener: (name, callback) => listeners[name] = callback },
+    window: { innerHeight: 800, matchMedia: () => ({ matches: reduce }), addEventListener: on },
     requestAnimationFrame: (callback) => { frame = callback; return 1; },
     IntersectionObserver: class {
       constructor(callback) { this.callback = callback; observers.push(this); }
@@ -55,7 +63,11 @@ function setup(reduce = false, { loaded = true } = {}) {
     listeners.scroll();
     frame();
   };
-  return { videos, panels, document, listeners, observers, railItems, scroll, flush: () => frame() };
+  const announce = (state) => {
+    documentElement.dataset.heroMontage = state;
+    listeners['hero-montage']();
+  };
+  return { videos, panels, document, listeners, observers, railItems, scroll, announce, flush: () => frame() };
 }
 
 test('distant loops do not fetch; approaching loops preload without playing', () => {
@@ -143,4 +155,31 @@ test('nothing in the showcase downloads before the page has loaded', () => {
   assert.ok(state.videos.every((video) => !video.src && !video.poster));
   state.listeners.load();
   assert.equal(state.observers.length, 1);
+});
+
+test('a loop within reach waits for the hero montage, and gets its poster meanwhile', () => {
+  const state = setup(false, { hero: 'pending' });
+  state.observers[0].callback([{ target: state.videos[0], isIntersecting: true }]);
+  assert.equal(state.videos[0].poster, '/loop-0.webp');
+  assert.equal(state.videos[0].src, undefined);
+  state.announce('ready');
+  assert.equal(state.videos[0].src, '/loop-0.mp4');
+  assert.equal(state.videos[0].loads, 1);
+  assert.equal(state.videos[1].src, undefined);
+});
+
+test('a montage on a slow connection does not release the loops; the first scroll does', () => {
+  const state = setup(false, { hero: 'pending' });
+  state.observers[0].callback([{ target: state.videos[0], isIntersecting: true }]);
+  state.announce('slow');
+  assert.equal(state.videos[0].src, undefined);
+  state.scroll([900, 1700, 2500, 3300, 4100]);
+  assert.equal(state.videos[0].src, '/loop-0.mp4');
+  assert.equal(state.videos[0].paused, true);
+});
+
+test('a montage that was ready before the showcase script ran does not hold the loops', () => {
+  const state = setup(false, { hero: 'ready' });
+  state.observers[0].callback([{ target: state.videos[0], isIntersecting: true }]);
+  assert.equal(state.videos[0].src, '/loop-0.mp4');
 });
