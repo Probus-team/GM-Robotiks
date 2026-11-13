@@ -3,7 +3,9 @@
 // artwork (the approved logo has gradients), so it goes through astro:assets
 // like every other image: AVIF with a WebP fallback, at the widths a 128 to
 // 160 px wide logo needs on 1x, 2x and 3x screens. The lossless 320 px WebP it
-// replaces was 19 kB on every page; the 1x AVIF is 3 kB.
+// replaces was 19 kB on every page; the 1x AVIF is 3 kB. The aspect ratio is
+// the master's: each resized file rounds its height to a whole pixel, which
+// would otherwise move the footer text under the logo by a fraction of one.
 import { Picture } from 'astro:assets';
 import white from '../assets/brand/optimized/logo-full-white.webp';
 
@@ -25,6 +27,7 @@ const { sizes, class: className, loading = 'eager' } = Astro.props;
   formats={['avif']}
   fallbackFormat="webp"
   class={className}
+  style={`aspect-ratio: ${white.width} / ${white.height}`}
   loading={loading}
   decoding="async"
 />
