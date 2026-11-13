@@ -64,8 +64,10 @@ const counts = families.map((f) => ({
     <div class="container content">
       <p class="eyebrow intro" style="--i:0">Distribuidor Pudu Robotics · México</p>
       <h1 id="hero-title">
-        <span class="mask"><span class="word" style="--i:1">Robots</span></span>
-        <span class="mask"><span class="word" style="--i:2">que ya</span></span>
+        {/* The spaces are for whatever reads the heading as text: each line is a
+            block, and without them it reads "Robotsque yatrabajan." */}
+        <span class="mask"><span class="word" style="--i:1">Robots</span></span>{' '}
+        <span class="mask"><span class="word" style="--i:2">que ya</span></span>{' '}
         <span class="mask"><span class="word line" style="--i:3">trabajan<Visor class="visor-inline" />.</span></span>
       </h1>
       <p class="lede intro" style="--i:4">
