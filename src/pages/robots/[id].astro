@@ -173,7 +173,7 @@ const structuredData = [
             <p class="lede">{clip.where} · Pudu Robotics · {clip.minutes} min</p>
           </div>
           <div class="video-frame reveal-frame">
-            <CaseFilm clip={clip} data-clip />
+            <CaseFilm clip={clip} />
           </div>
         </div>
       </section>
@@ -789,24 +789,6 @@ const structuredData = [
 </style>
 
 <script>
-  // The clip's poster loads as its section approaches, not with the page.
-  const clipVideo = document.querySelector<HTMLVideoElement>('[data-clip]');
-  if (clipVideo) {
-    const showPoster = () => {
-      if (clipVideo.dataset.poster) clipVideo.poster = clipVideo.dataset.poster;
-    };
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(([entry]) => {
-        if (!entry.isIntersecting) return;
-        showPoster();
-        io.disconnect();
-      }, { rootMargin: '600px 0px' });
-      io.observe(clipVideo);
-    } else {
-      showPoster();
-    }
-  }
-
   // Show the phone quote bar once the hero is out of view.
   const bar = document.querySelector<HTMLElement>('[data-sticky-cta]');
   const hero = document.querySelector('[data-robot-hero]');

@@ -290,31 +290,4 @@ const pendingSlots = deployments.length === 0 ? 3 : 0;
   const slots = document.querySelector<HTMLElement>('[data-pending-slots]');
   const production = ['gmrobotiks.com', 'www.gmrobotiks.com'].includes(location.hostname);
   if (slots && !production) slots.hidden = false;
-
-  // Posters load as the section approaches, not with the page.
-  const videos = document.querySelectorAll<HTMLVideoElement>('#casos video');
-  const showPoster = (video: HTMLVideoElement) => {
-    if (video.dataset.poster) video.poster = video.dataset.poster;
-  };
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        showPoster(entry.target as HTMLVideoElement);
-        io.unobserve(entry.target);
-      });
-    }, { rootMargin: '600px 0px' });
-    videos.forEach((video) => io.observe(video));
-  } else {
-    videos.forEach(showPoster);
-  }
-
-  // Only one clip plays at a time.
-  videos.forEach((v) =>
-    v.addEventListener('play', () => {
-      videos.forEach((other) => {
-        if (other !== v) other.pause();
-      });
-    }),
-  );
 </script>
