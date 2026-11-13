@@ -20,5 +20,5 @@ export function robotTitle(robot: { name: string; role: string }): string {
 }
 
 export function canonicalPath(path: string): string {
-  return path === '/' ? '/' : `${path.replace(/\/+$/, '')}/`;
+  return `${path.replace(/\/+$/, '')}/`;
 }
