@@ -65,8 +65,9 @@ public/
 ## Videos
 
 `scripts/build-videos.sh <source-dir> home` rebuilds the home montage
-(`public/media/hero/`), the showcase loops (`public/media/loops/`) and their
-posters from Pudu Robotics' original files. The script lists every source file
+(`public/media/hero/`), the 7–8 s showcase loops (`public/media/loops/`, one
+per panel in `src/data/showcase.ts`) and their posters from Pudu Robotics'
+original files. The script lists every source file
 with its URL (Pudu's CDN or the Pudu Robotics YouTube channel), the cut points
 and the encoder settings. Each clip is cut once to a lossless intermediate and
 encoded once as AV1 and once as H.264; the page picks AV1 where the browser
@@ -139,10 +140,3 @@ After merging, verify the Cloudflare production deployment identifies the
 merged commit, and that both production hosts respond over HTTPS. Check the
 canonical URL and an image, video, and PDF from the deployed site. Production
 must not send the preview-only `X-Robots-Tag` header.
-
-## Showcase loops
-
-`public/media/loops/` holds 7–8 s muted cuts of Pudu case films for the
-full-screen panels on the home page, as AV1 and H.264 with a poster each. They
-are built with the home videos (see Videos above); cut points are in
-`scripts/build-videos.sh` and panels in `src/data/showcase.ts`.
