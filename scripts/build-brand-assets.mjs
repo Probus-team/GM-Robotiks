@@ -76,7 +76,7 @@ function trace(mask, width, height) {
 const assets = {};
 for (const [name, region] of Object.entries(regions)) {
   const asset = extractArtwork(pixels, info, region);
-  asset.paths = asset.masks.map(mask => trace(mask, asset.width, asset.height));
+  asset.path = trace(asset.mask, asset.width, asset.height);
   assets[name] = asset;
 }
 
@@ -93,7 +93,7 @@ async function png(asset, variant = 'color') {
 
 async function svg(asset, variant = 'color') {
   const content = variant.startsWith('mono')
-    ? asset.paths.map(d => `<path fill="${variant === 'mono-white' ? palette.white : palette.navy}" fill-rule="evenodd" d="${d}"/>`).join('')
+    ? `<path fill="${variant === 'mono-white' ? palette.white : palette.navy}" fill-rule="evenodd" d="${asset.path}"/>`
     : `<image width="${asset.width}" height="${asset.height}" href="data:image/png;base64,${(await png(asset, variant)).toString('base64')}"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${asset.width} ${asset.height}"><title>GM Robotiks IA</title>${content}</svg>`;
 }

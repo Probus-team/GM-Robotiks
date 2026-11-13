@@ -15,5 +15,5 @@ export function extractArtwork(pixels, info, region) {
     pixels.copy(rgba, p * 4, i, i + 4);
     if (pixels[i + 3] >= 128) mask[p] = 1;
   }
-  return { rgba, masks: [mask], width, height, left };
+  return { rgba, mask, width, height, left };
 }
