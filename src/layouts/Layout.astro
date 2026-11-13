@@ -65,10 +65,13 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
     {!noindex && <link rel="canonical" href={canonical} />}
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
-    <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    {/* PNGs at the sizes a tab, a bookmark and a 2x or 3x screen ask for (0.8 to
+        4 kB). /favicon.ico stays at its URL for clients that ask for it unprompted,
+        but is no longer advertised: Chrome picked it on every page view, 89 kB. The
+        SVG icon was a 256 px PNG in an SVG wrapper (22 kB), no sharper than these. */}
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
-    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
