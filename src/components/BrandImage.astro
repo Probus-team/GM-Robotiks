@@ -1,33 +1,29 @@
 ---
-import full from '../assets/brand/optimized/logo-full.webp';
-import full320 from '../assets/brand/optimized/logo-full-320.webp';
-import full480 from '../assets/brand/optimized/logo-full-480.webp';
+// The lockup for dark grounds, as the header and footer show it. It is raster
+// artwork (the approved logo has gradients), so it goes through astro:assets
+// like every other image: AVIF with a WebP fallback, at the widths a 128 to
+// 160 px wide logo needs on 1x, 2x and 3x screens. The lossless 320 px WebP it
+// replaces was 19 kB on every page; the 1x AVIF is 3 kB.
+import { Picture } from 'astro:assets';
 import white from '../assets/brand/optimized/logo-full-white.webp';
-import white320 from '../assets/brand/optimized/logo-full-white-320.webp';
-import white480 from '../assets/brand/optimized/logo-full-white-480.webp';
-import mark from '../assets/brand/optimized/logo-mark.webp';
-import mark176 from '../assets/brand/optimized/logo-mark-176.webp';
-import mark288 from '../assets/brand/optimized/logo-mark-288.webp';
 
 interface Props {
-  variant: 'full' | 'white' | 'mark';
+  /** CSS width the logo is shown at. */
+  sizes: string;
   class?: string;
   loading?: 'eager' | 'lazy';
 }
 
-const { variant, class: className, loading = 'eager' } = Astro.props;
-const sources = { full: [full320, full480, full], white: [white320, white480, white], mark: [mark176, mark288, mark] }[variant];
-const original = sources[2];
+const { sizes, class: className, loading = 'eager' } = Astro.props;
 ---
 
-<img
-  src={sources[1].src}
-  srcset={sources.map((image) => `${image.src} ${image.width}w`).join(', ')}
-  sizes={variant === 'mark' ? '5.5rem' : '9.2rem'}
-  width={original.width}
-  height={original.height}
-  style={`aspect-ratio: ${original.width} / ${original.height}`}
-  alt={variant === 'mark' ? 'GM Robotiks IA' : ''}
+<Picture
+  src={white}
+  alt=""
+  widths={[160, 256, 384, 512]}
+  sizes={sizes}
+  formats={['avif']}
+  fallbackFormat="webp"
   class={className}
   loading={loading}
   decoding="async"
