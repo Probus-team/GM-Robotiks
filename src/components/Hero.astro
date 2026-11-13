@@ -5,6 +5,7 @@
 // downloads after the page has loaded, and never with reduced motion or
 // data saver on. scripts/build-videos.sh builds the montage and posters.
 import Visor from './Visor.astro';
+import VisorScript from './VisorScript.astro';
 import Icon from './Icon.astro';
 import { families, robots } from '../data/robots';
 import { heroPosters } from '../lib/media';
@@ -109,6 +110,7 @@ const counts = families.map((f) => ({
   </nav>
 
   <script type="application/json" data-shots set:html={JSON.stringify(shots)} />
+  <VisorScript />
 </section>
 
 <style>
