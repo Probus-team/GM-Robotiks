@@ -23,7 +23,11 @@ export default defineConfig({
       weights: ['400 800'],
       styles: ['normal'],
       subsets: ['latin', 'latin-ext'],
-      fallbacks: ['Arial Narrow', 'Arial', 'sans-serif'],
+      // The stand-in while the font loads is ours (global.css, "Fallbacks for the
+      // web fonts"). Astro's generated one measured the latin-ext file and came
+      // out a third too large (size-adjust 132.6% where the text needs 101%).
+      optimizedFallbacks: false,
+      fallbacks: ['GM Display Fallback', 'Arial Narrow', 'Arial', 'sans-serif'],
     },
     {
       provider: fontProviders.google(),
@@ -33,7 +37,8 @@ export default defineConfig({
       // No italic: the only <em> and <cite> on the site are styled upright.
       styles: ['normal'],
       subsets: ['latin', 'latin-ext'],
-      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+      optimizedFallbacks: false,
+      fallbacks: ['GM Body Fallback', 'Helvetica Neue', 'Arial', 'sans-serif'],
     },
   ],
 });

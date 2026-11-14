@@ -58,6 +58,53 @@
   color: var(--white);
 }
 
+/* Fallbacks for the web fonts: local Arial, resized so that text takes the
+   same room as it will in Bricolage Grotesque and Figtree. Text is drawn in
+   these until the web fonts arrive (font-display: swap) and nothing moves when
+   they do. The numbers come from setting the site's own text in both fonts at
+   each weight (web font width / Arial width; ascent and descent divided by
+   that): regular Arial stands in for 300 to 500, Arial Bold for 600 to 800.
+   Re-measure if a font or its weights change. */
+@font-face {
+  font-family: 'GM Display Fallback';
+  src: local('Arial');
+  font-weight: 400 599;
+  size-adjust: 104.9%;
+  ascent-override: 88.6%;
+  descent-override: 25.7%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GM Display Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT');
+  font-weight: 600 800;
+  size-adjust: 101.2%;
+  ascent-override: 91.9%;
+  descent-override: 26.7%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GM Body Fallback';
+  src: local('Arial');
+  font-weight: 300 599;
+  size-adjust: 99.9%;
+  ascent-override: 95.1%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GM Body Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT');
+  font-weight: 600 800;
+  size-adjust: 95.5%;
+  ascent-override: 99.5%;
+  descent-override: 26.2%;
+  line-gap-override: 0%;
+}
+
 *,
 *::before,
 *::after {
