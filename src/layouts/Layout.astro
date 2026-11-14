@@ -108,8 +108,13 @@ const speculationRules = JSON.stringify({
     <script type="application/ld+json" set:html={jsonLd} />
     <script type="speculationrules" set:html={speculationRules} />
 
-    <Font cssVariable="--font-display" preload={[{ subset: 'latin', style: 'normal' }]} />
-    <Font cssVariable="--font-body" preload={[{ subset: 'latin', style: 'normal' }]} />
+    {/* Not preloaded on purpose: Chrome paints nothing until preloaded fonts
+        arrive, one request after the document (about 100 ms on a fast
+        connection). Without the preload the page is drawn at once in the
+        size-matched fallbacks (global.css) and the web fonts replace them in
+        place when they arrive. */}
+    <Font cssVariable="--font-display" />
+    <Font cssVariable="--font-body" />
     <slot name="head" />
     <script is:inline>
       document.documentElement.classList.add('js');
