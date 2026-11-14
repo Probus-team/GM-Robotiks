@@ -72,6 +72,13 @@ and the encoder settings. Each clip is cut once to a lossless intermediate and
 encoded once as AV1 and once as H.264; the page picks AV1 where the browser
 decodes it. Every file stays under 5 MB (`tests/catalog.test.mjs`).
 
+The montage comes in five sizes, each as AV1 and H.264: landscape at 1080p,
+720p and a 540p "lite", portrait at 720×1280 and a 540×960 "lite". The hero's
+script picks one from the screen (720p up to 1400 device pixels wide) and from
+how fast the poster arrived (the lite files for slow connections; on the
+slowest, and with data saver on, the montage waits for the play button). It
+starts when the page has loaded.
+
 The montage is 10 s: KettyBot Pro in a café (4K source), ET1 in a store, T600
 in a warehouse, GT5 and GT7, with no burned-in captions. Shot start times and
 captions are in `src/components/Hero.astro`; keep them in sync when re-cutting.
