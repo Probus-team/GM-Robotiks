@@ -50,6 +50,21 @@ const graph = [
   ...structuredData,
 ];
 const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
+
+// Chrome and Edge fetch a page of this site when the pointer rests on a link
+// to it (or a finger touches it), so the document is already there on the
+// click. One request of 6 to 21 kB per link hovered, never a download or a
+// link that leaves the site. Other browsers ignore the block.
+const speculationRules = JSON.stringify({
+  prefetch: [{
+    where: { and: [
+      { href_matches: '/*' },
+      { not: { href_matches: '/media/*' } },
+      { not: { selector_matches: '[target="_blank"], [download]' } },
+    ] },
+    eagerness: 'moderate',
+  }],
+});
 ---
 
 <!doctype html>
@@ -91,6 +106,7 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
     <meta name="twitter:image" content={socialImage} />
     <meta name="twitter:image:alt" content={socialImageAlt} />
     <script type="application/ld+json" set:html={jsonLd} />
+    <script type="speculationrules" set:html={speculationRules} />
 
     <Font cssVariable="--font-display" preload={[{ subset: 'latin', style: 'normal' }]} />
     <Font cssVariable="--font-body" preload={[{ subset: 'latin', style: 'normal' }]} />
