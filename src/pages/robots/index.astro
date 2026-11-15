@@ -8,6 +8,13 @@ import Footer from '../../components/Footer.astro';
 import { site } from '../../data/site';
 import { robots } from '../../data/robots';
 import { breadcrumbs, robotPath } from '../../data/seo';
+import { getImage } from 'astro:assets';
+import { scene } from '../../lib/media';
+
+// The hero image, preloaded at the top of <head> so it is requested ahead of the
+// fonts and the inline CSS. Same widths and format as its <Picture> in
+// Catalog.astro, so the URLs match (tests/catalog.test.mjs checks it).
+const hero = await getImage({ src: scene('pudu-family'), widths: [640, 960, 1280, 1800, 2400], format: 'avif' });
 
 const catalogUrl = new URL('/robots/', Astro.site).href;
 const structuredData = [
@@ -26,6 +33,7 @@ const structuredData = [
   pageType="CollectionPage"
   structuredData={structuredData}
 >
+  <link slot="head-first" rel="preload" as="image" type="image/avif" imagesrcset={hero.srcSet.attribute} imagesizes="100vw" fetchpriority="high" />
   <Header />
   <main id="contenido">
     <Catalog />

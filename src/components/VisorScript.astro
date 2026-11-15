@@ -1,0 +1,45 @@
+---
+// Makes every <Visor> on the page glance toward the pointer. It lives apart
+// from Visor.astro because a component's script is rendered where the component
+// is: inside the visor it would sit in the middle of the heading it decorates,
+// and anything that reads the heading's text would read the script. Render it
+// once, anywhere after the visors.
+---
+
+<script>
+  const visors = Array.from(document.querySelectorAll<HTMLElement>('[data-visor]'), (element) => ({
+    element,
+    eyes: element.querySelectorAll<HTMLElement>('.eye'),
+  }));
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce && visors.length && matchMedia('(pointer: fine)').matches) {
+    let raf = 0;
+    let mx = 0;
+    let my = 0;
+    const update = () => {
+      raf = 0;
+      const bounds = visors.map(({ element }) => element.getBoundingClientRect());
+      visors.forEach(({ eyes }, i) => {
+        const r = bounds[i];
+        if (r.bottom < 0 || r.top > window.innerHeight) return;
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const dx = Math.max(-1, Math.min(1, (mx - cx) / 400));
+        const dy = Math.max(-1, Math.min(1, (my - cy) / 400));
+        const w = r.width;
+        eyes.forEach((eye) => {
+          eye.style.translate = `${dx * w * 0.06}px ${dy * w * 0.05}px`;
+        });
+      });
+    };
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+        if (!raf) raf = requestAnimationFrame(update);
+      },
+      { passive: true },
+    );
+  }
+</script>

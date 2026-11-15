@@ -111,12 +111,10 @@ for (const [name, key, variant] of exports) {
   await writeFile(path.join(brand, `${name}.svg`), await svg(assets[key], variant));
 }
 
-// The header and footer logo (src/components/BrandImage.astro).
+// The master for the header and footer logo; astro:assets makes the sizes and
+// formats the pages use (src/components/BrandImage.astro).
 const whiteLogo = path.join(brand, 'logo-full-white.png');
 await sharp(whiteLogo).webp({ lossless: true }).toFile(path.join(optimized, 'logo-full-white.webp'));
-for (const width of [320, 480]) {
-  await sharp(whiteLogo).resize({ width }).webp({ lossless: true }).toFile(path.join(optimized, `logo-full-white-${width}.webp`));
-}
 
 // White tiles keep the original blue robot legible in both light and dark browser chrome.
 function tile(size, radius) {
@@ -193,4 +191,4 @@ for (let i = 0; i < reviewTiles.length; i++) {
   reviewLayers.push({ input: tile, left: (i % 2) * 600, top: Math.floor(i / 2) * 280 });
 }
 await sharp({ create: { width: 1200, height: 840, channels: 4, background: '#ffffff' } }).composite(reviewLayers).png().toFile(path.join(kit, 'asset-review.png'));
-console.log(`Built ${inventory.length} public assets, 3 optimized WebP files, and the review kit in output/brand-kit.`);
+console.log(`Built ${inventory.length} public assets, 1 optimized WebP master, and the review kit in output/brand-kit.`);

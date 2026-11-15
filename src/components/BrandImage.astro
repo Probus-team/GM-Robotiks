@@ -1,25 +1,33 @@
 ---
-// The white full logo for dark grounds (header and footer).
+// The lockup for dark grounds, as the header and footer show it. It is raster
+// artwork (the approved logo has gradients), so it goes through astro:assets
+// like every other image: AVIF with a WebP fallback, at the widths a 128 to
+// 160 px wide logo needs on 1x, 2x and 3x screens. The lossless 320 px WebP it
+// replaces was 19 kB on every page; the 1x AVIF is 3 kB. The aspect ratio is
+// the master's: each resized file rounds its height to a whole pixel, which
+// would otherwise move the footer text under the logo by a fraction of one.
+import { Picture } from 'astro:assets';
 import white from '../assets/brand/optimized/logo-full-white.webp';
-import white320 from '../assets/brand/optimized/logo-full-white-320.webp';
-import white480 from '../assets/brand/optimized/logo-full-white-480.webp';
 
 interface Props {
+  /** CSS width the logo is shown at. */
+  sizes: string;
+  class?: string;
   loading?: 'eager' | 'lazy';
 }
 
-const { loading = 'eager' } = Astro.props;
-const sources = [white320, white480, white];
+const { sizes, class: className, loading = 'eager' } = Astro.props;
 ---
 
-<img
-  src={white480.src}
-  srcset={sources.map((image) => `${image.src} ${image.width}w`).join(', ')}
-  sizes="9.2rem"
-  width={white.width}
-  height={white.height}
-  style={`aspect-ratio: ${white.width} / ${white.height}`}
+<Picture
+  src={white}
   alt=""
+  widths={[160, 256, 384, 512]}
+  sizes={sizes}
+  formats={['avif']}
+  fallbackFormat="webp"
+  class={className}
+  style={`aspect-ratio: ${white.width} / ${white.height}`}
   loading={loading}
   decoding="async"
 />
