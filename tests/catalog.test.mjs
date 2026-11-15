@@ -79,3 +79,16 @@ test('home videos come in AV1 and H.264, each within the 5 MB budget, with poste
     assert.ok(existsSync(file(`src/assets/hero/${name}`)), name);
   }
 });
+
+// The catalogue preloads its hero (src/pages/robots/index.astro). The preload only helps if it asks
+// for the same files as the hero's <Picture>: same image, widths and format.
+test('the catalogue hero preload matches the hero picture', () => {
+  const page = readFileSync(file('src/pages/robots/index.astro'), 'utf8');
+  const catalog = readFileSync(file('src/components/Catalog.astro'), 'utf8');
+  const preload = page.match(/getImage\(\{ src: scene\('([^']+)'\), widths: (\[[^\]]+\]), format: '(\w+)' \}\)/);
+  const hero = catalog.match(/<Picture\s+src=\{scene\('([^']+)'\)\}[\s\S]*?widths=\{(\[[^\]]+\])\}[\s\S]*?formats=\{\['(\w+)'\]\}[\s\S]*?fetchpriority="high"/);
+  assert.ok(preload && hero, 'preload or hero picture not found');
+  assert.deepEqual(preload.slice(1), hero.slice(1));
+  assert.match(page, /<link slot="head-first" rel="preload" as="image"[^>]*imagesrcset=\{hero\.srcSet\.attribute\}[^>]*imagesizes="100vw"[^>]*fetchpriority="high"/);
+  assert.match(catalog, /sizes="100vw"/);
+});
