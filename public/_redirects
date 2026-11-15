@@ -1,0 +1,3 @@
+# The catalogue lives at /robots/. Without this line Cloudflare answers /robots
+# with a temporary redirect (307), which a browser asks for again every time.
+/robots /robots/ 301
