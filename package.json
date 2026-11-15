@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=22.23.4"
   },
   "scripts": {
     "brand:build": "node scripts/build-brand-assets.mjs",
@@ -17,7 +17,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.3.3"
+    "astro": "^7.4.7"
   },
   "allowScripts": {
     "esbuild": true

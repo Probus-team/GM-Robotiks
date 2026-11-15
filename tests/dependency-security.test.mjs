@@ -10,8 +10,8 @@ const lock = readFileSync(new URL('../bun.lock', import.meta.url), 'utf8');
 
 // Check nested copies as well as hoisted ones, including Miniflare tooling.
 const patchedRanges = {
-  // GHSA-mpr7-6m5w-76rw and GHSA-98hj-9722-w3j8.
-  astro: '>=7.3.3',
+  // Includes GHSA-mh32-jxcr-mh9f and GHSA-r3h5-4585-7x3w.
+  astro: '>=7.4.7',
   devalue: '>=5.9.3',
   'http-cache-semantics': '>=4.3.0',
   sharp: '>=0.35.5',
@@ -111,6 +111,41 @@ const astroPackage = import.meta.resolve('astro/package.json');
 const { stringifyAnimation } = await import(new URL('dist/runtime/server/transition.js', astroPackage));
 const { renderJSX } = await import(new URL('dist/runtime/server/jsx.js', astroPackage));
 const { jsx } = await import('astro/jsx-runtime');
+const { renderComponentToString } = await import(new URL('dist/runtime/server/render/component.js', astroPackage));
+
+for (const [renderer, renderTag] of [
+  ['Astro', (tag) => renderComponentToString({ renderers: [] }, 'DynamicTag', tag, {})],
+  ['JSX', async (tag) => String(await renderJSX({ renderers: [] }, jsx(tag, {})))],
+]) {
+  test(`${renderer} dynamic tag names cannot inject attributes`, async () => {
+    for (const tag of ['img/src/onerror=alert(1)', 'img onerror=alert(1)', 'img=onerror']) {
+      assert.match(await renderTag(tag), /^<img\s*\/?>$/);
+    }
+    for (const tag of ['div', 'my-element', 'h2']) {
+      assert.equal(await renderTag(tag), `<${tag}></${tag}>`);
+    }
+  });
+
+  test(`${renderer} rejects dynamic tag names without a valid leading element`, async () => {
+    for (const tag of ['', '!--', '/img', '1div']) {
+      await assert.rejects(async () => renderTag(tag));
+    }
+  });
+}
+
+test('image containment rejects case-variant sibling directories on POSIX paths', async () => {
+  const { isParentDirectory } = await import(requireFromAstro.resolve('@astrojs/internal-helpers/path'));
+  assert.equal(isParentDirectory('/srv/app/dist/client/', '/srv/app/DIST/client/secret.png'), false);
+  assert.equal(isParentDirectory('/srv/app/dist/client/', '/srv/app/dist/client/image.png'), true);
+  assert.equal(isParentDirectory('/srv/app/dist/client/', '/srv/app/dist/client/nested/image.png'), true);
+  assert.equal(isParentDirectory('/srv/app/dist/client/', '/srv/app/dist/client-extra/image.png'), false);
+  assert.equal(isParentDirectory('/srv/app/dist/client/', '/srv/app/secret.png'), false);
+});
+
+test('the declared Node minimum supports the patched Astro release', () => {
+  const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+  assert.ok(semver.gte(semver.minVersion(manifest.engines.node), '22.23.4'));
+});
 
 test('transition animation properties cannot inject CSS rules', () => {
   for (const property of ['name', 'duration', 'delay', 'easing', 'direction', 'fillMode']) {
