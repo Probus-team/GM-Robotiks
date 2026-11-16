@@ -8,12 +8,15 @@ const source = readFileSync(new URL('../src/components/Hero.astro', import.meta.
 const script = stripTypeScriptTypes(source.match(/<script>([\s\S]*?)<\/script>/)[1]);
 
 const POSTER = 'https://gmrobotiks.com/_astro/poster.avif';
+const NOW = Date.UTC(2026, 10, 15, 12);
+const HOUR = 60 * 60 * 1000;
+const saved = (tier, at) => JSON.stringify({ tier, at });
 // A poster of 66 kB whose body took `ms` to arrive: 528 kbit / ms.
 const posterEntry = (ms) => ({ transferSize: 66_300, encodedBodySize: 66_000, responseStart: 200, responseEnd: 200 + ms });
 
 function setup({
   reduce = false, portrait = false, loaded = true, hash = '', scrollY = 0, width = 1254, dpr = 1,
-  av1 = true, entry = posterEntry(20), connection, stored,
+  av1 = true, entry = posterEntry(20), connection, stored, session, now = NOW,
 } = {}) {
   const handlers = {};
   const on = (name, callback) => (handlers[name] ??= []).push(callback);
@@ -21,6 +24,8 @@ function setup({
   const timers = [];
   const observers = [];
   const storage = new Map(stored ? [['hero-video-tier', stored]] : []);
+  const sessionStore = new Map(session ? [['hero-video-tier', session]] : []);
+  const store = (map) => ({ getItem: (key) => map.get(key) ?? null, setItem: (key, value) => map.set(key, String(value)), removeItem: (key) => map.delete(key) });
   const classes = new Set();
   const videoEvents = {};
   const video = {
@@ -57,12 +62,12 @@ function setup({
   runInNewContext(script, {
     document, window, location: { hash }, navigator: { connection },
     performance: { getEntriesByName: (name) => (name === POSTER && entry ? [entry] : []) },
-    localStorage: { getItem: (key) => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
+    localStorage: store(storage), sessionStorage: store(sessionStore), Date: { now: () => now },
     clearTimeout: () => {}, Event: class { constructor(type) { this.type = type; } },
     IntersectionObserver,
   });
   const see = (isIntersecting = true) => observers[0].callback([{ isIntersecting }]);
-  return { video, toggle, toggleLabel, timers, storage, documentElement, window, see, load: () => fire('load'), classes };
+  return { video, toggle, toggleLabel, timers, storage, sessionStore, documentElement, window, see, load: () => fire('load'), classes };
 }
 
 test('nothing is attached before the page has loaded', () => {
@@ -124,17 +129,53 @@ test('the connection caps the bitrate, measured on the poster that was just down
   assert.equal(src({ width: 1894, connection: { effectiveType: '3g' } }), '/media/hero/montage-landscape-lite-av1.mp4');
 });
 
-test('a poster from the cache says nothing about the connection: the last measurement is used', () => {
+test('a poster from the cache says nothing about the connection: the last measurement is used, for a day', () => {
   const cached = { transferSize: 0, encodedBodySize: 66_000, responseStart: 5, responseEnd: 6 };
   const first = setup({ width: 1894, entry: posterEntry(800) });
   first.see();
-  assert.equal(first.storage.get('hero-video-tier'), 'lite');
-  const again = setup({ width: 1894, entry: cached, stored: 'lite' });
+  assert.deepEqual(JSON.parse(first.storage.get('hero-video-tier')), { tier: 'lite', at: NOW });
+  const again = setup({ width: 1894, entry: cached, stored: saved('lite', NOW - 23 * HOUR) });
   again.see();
   assert.equal(again.video.src, '/media/hero/montage-landscape-lite-av1.mp4');
   const unknown = setup({ width: 1894, entry: cached });
   unknown.see();
   assert.equal(unknown.video.src, '/media/hero/montage-landscape-av1.mp4');
+  // After a day the stored answer is dropped: the screen decides again, as on a first visit.
+  for (const stored of [saved('lite', NOW - 25 * HOUR), saved('lite', NOW + HOUR), saved('lite'), 'lite', '{', saved('fast', NOW)]) {
+    const old = setup({ width: 1894, entry: cached, stored });
+    old.see();
+    assert.equal(old.video.src, '/media/hero/montage-landscape-av1.mp4', stored);
+    assert.equal(old.storage.has('hero-video-tier'), false, stored);
+  }
+});
+
+test('"too slow for any video" lasts for the tab only', () => {
+  const cached = { transferSize: 0, encodedBodySize: 66_000, responseStart: 5, responseEnd: 6 };
+  const slow = setup({ width: 1894, entry: posterEntry(2000), stored: saved('mid', NOW - HOUR) });
+  slow.see();
+  assert.equal(slow.sessionStore.get('hero-video-tier'), 'none');
+  assert.deepEqual(JSON.parse(slow.storage.get('hero-video-tier')), { tier: 'mid', at: NOW - HOUR });
+  // Same tab, poster now from the cache: still waits for the button.
+  const sameTab = setup({ width: 1894, entry: cached, session: 'none', stored: saved('mid', NOW - HOUR) });
+  sameTab.see();
+  assert.equal(sameTab.video.src, undefined);
+  assert.equal(sameTab.toggle.hidden, false);
+  // A new tab has no session value: the day-old-at-most answer applies.
+  const newTab = setup({ width: 1894, entry: cached, stored: saved('mid', NOW - HOUR) });
+  newTab.see();
+  assert.equal(newTab.video.src, '/media/hero/montage-landscape-720-av1.mp4');
+  // A measurement that can take video clears the tab's "none".
+  const better = setup({ width: 1894, entry: posterEntry(20), session: 'none' });
+  better.see();
+  assert.equal(better.sessionStore.has('hero-video-tier'), false);
+  assert.equal(better.video.src, '/media/hero/montage-landscape-av1.mp4');
+});
+
+test('the button keeps its place while hidden, so the caption does not move when it appears', () => {
+  const css = source.match(/<style>([\s\S]*?)<\/style>/)[1];
+  const rule = css.match(/\.pause\[hidden\]\s*\{([^}]*)\}/)[1];
+  assert.match(rule, /visibility:\s*hidden/);
+  assert.doesNotMatch(rule, /display:\s*none/);
 });
 
 test('too slow for any rendition, or data saver: the montage waits for the play button and then takes the smallest file', () => {

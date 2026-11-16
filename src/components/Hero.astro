@@ -322,8 +322,17 @@ const counts = families.map((f) => ({
     background: rgba(10, 28, 43, 0.7);
   }
 
+  /* Hidden until the montage plays (or waits for a press), but its place is
+     kept so the caption beside it does not move when it appears. */
   .pause[hidden] {
-    display: none;
+    visibility: hidden;
+  }
+
+  /* With reduced motion there is no video and so never a button. */
+  @media (prefers-reduced-motion: reduce) {
+    .pause[hidden] {
+      display: none;
+    }
   }
 
   .pause .i-play,
@@ -481,9 +490,14 @@ const counts = families.map((f) => ({
   // whatever the link is. The poster shares the link with the fonts, so this
   // reads up to half the real figure; the thresholds below allow for that. A
   // poster that came from the cache says nothing, and neither does a browser
-  // without Resource Timing sizes: then the last visit's answer is used.
+  // without Resource Timing sizes: then the last visit's answer is used, for a
+  // day at most (the poster stays cached for a year, so a stored answer would
+  // otherwise never be measured again). "Too slow for any video" is kept for
+  // this tab only, so one bad connection does not hide the montage next time.
   const TIERS = ['none', 'lite', 'mid', 'full'] as const;
   type Tier = (typeof TIERS)[number];
+  const TIER_KEY = 'hero-video-tier';
+  const TIER_MAX_AGE = 24 * 60 * 60 * 1000;
   const measuredTier = (): Tier | undefined => {
     const entry = poster && (performance.getEntriesByName(poster.currentSrc)[0] as PerformanceResourceTiming | undefined);
     if (!entry || !entry.transferSize || entry.encodedBodySize < 20_000) return undefined;
@@ -493,22 +507,37 @@ const counts = families.map((f) => ({
   };
   const remembered = (): Tier | undefined => {
     try {
-      const tier = localStorage.getItem('hero-video-tier') as Tier | null;
-      return tier && TIERS.includes(tier) ? tier : undefined;
+      if (sessionStorage.getItem(TIER_KEY) === 'none') return 'none';
+      let saved: { tier?: Tier; at?: number } | null = null;
+      try {
+        saved = JSON.parse(localStorage.getItem(TIER_KEY) ?? 'null');
+      } catch {
+        saved = {};
+      }
+      const fresh = saved && typeof saved.at === 'number' && Date.now() - saved.at < TIER_MAX_AGE && saved.at <= Date.now();
+      if (saved?.tier && fresh && TIERS.includes(saved.tier) && saved.tier !== 'none') return saved.tier;
+      if (saved) localStorage.removeItem(TIER_KEY);
+      return undefined;
     } catch {
       return undefined;
+    }
+  };
+  const remember = (tier: Tier) => {
+    try {
+      if (tier === 'none') {
+        sessionStorage.setItem(TIER_KEY, 'none');
+      } else {
+        sessionStorage.removeItem(TIER_KEY);
+        localStorage.setItem(TIER_KEY, JSON.stringify({ tier, at: Date.now() }));
+      }
+    } catch {
+      // Private browsing: measure again next time.
     }
   };
   const connectionTier = (): Tier => {
     if (connection?.saveData || connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g') return 'none';
     const measured = measuredTier();
-    if (measured) {
-      try {
-        localStorage.setItem('hero-video-tier', measured);
-      } catch {
-        // Private browsing: measure again next time.
-      }
-    }
+    if (measured) remember(measured);
     const tier = measured ?? remembered() ?? 'full';
     return connection?.effectiveType === '3g' && tier !== 'none' ? 'lite' : tier;
   };
