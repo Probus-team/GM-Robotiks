@@ -61,7 +61,12 @@
    they do. The numbers come from setting the site's own text in both fonts at
    each weight (web font width / Arial width; ascent and descent divided by
    that): regular Arial stands in for 300 to 500, Arial Bold for 600 to 800.
-   Re-measure if a font or its weights change. */
+   Android has no Arial; there the "Android" faces size its Roboto the same
+   way. Measured in Chrome on Android 16, whose only Roboto is the variable
+   Roboto-Regular.ttf: local('Roboto') finds it for every weight and Chrome sets
+   its weight axis to the weight asked for, so the bold faces get real bold
+   widths, not synthetic bold. The same numbers fit the static Roboto Bold of
+   older Android within 1%. Re-measure if a font or its weights change. */
 @font-face {
   font-family: 'GM Display Fallback';
   src: local('Arial');
@@ -99,6 +104,46 @@
   size-adjust: 95.5%;
   ascent-override: 99.5%;
   descent-override: 26.2%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GM Display Fallback Android';
+  src: local('Roboto'), local('Roboto-Regular'), local('Roboto Regular');
+  font-weight: 400 599;
+  size-adjust: 105.8%;
+  ascent-override: 87.9%;
+  descent-override: 25.5%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GM Display Fallback Android';
+  src: local('Roboto Bold'), local('Roboto-Bold'), local('Roboto');
+  font-weight: 600 800;
+  size-adjust: 107.6%;
+  ascent-override: 86.5%;
+  descent-override: 25.1%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GM Body Fallback Android';
+  src: local('Roboto'), local('Roboto-Regular'), local('Roboto Regular');
+  font-weight: 300 599;
+  size-adjust: 100.7%;
+  ascent-override: 94.3%;
+  descent-override: 24.8%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GM Body Fallback Android';
+  src: local('Roboto Bold'), local('Roboto-Bold'), local('Roboto');
+  font-weight: 600 800;
+  size-adjust: 101.7%;
+  ascent-override: 93.4%;
+  descent-override: 24.6%;
   line-gap-override: 0%;
 }
 
