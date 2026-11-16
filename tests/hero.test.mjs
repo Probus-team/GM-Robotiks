@@ -31,12 +31,14 @@ function setup({
   const video = {
     dataset: { portrait: '/media/hero/montage-portrait', landscape: '/media/hero/montage-landscape' },
     clientWidth: width, paused: true, currentTime: 0, plays: 0,
-    classList: { add: (name) => classes.add(name), contains: (name) => classes.has(name) },
+    classList: { add: (name) => classes.add(name), remove: (name) => classes.delete(name), contains: (name) => classes.has(name) },
     canPlayType: (type) => (av1 && type.includes('av01') ? 'probably' : ''),
     addEventListener: (name, callback) => (videoEvents[name] ??= []).push(callback),
     emit: (name) => (videoEvents[name] ?? []).forEach((callback) => callback()),
     play() { this.plays++; this.paused = false; return Promise.resolve(); },
     pause() { this.paused = true; },
+    loads: 0, load() { this.loads++; this.paused = true; },
+    fail(code) { this.error = { code }; this.emit('error'); },
   };
   const toggle = { hidden: true, attributes: {}, setAttribute(name, value) { this.attributes[name] = value; }, addEventListener: (name, callback) => (toggle.click = callback) };
   const toggleLabel = { textContent: 'Pausar video' };
@@ -224,4 +226,61 @@ test('the video is shown once it is playing, and pauses when the hero leaves the
   assert.equal(state.video.paused, true);
   state.see();
   assert.equal(state.video.paused, false);
+});
+
+test('an AV1 file the browser cannot decode after all is swapped once for H.264, and the montage starts', () => {
+  for (const code of [4, 3]) {
+    const state = setup({ width: 1254 });
+    state.see();
+    assert.equal(state.video.src, '/media/hero/montage-landscape-720-av1.mp4');
+    assert.equal(state.video.plays, 1);
+    state.video.fail(code);
+    assert.equal(state.video.src, '/media/hero/montage-landscape-720-h264.mp4', `error ${code}`);
+    assert.equal(state.video.loads, 1);
+    assert.equal(state.video.plays, 2);
+    // H.264 failing as well leaves the poster: no third file, no loop.
+    state.video.fail(code);
+    assert.equal(state.video.src, '/media/hero/montage-landscape-720-h264.mp4');
+    assert.equal(state.video.loads, 1);
+    assert.equal(state.video.plays, 2);
+  }
+});
+
+test('a network error, or an error on an H.264 file, does not switch files', () => {
+  const network = setup({ width: 1254 });
+  network.see();
+  network.video.fail(2);
+  assert.equal(network.video.src, '/media/hero/montage-landscape-720-av1.mp4');
+  assert.equal(network.video.loads, 0);
+  const h264 = setup({ width: 1254, av1: false });
+  h264.see();
+  h264.video.fail(4);
+  assert.equal(h264.video.src, '/media/hero/montage-landscape-720-h264.mp4');
+  assert.equal(h264.video.loads, 0);
+});
+
+test('the swap keeps the size the connection chose, and waits if the visitor paused', () => {
+  const lite = setup({ width: 1894, entry: posterEntry(800) });
+  lite.see();
+  lite.video.fail(4);
+  assert.equal(lite.video.src, '/media/hero/montage-landscape-lite-h264.mp4');
+  const paused = setup({ width: 1894 });
+  paused.see();
+  paused.toggle.click();
+  const plays = paused.video.plays;
+  paused.video.fail(4);
+  assert.equal(paused.video.src, '/media/hero/montage-landscape-h264.mp4');
+  assert.equal(paused.video.plays, plays);
+});
+
+test('a decode error mid-play shows the poster again until the H.264 file plays', () => {
+  const state = setup({ width: 1254 });
+  state.see();
+  state.video.emit('playing');
+  assert.equal(state.classes.has('is-playing'), true);
+  state.video.fail(3);
+  assert.equal(state.video.src, '/media/hero/montage-landscape-720-h264.mp4');
+  assert.equal(state.classes.has('is-playing'), false);
+  state.video.emit('playing');
+  assert.equal(state.classes.has('is-playing'), true);
 });
