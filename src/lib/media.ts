@@ -37,8 +37,8 @@ export function scene(id: string): ImageMetadata {
  */
 export async function heroPosters() {
   const [landAvif, landWebp, portAvif, portWebp] = await Promise.all([
-    getImage({ src: posterLandscape, widths: [960, 1440, 1920], format: 'avif' }),
-    getImage({ src: posterLandscape, widths: [960, 1440, 1920], format: 'webp' }),
+    getImage({ src: posterLandscape, widths: [960, 1280, 1440, 1920], format: 'avif' }),
+    getImage({ src: posterLandscape, widths: [960, 1280, 1440, 1920], format: 'webp' }),
     getImage({ src: posterPortrait, widths: [480, 720], format: 'avif' }),
     getImage({ src: posterPortrait, widths: [480, 720], format: 'webp' }),
   ]);
