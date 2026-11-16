@@ -547,8 +547,9 @@ const counts = families.map((f) => ({
   // at 0.8 (AV1; H.264 runs a fifth to a third higher). The connection caps the
   // bitrate; under that cap the screen picks the size: 720p covers a frame up to
   // 1400 device pixels wide.
-  // AV1 where the browser decodes it (Safari only reports it with hardware
-  // support), H.264 everywhere else.
+  // AV1 where the browser says it decodes it, H.264 everywhere else. Saying so
+  // is not decoding it: Safari in the iOS Simulator answers "probably" and then
+  // rejects the file, so attach() falls back to H.264 when that happens.
   const pickSource = (v: HTMLVideoElement, tier: Tier) => {
     const portrait = window.matchMedia('(max-aspect-ratio: 4/5)').matches;
     const base = portrait ? v.dataset.portrait : v.dataset.landscape;
@@ -599,6 +600,17 @@ const counts = families.map((f) => ({
     const src = pickSource(v, tier);
     if (!src) return false;
     v.src = src;
+    // An AV1 file the browser cannot decode after all (unsupported source or a
+    // decode error) is swapped once for the H.264 file of the same size, and the
+    // montage starts as it would have. A failing H.264 file leaves the poster:
+    // there is nothing left to try. Network errors are not a reason to switch.
+    v.addEventListener('error', () => {
+      const code = v.error?.code;
+      if ((code !== 3 && code !== 4) || !v.src.endsWith('-av1.mp4')) return;
+      v.src = v.src.replace(/-av1\.mp4$/, '-h264.mp4');
+      v.load();
+      sync();
+    });
     v.addEventListener('playing', () => v.classList.add('is-playing'), { once: true });
     v.addEventListener('canplaythrough', () => settle(tier === 'full' || tier === 'mid' ? 'ready' : 'slow'), { once: true });
     v.addEventListener('timeupdate', () => {

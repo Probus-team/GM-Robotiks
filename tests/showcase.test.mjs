@@ -24,8 +24,10 @@ function setup(reduce = false, { loaded = true, hero = 'none' } = {}) {
     };
   };
   const videos = Array.from({ length: 3 }, (_, i) => ({
-    dataset: { src: `/loop-${i}.mp4`, poster: `/loop-${i}.webp` }, paused: true, loads: 0,
-    load() { this.loads++; },
+    dataset: { src: `/loop-${i}.mp4`, poster: `/loop-${i}.webp` }, paused: true, loads: 0, events: {},
+    load() { this.loads++; this.paused = true; },
+    addEventListener(name, callback) { (this.events[name] ??= []).push(callback); },
+    fail(code) { this.error = { code }; (this.events.error ?? []).forEach((callback) => callback()); },
     play() { this.paused = false; return Promise.resolve(); },
     pause() { this.paused = true; },
   }));
@@ -181,4 +183,35 @@ test('a montage that was ready before the showcase script ran does not hold the 
   const state = setup(false, { hero: 'ready' });
   state.observers[0].callback([{ target: state.videos[0], isIntersecting: true }]);
   assert.equal(state.videos[0].src, '/loop-0.mp4');
+});
+
+test('an AV1 loop the browser cannot decode after all is swapped once for H.264 and keeps playing', () => {
+  const state = setup();
+  state.videos[0].dataset.srcAv1 = '/loop-0-av1.mp4';
+  state.videos[0].canPlayType = (type) => type.includes('av01') ? 'probably' : '';
+  state.scroll([0, 800, 1600, 2400, 3200]);
+  assert.equal(state.videos[0].src, '/loop-0-av1.mp4');
+  assert.equal(state.videos[0].paused, false);
+  state.videos[0].fail(4);
+  assert.equal(state.videos[0].src, '/loop-0.mp4');
+  assert.equal(state.videos[0].loads, 2);
+  state.flush();
+  assert.equal(state.videos[0].paused, false);
+  // The H.264 file failing too keeps the poster: no further swap.
+  state.videos[0].fail(3);
+  assert.equal(state.videos[0].src, '/loop-0.mp4');
+  assert.equal(state.videos[0].loads, 2);
+});
+
+test('a network error, or an H.264 loop failing, does not switch files', () => {
+  const state = setup();
+  state.videos[0].dataset.srcAv1 = '/loop-0-av1.mp4';
+  state.videos[0].canPlayType = () => 'probably';
+  state.videos[1].canPlayType = () => '';
+  state.observers[0].callback([{ target: state.videos[0], isIntersecting: true }, { target: state.videos[1], isIntersecting: true }]);
+  state.videos[0].fail(2);
+  assert.equal(state.videos[0].src, '/loop-0-av1.mp4');
+  state.videos[1].fail(4);
+  assert.equal(state.videos[1].src, '/loop-1.mp4');
+  assert.equal(state.videos[1].loads, 1);
 });

@@ -366,11 +366,27 @@ const withCounts = panels.map((p) => ({
   const railItems = Array.from(root?.querySelectorAll<HTMLElement>('[data-rail-item]') ?? []);
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // AV1 where the browser decodes it (Safari only with hardware support), H.264 otherwise.
+  // AV1 where the browser says it decodes it, H.264 otherwise. Saying so is not
+  // decoding it (Safari in the iOS Simulator answers "probably" and then rejects
+  // the file), so an AV1 loop that fails with an unsupported source or a decode
+  // error is swapped once for its H.264 file; a failing H.264 file keeps the
+  // poster. Network errors are not a reason to switch.
   const loadVideo = (video: HTMLVideoElement) => {
     if (!video.dataset.src) return;
+    const h264 = video.dataset.src;
     const av1 = video.dataset.srcAv1 && video.canPlayType?.('video/mp4; codecs="av01.0.08M.10"');
-    video.src = av1 ? video.dataset.srcAv1! : video.dataset.src;
+    video.src = av1 ? video.dataset.srcAv1! : h264;
+    if (av1) {
+      let switched = false;
+      video.addEventListener('error', () => {
+        const code = video.error?.code;
+        if (switched || (code !== 3 && code !== 4)) return;
+        switched = true;
+        video.src = h264;
+        video.load();
+        scheduleUpdate();
+      });
+    }
     delete video.dataset.src;
     video.preload = 'auto';
     video.load();
