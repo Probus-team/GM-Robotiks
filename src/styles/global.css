@@ -62,7 +62,11 @@
    each weight (web font width / Arial width; ascent and descent divided by
    that): regular Arial stands in for 300 to 500, Arial Bold for 600 to 800.
    Android has no Arial; there the "Android" faces size its Roboto the same
-   way. Re-measure if a font or its weights change. */
+   way. Measured in Chrome on Android 16, whose only Roboto is the variable
+   Roboto-Regular.ttf: local('Roboto') finds it for every weight and Chrome sets
+   its weight axis to the weight asked for, so the bold faces get real bold
+   widths, not synthetic bold. The same numbers fit the static Roboto Bold of
+   older Android within 1%. Re-measure if a font or its weights change. */
 @font-face {
   font-family: 'GM Display Fallback';
   src: local('Arial');

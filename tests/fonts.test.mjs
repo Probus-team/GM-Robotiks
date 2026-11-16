@@ -5,6 +5,8 @@ import { test } from 'node:test';
 // Whenever the web fonts arrive late (a slow connection: Chrome waits about 0.1 s for preloaded fonts), the text
 // is drawn in a fallback font first, so every fallback has to be sized to its web font, on the systems visitors
 // have: Arial (Windows, macOS, iOS) and Roboto (Android). Otherwise the page moves when the web fonts arrive.
+// The Roboto values were measured in Chrome on Android 16 (one variable Roboto-Regular.ttf, drawn at the weight
+// asked for through its weight axis) and fit the static Roboto Bold of older Android within 1%.
 const config = readFileSync(new URL('../astro.config.mjs', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../src/styles/global.css', import.meta.url), 'utf8');
 const faces = [...css.matchAll(/@font-face\s*\{([^}]*)\}/g)].map(([, body]) => ({
