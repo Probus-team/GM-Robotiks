@@ -602,11 +602,17 @@ const counts = families.map((f) => ({
     v.src = src;
     // An AV1 file the browser cannot decode after all (unsupported source or a
     // decode error) is swapped once for the H.264 file of the same size, and the
-    // montage starts as it would have. A failing H.264 file leaves the poster:
-    // there is nothing left to try. Network errors are not a reason to switch.
+    // montage starts as it would have. A file that cannot be fetched at all (404,
+    // refused, dropped at the start) also reports "unsupported" and is swapped
+    // too; a network error after loading has started (code 2) is not. A failing
+    // H.264 file leaves the poster: there is nothing left to try.
     v.addEventListener('error', () => {
       const code = v.error?.code;
       if ((code !== 3 && code !== 4) || !v.src.endsWith('-av1.mp4')) return;
+      // A decode error mid-play would leave the video shown with no frame: back
+      // to the poster until the H.264 file plays.
+      v.classList.remove('is-playing');
+      v.addEventListener('playing', () => v.classList.add('is-playing'), { once: true });
       v.src = v.src.replace(/-av1\.mp4$/, '-h264.mp4');
       v.load();
       sync();

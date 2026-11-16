@@ -31,7 +31,7 @@ function setup({
   const video = {
     dataset: { portrait: '/media/hero/montage-portrait', landscape: '/media/hero/montage-landscape' },
     clientWidth: width, paused: true, currentTime: 0, plays: 0,
-    classList: { add: (name) => classes.add(name), contains: (name) => classes.has(name) },
+    classList: { add: (name) => classes.add(name), remove: (name) => classes.delete(name), contains: (name) => classes.has(name) },
     canPlayType: (type) => (av1 && type.includes('av01') ? 'probably' : ''),
     addEventListener: (name, callback) => (videoEvents[name] ??= []).push(callback),
     emit: (name) => (videoEvents[name] ?? []).forEach((callback) => callback()),
@@ -271,4 +271,16 @@ test('the swap keeps the size the connection chose, and waits if the visitor pau
   paused.video.fail(4);
   assert.equal(paused.video.src, '/media/hero/montage-landscape-h264.mp4');
   assert.equal(paused.video.plays, plays);
+});
+
+test('a decode error mid-play shows the poster again until the H.264 file plays', () => {
+  const state = setup({ width: 1254 });
+  state.see();
+  state.video.emit('playing');
+  assert.equal(state.classes.has('is-playing'), true);
+  state.video.fail(3);
+  assert.equal(state.video.src, '/media/hero/montage-landscape-720-h264.mp4');
+  assert.equal(state.classes.has('is-playing'), false);
+  state.video.emit('playing');
+  assert.equal(state.classes.has('is-playing'), true);
 });

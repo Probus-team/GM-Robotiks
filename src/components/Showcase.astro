@@ -370,7 +370,8 @@ const withCounts = panels.map((p) => ({
   // decoding it (Safari in the iOS Simulator answers "probably" and then rejects
   // the file), so an AV1 loop that fails with an unsupported source or a decode
   // error is swapped once for its H.264 file; a failing H.264 file keeps the
-  // poster. Network errors are not a reason to switch.
+  // poster. A file that cannot be fetched at all also reports "unsupported" and
+  // is swapped; a network error after loading has started (code 2) is not.
   const loadVideo = (video: HTMLVideoElement) => {
     if (!video.dataset.src) return;
     const h264 = video.dataset.src;
