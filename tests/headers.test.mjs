@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { robots } from '../src/data/robots.ts';
 import { legalPages } from '../src/data/legal.ts';
@@ -19,6 +19,28 @@ const cacheControl = (path) => rules
 
 test('every page may be reused by the browser for five minutes, and by nothing longer', () => {
   const pages = ['/', '/robots/', ...robots.map((robot) => `/robots/${robot.id}/`), ...legalPages.map((page) => page.path)];
+  for (const page of pages) assert.deepEqual(cacheControl(page), ['public, max-age=300, must-revalidate'], page);
+});
+
+// Every HTML page the site builds, from src/pages itself rather than from the sitemap or the data files, so a
+// page added without a sitemap entry (or outside the robot and legal lists) still has to get the header above.
+// Endpoints (.ts: sitemap, robots.txt, llms.txt, social images) are not pages; 404.astro is served for missing
+// paths rather than at a path of its own.
+const pagesDir = new URL('../src/pages/', import.meta.url);
+const builtPages = () => readdirSync(pagesDir, { recursive: true })
+  .map((file) => String(file).replaceAll('\\', '/'))
+  .filter((file) => file.endsWith('.astro') && file !== '404.astro')
+  .flatMap((file) => {
+    const route = file.replace(/\.astro$/, '').replace(/(^|\/)index$/, '');
+    const url = route ? `/${route}/` : '/';
+    if (!url.includes('[')) return [url];
+    if (url === '/robots/[id]/') return robots.map((robot) => `/robots/${robot.id}/`);
+    throw new Error(`${file}: a new dynamic page; list its paths in tests/headers.test.mjs`);
+  });
+
+test('every page in src/pages gets the five-minute header, listed in the sitemap or not', () => {
+  const pages = builtPages();
+  for (const path of ['/', '/robots/', '/privacidad/', '/terminos/', '/eliminacion-de-datos/', '/robots/et1/']) assert.ok(pages.includes(path), path);
   for (const page of pages) assert.deepEqual(cacheControl(page), ['public, max-age=300, must-revalidate'], page);
 });
 
