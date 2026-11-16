@@ -27,7 +27,7 @@ export default defineConfig({
       // web fonts"). Astro's generated one measured the latin-ext file and came
       // out a third too large (size-adjust 132.6% where the text needs 101%).
       optimizedFallbacks: false,
-      fallbacks: ['GM Display Fallback', 'Arial Narrow', 'Arial', 'sans-serif'],
+      fallbacks: ['GM Display Fallback', 'GM Display Fallback Android', 'Arial Narrow', 'Arial', 'sans-serif'],
     },
     {
       provider: fontProviders.google(),
@@ -38,7 +38,7 @@ export default defineConfig({
       styles: ['normal'],
       subsets: ['latin', 'latin-ext'],
       optimizedFallbacks: false,
-      fallbacks: ['GM Body Fallback', 'Helvetica Neue', 'Arial', 'sans-serif'],
+      fallbacks: ['GM Body Fallback', 'GM Body Fallback Android', 'Helvetica Neue', 'Arial', 'sans-serif'],
     },
   ],
 });
