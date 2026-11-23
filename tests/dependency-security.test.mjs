@@ -200,3 +200,31 @@ for (const [name, range] of Object.entries({
     }
   });
 }
+
+// Wrangler 4.159.0 fixes Miniflare's bundled browser download/proxy graph.
+// These copies are bundled JavaScript, so the lockfile audit cannot see them.
+for (const [name, range] of Object.entries({
+  devalue: '>=5.9.4',
+  'basic-ftp': '>=6.2.1',
+  socks: '>=2.8.10',
+  'ip-address': '>=10.7.6',
+})) {
+  test(`Miniflare bundles patched ${name} for browser and proxy tooling`, () => {
+    const versions = [...bundledSources[1].matchAll(new RegExp(`${name}@([0-9]+\\.[0-9]+\\.[0-9]+)`, 'g'))]
+      .map((match) => match[1]);
+    assert.ok(versions.length > 0, `${name} must be identifiable in the Miniflare bundle`);
+    for (const version of versions) {
+      assert.ok(semver.satisfies(version, range), `${name}@${version} must satisfy ${range}`);
+    }
+  });
+}
+
+test('Miniflare uses the patched browser archive extractor', () => {
+  assert.ok(!bundledSources[1].includes('tar-fs@3.1.0'), 'the old browser archive extractor must be removed');
+  const versions = [...bundledSources[1].matchAll(/modern-tar@([0-9]+\.[0-9]+\.[0-9]+)/g)]
+    .map((match) => match[1]);
+  assert.ok(versions.length > 0, 'the replacement archive extractor must be identifiable');
+  for (const version of versions) {
+    assert.ok(semver.satisfies(version, '>=0.8.6'), `modern-tar@${version} must include the archive fixes`);
+  }
+});
